@@ -1,6 +1,5 @@
 import { dev } from '$app/env';
 import type { Schedule } from '#lib/series.ts';
-import { scrapeSchedule } from './scrape';
 
 /**
  * In production the schedule is scraped hourly by a GitHub Action
@@ -20,7 +19,10 @@ let attemptedAt = 0;
 let inflight: Promise<void> | undefined;
 
 async function load(): Promise<Schedule> {
-	if (dev) return scrapeSchedule(cached);
+	if (dev) {
+		const { scrapeSchedule } = await import('./scrape');
+		return scrapeSchedule(cached);
+	}
 	const res = await fetch(SNAPSHOT_URL, { signal: AbortSignal.timeout(10_000) });
 	if (!res.ok) throw new Error(`HTTP ${res.status} for ${SNAPSHOT_URL}`);
 	return res.json();

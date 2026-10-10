@@ -18,11 +18,22 @@ export const FILTER_LABELS: Record<SessionFilter, string> = {
 };
 
 const DAY_MS = 86_400_000;
+const FORMATTERS = new Map<string, Intl.DateTimeFormat>();
+
+function formatter(locale: string, options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+	const key = `${locale}:${JSON.stringify(options)}`;
+	let value = FORMATTERS.get(key);
+	if (!value) {
+		value = new Intl.DateTimeFormat(locale, options);
+		FORMATTERS.set(key, value);
+	}
+	return value;
+}
 
 /** Calendar date (YYYY-MM-DD) of an instant in a time zone. */
 export function localDate(iso: string, timeZone: string): string {
 	// en-CA formats as YYYY-MM-DD
-	return new Date(iso).toLocaleDateString('en-CA', { timeZone });
+	return formatter('en-CA', { timeZone }).format(new Date(iso));
 }
 
 export function addDays(date: string, days: number): string {
@@ -53,15 +64,15 @@ export function eventEndMs(e: MotorEvent): number {
 
 /** Format a plain YYYY-MM-DD date (no time zone shifting). */
 export function fmtDate(date: string, opts: Intl.DateTimeFormatOptions): string {
-	return new Date(`${date}T12:00:00Z`).toLocaleDateString('en-GB', { ...opts, timeZone: 'UTC' });
+	return formatter('en-GB', { ...opts, timeZone: 'UTC' }).format(new Date(`${date}T12:00:00Z`));
 }
 
 export function fmtTime(iso: string, timeZone: string): string {
-	return new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone });
+	return formatter('en-GB', { hour: '2-digit', minute: '2-digit', timeZone }).format(new Date(iso));
 }
 
 export function fmtDay(iso: string, timeZone: string): string {
-	return new Date(iso).toLocaleDateString('en-GB', { weekday: 'short', timeZone });
+	return formatter('en-GB', { weekday: 'short', timeZone }).format(new Date(iso));
 }
 
 /** "9 – 11 Oct", "30 Oct – 1 Nov" */
