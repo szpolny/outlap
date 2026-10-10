@@ -426,6 +426,11 @@
 				Series names and logos are trademarks of their respective owners, used only to identify each championship. Outlap is not
 				affiliated with or endorsed by any series.
 			</p>
+			<p class="my-[1em]">
+				Venue photos come from Wikimedia Commons; each event credits its photographer. Track outlines are based on
+				<a class="underline" href="https://github.com/bacinger/f1-circuits">f1-circuits</a> (MIT) and
+				<a class="underline" href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>.
+			</p>
 		</details>
 	</footer>
 </div>

@@ -51,6 +51,21 @@ export interface MotorEvent {
 	allDay: boolean;
 	sessions: Session[];
 	url?: string;
+	/** outline in static/tracks/<track>.svg */
+	track?: string;
+	/** Wikimedia Commons photo of the venue or event */
+	photo?: EventImage;
+}
+
+export interface EventImage {
+	/** thumbnail URL */
+	src: string;
+	width: number;
+	height: number;
+	/** file description page, with the full author and licence details */
+	page: string;
+	/** "Author, CC BY-SA 4.0" */
+	credit: string;
 }
 
 export interface SourceStatus {

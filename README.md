@@ -11,9 +11,9 @@ subscriptions that stay up to date. Built with SvelteKit 3 + TypeScript.
 
 ## Series and data sources
 
-Schedules are scraped from the sources below every hour (no hardcoded dates).
-If a source fails, its last good data keeps being served and the page shows a
-warning.
+Schedules are scraped from the sources below every hour (no hardcoded dates;
+see [Schedule snapshots](#schedule-snapshots)). If a source fails, its last good
+data keeps being served and the page shows a warning.
 
 | Series | Source |
 | --- | --- |
@@ -29,6 +29,10 @@ warning.
 
 Start times are as published. End times are estimates, except for MotoGP,
 which publishes them.
+
+## Event visuals
+
+Event cards include track outlines and venue photos where available.
 
 ## Apple Calendar
 
@@ -61,7 +65,14 @@ pnpm check
 
 ## Schedule snapshots
 
-GitHub Actions refreshes the schedule hourly and when scraper files change.
-The workflow runs `node scripts/snapshot.js` and publishes `schedule.json` to
-the `data` branch. If a source fails, its events from the previous snapshot
-are kept.
+1. `.github/workflows/snapshot.yml` runs hourly (and on pushes that touch the
+   scrapers), runs `node scripts/snapshot.js`, and publishes `schedule.json`
+   to the `data` branch. A source that fails keeps its events from the previous
+   snapshot.
+
+`pnpm dev` still scrapes the sources directly.
+
+## Credits
+
+Series logos, track outlines and venue photos are credited to their respective
+creators and used under their applicable terms.

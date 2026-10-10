@@ -65,16 +65,32 @@
 >
 	<button
 		class={[
-			'box-border grid w-full cursor-pointer grid-cols-[44px_minmax(0,1fr)_16px] items-center gap-3 py-3 pr-3 pl-4 text-left focus-visible:rounded-[14px] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--c) sm:grid-cols-[52px_minmax(0,1fr)_auto_16px] sm:gap-4 sm:py-3.5 sm:pr-4 sm:pl-5',
+			'relative box-border grid w-full cursor-pointer items-center gap-3 py-3 pr-3 pl-4 text-left focus-visible:rounded-[14px] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--c) sm:gap-4 sm:py-3.5 sm:pr-4 sm:pl-5',
+			event.track
+				? 'grid-cols-[44px_minmax(0,1fr)_40px] sm:grid-cols-[52px_minmax(0,1fr)_auto_48px]'
+				: 'grid-cols-[44px_minmax(0,1fr)_16px] sm:grid-cols-[52px_minmax(0,1fr)_auto_16px]',
 			finished && 'opacity-55'
 		]}
 		aria-expanded={expanded}
 		aria-controls={detailsId}
 		onclick={ontoggle}
 	>
+		{#if event.photo}
+			<!-- The photo shows on the right and fades into the card, so the text stays readable. -->
+			<span
+				class="pointer-events-none absolute inset-y-0 right-0 w-[75%] bg-cover bg-center sm:w-[60%]"
+				style:background-image="url(&quot;{event.photo.src}&quot;)"
+				aria-hidden="true"
+			></span>
+			<span
+				class="pointer-events-none absolute inset-0 bg-linear-to-r from-panel from-25% via-panel/85 via-60% to-panel/65 sm:from-40%"
+				aria-hidden="true"
+			></span>
+		{/if}
+
 		<span
 			class={[
-				'flex h-12 flex-col items-center justify-center rounded-[10px] leading-none sm:h-[52px]',
+				'relative flex h-12 flex-col items-center justify-center rounded-[10px] leading-none sm:h-[52px]',
 				raceDay ? 'bg-fg text-bg' : 'bg-subtle'
 			]}
 			title={raceDay ? 'Race day' : undefined}
@@ -83,7 +99,7 @@
 			<span class="mt-[3px] text-lg font-[650] tabular-nums sm:text-[21px]">{fmtDate(anchor, { day: 'numeric' })}</span>
 		</span>
 
-		<span class="flex min-w-0 flex-col gap-0.5">
+		<span class="relative flex min-w-0 flex-col gap-0.5">
 			<span class="flex flex-wrap items-center gap-2 text-[12.5px] text-muted">
 				<SeriesLogo series={event.series} class="h-[11px] text-(--c)" />
 				{#if event.round}<span class={sep}>Round {event.round}</span>{/if}
@@ -94,7 +110,7 @@
 		</span>
 
 		<span
-			class="col-start-2 row-start-2 flex flex-wrap items-center gap-2 text-left sm:col-auto sm:row-auto sm:flex-col sm:flex-nowrap sm:items-end sm:gap-1.5 sm:text-right"
+			class="relative col-start-2 row-start-2 flex flex-wrap items-center gap-2 text-left sm:col-auto sm:row-auto sm:flex-col sm:flex-nowrap sm:items-end sm:gap-1.5 sm:text-right"
 		>
 			{#if live.length}
 				<span class={[pill, 'bg-live font-semibold text-white']}
@@ -127,15 +143,29 @@
 			{/if}
 		</span>
 
-		<svg
-			class={['col-start-3 row-start-1 text-muted transition-transform duration-200 sm:col-auto sm:row-auto', expanded && 'rotate-180']}
-			viewBox="0 0 16 16"
-			width="16"
-			height="16"
-			aria-hidden="true"
+		<span
+			class={[
+				'relative col-start-3 row-span-2 row-start-1 flex flex-col items-end self-stretch sm:col-auto sm:row-span-1 sm:row-auto',
+				event.track ? 'justify-between' : 'justify-center'
+			]}
 		>
-			<path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-		</svg>
+			{#if event.track}
+				<span
+					class="h-8 w-10 bg-current text-fg/75 sm:h-9 sm:w-12"
+					style:mask="url(&quot;/tracks/{event.track}.svg&quot;) right top / contain no-repeat"
+					aria-hidden="true"
+				></span>
+			{/if}
+			<svg
+				class={['text-muted transition-transform duration-200', expanded && 'rotate-180']}
+				viewBox="0 0 16 16"
+				width="16"
+				height="16"
+				aria-hidden="true"
+			>
+				<path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+			</svg>
+		</span>
 	</button>
 
 	{#if expanded}
@@ -190,6 +220,13 @@
 					<a class={[btn, 'border border-line text-fg']} href={event.url} target="_blank" rel="noopener">Event page ↗</a>
 				{/if}
 			</div>
+			{#if event.photo}
+				<p class="mt-3 truncate text-[11px] text-muted">
+					Photo: <a class="underline decoration-current/40 underline-offset-2" href={event.photo.page} target="_blank" rel="noopener"
+						>{event.photo.credit || 'Wikimedia Commons'}</a
+					>
+				</p>
+			{/if}
 		</div>
 	{/if}
 </article>

@@ -9,6 +9,7 @@ import { sgp } from './sources/sgp';
 import { f2, f3 } from './sources/sportstimes';
 import type { Source } from './sources/types';
 import { wrc } from './sources/wrc';
+import { attachVenues } from './venues';
 
 const SOURCES: Source[] = [f1, f2, f3, motogp, sgp, wec, elms, lemanscup, imsa, indycar, indynxt, nascar, wrc];
 
@@ -40,5 +41,13 @@ export async function scrapeSchedule(previous?: Schedule): Promise<Schedule> {
 	);
 
 	const events = results.flatMap((r) => r.events).sort((a, b) => a.start.localeCompare(b.start));
+	try {
+		await attachVenues(events);
+	} catch (e) {
+		console.error('[schedule] venue photos failed:', e instanceof Error ? e.message : e);
+		// Photos are optional; reuse the previous snapshot's.
+		const previousPhotos = new Map(previous?.events.map((ev) => [ev.id, ev.photo]));
+		for (const ev of events) ev.photo ??= previousPhotos.get(ev.id);
+	}
 	return { events, sources: results.map((r) => r.status), generatedAt: new Date().toISOString() };
 }
