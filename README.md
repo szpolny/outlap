@@ -4,6 +4,8 @@
 
 # Outlap
 
+Website: [outlap.lol](https://outlap.lol)
+
 Upcoming motorsport sessions in your local time zone, with Apple Calendar
 subscriptions that stay up to date. Built with SvelteKit 3 + TypeScript.
 
