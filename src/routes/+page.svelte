@@ -1,0 +1,402 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import { SvelteSet } from 'svelte/reactivity';
+	import { page } from '$app/state';
+	import { SERIES, SERIES_IDS, type MotorEvent, type SeriesId, type Session } from '#lib/series.ts';
+	import {
+		FILTER_KINDS,
+		FILTER_LABELS,
+		addDays,
+		anchorDate,
+		countdown,
+		eventEndMs,
+		fmtDate,
+		fmtDay,
+		fmtRange,
+		fmtTime,
+		localDate,
+		sessionState,
+		weekStart,
+		type SessionFilter
+	} from '#lib/format.ts';
+	import EventRow from '#lib/components/EventRow.svelte';
+	import SubscribeDialog from '#lib/components/SubscribeDialog.svelte';
+	import TimeZonePicker from '#lib/components/TimeZonePicker.svelte';
+	import type { PageProps } from './$types';
+
+	let { data }: PageProps = $props();
+
+	const FILTERS = Object.keys(FILTER_LABELS) as SessionFilter[];
+	const STORAGE_KEY = 'outlap:prefs';
+
+	let selected = $state<SeriesId[]>([...SERIES_IDS]);
+	let filter = $state<SessionFilter>('all');
+	let alarm = $state(0);
+	let showPast = $state(false);
+	let subscribeOpen = $state(false);
+	let prefsLoaded = $state(false);
+	let barHeight = $state(0);
+	const expanded = new SvelteSet<string>();
+
+	// Server renders in UTC; the browser switches to the viewer's zone after hydration.
+	let detectedZone = $state('UTC');
+	/** 'auto' follows the device; otherwise an IANA zone picked by the viewer */
+	let zonePref = $state('auto');
+	const timeZone = $derived(zonePref === 'auto' ? detectedZone : zonePref);
+	let now = $state(Date.now());
+
+	onMount(() => {
+		detectedZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+		try {
+			const prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null');
+			if (prefs) {
+				if (Array.isArray(prefs.selected)) selected = prefs.selected.filter((s: string) => s in SERIES);
+				if (prefs.filter in FILTER_KINDS) filter = prefs.filter;
+				alarm = Number(prefs.alarm) || 0;
+				if (typeof prefs.timeZone === 'string' && isValidZone(prefs.timeZone)) zonePref = prefs.timeZone;
+			}
+		} catch {
+			// storage unavailable; defaults are fine
+		}
+		prefsLoaded = true;
+		const timer = setInterval(() => (now = Date.now()), 20_000);
+		return () => clearInterval(timer);
+	});
+
+	$effect(() => {
+		if (!prefsLoaded) return;
+		const prefs = JSON.stringify({ selected, filter, alarm, timeZone: zonePref });
+		try {
+			localStorage.setItem(STORAGE_KEY, prefs);
+		} catch {
+			// ignore
+		}
+	});
+
+	function isValidZone(zone: string): boolean {
+		if (zone === 'auto') return true;
+		try {
+			new Intl.DateTimeFormat('en', { timeZone: zone });
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
+	const kinds = $derived(FILTER_KINDS[filter]);
+	const today = $derived(localDate(new Date(now).toISOString(), timeZone));
+	const thisWeek = $derived(weekStart(today));
+
+	const matching = $derived(
+		data.events.filter((e) => selected.includes(e.series) && (e.allDay || e.sessions.some((s) => kinds.includes(s.kind))))
+	);
+
+	const isPast = (e: MotorEvent) => weekStart(anchorDate(e, timeZone)) < thisWeek && eventEndMs(e) <= now;
+	const pastCount = $derived(matching.filter(isPast).length);
+
+	type WeekItem =
+		| { type: 'week'; start: string; events: MotorEvent[] }
+		| { type: 'gap'; start: string; weeks: number };
+
+	const weeks = $derived.by((): WeekItem[] => {
+		const byWeek = new Map<string, MotorEvent[]>();
+		for (const e of matching) {
+			if (!showPast && isPast(e)) continue;
+			const week = weekStart(anchorDate(e, timeZone));
+			byWeek.set(week, [...(byWeek.get(week) ?? []), e]);
+		}
+		const keys = [...byWeek.keys()].sort();
+		if (keys.length === 0) return [];
+
+		// Walk week by week so runs of empty weeks become a single "quiet" divider.
+		const items: WeekItem[] = [];
+		for (let week = keys[0]; week <= keys.at(-1)!; week = addDays(week, 7)) {
+			const events = byWeek.get(week);
+			if (events) {
+				events.sort(
+					(a, b) => anchorDate(a, timeZone).localeCompare(anchorDate(b, timeZone)) || a.start.localeCompare(b.start)
+				);
+				items.push({ type: 'week', start: week, events });
+			} else {
+				const last = items.at(-1);
+				if (last?.type === 'gap') last.weeks++;
+				else items.push({ type: 'gap', start: week, weeks: 1 });
+			}
+		}
+		return items;
+	});
+
+	const liveNow = $derived(
+		matching.flatMap((event) =>
+			event.sessions
+				.filter((s) => kinds.includes(s.kind) && sessionState(s, now) === 'live')
+				.map((session) => ({ event, session }))
+		)
+	);
+
+	const nextUp = $derived.by(() => {
+		let best: { event: MotorEvent; session: Session } | null = null;
+		for (const event of matching) {
+			for (const session of event.sessions) {
+				if (!kinds.includes(session.kind) || Date.parse(session.start) <= now) continue;
+				if (!best || session.start < best.session.start) best = { event, session };
+			}
+		}
+		return best;
+	});
+
+	const weeksFromNow = (start: string) => Math.round((Date.parse(start) - Date.parse(thisWeek)) / (7 * 86_400_000));
+
+	function weekTitle(start: string): string {
+		const diff = weeksFromNow(start);
+		if (diff === 0) return 'This week';
+		if (diff === 1) return 'Next week';
+		if (diff === -1) return 'Last week';
+		return fmtRange(start, addDays(start, 6));
+	}
+
+	function weekSubtitle(start: string): string {
+		const diff = weeksFromNow(start);
+		if (Math.abs(diff) <= 1) return fmtRange(start, addDays(start, 6));
+		return diff > 0 ? `in ${diff} weeks` : `${-diff} weeks ago`;
+	}
+
+	function toggleSeries(id: SeriesId) {
+		selected = selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id];
+	}
+
+	function toggleExpanded(id: string) {
+		if (expanded.has(id)) expanded.delete(id);
+		else expanded.add(id);
+	}
+
+	const allSelected = $derived(selected.length === SERIES_IDS.length);
+	const failing = $derived(data.sources.filter((s) => !s.ok));
+	const oldestRefresh = $derived(data.sources.map((s) => s.fetchedAt).filter(Boolean).sort()[0]);
+
+	const hero =
+		'mb-3.5 flex rounded-2xl border border-[color-mix(in_srgb,var(--c,var(--color-accent))_25%,var(--color-line))] bg-panel bg-[radial-gradient(120%_140%_at_0%_0%,color-mix(in_srgb,var(--c,var(--color-accent))_18%,transparent),transparent_60%)] px-4 py-3.5 sm:px-5 sm:py-[18px]';
+	const eyebrow = 'inline-flex items-center gap-[7px] text-[11.5px] font-bold tracking-[0.08em] uppercase';
+	const heroBadge = 'text-[12.5px] font-bold text-(--c)';
+	const heroName = 'text-[15px] font-[650] tracking-[-0.01em] sm:text-[17px]';
+	const heroSession = 'text-[13px] text-muted sm:text-sm';
+	const chip =
+		'inline-flex shrink-0 cursor-pointer items-center gap-[7px] rounded-full border px-3 py-1.5 text-[13.5px] font-[550] transition-colors duration-[120ms] select-none';
+	const chipOff = 'border-line bg-panel text-muted';
+</script>
+
+<svelte:head>
+	<title>Outlap · Motorsport Calendar</title>
+	<meta
+		name="description"
+		content="Every F1, MotoGP, WEC, IndyCar and WRC session in your time zone, with Apple Calendar subscriptions."
+	/>
+	<meta name="theme-color" content="#0f1012" media="(prefers-color-scheme: dark)" />
+	<meta name="theme-color" content="#f5f5f3" media="(prefers-color-scheme: light)" />
+</svelte:head>
+
+<div class="mx-auto max-w-[980px] px-4 pt-[18px] pb-20 sm:pt-7" style:--bar-h="{barHeight}px">
+	<header class="mb-[18px]">
+		<div class="flex items-center gap-3">
+			<span class="grid size-10 place-items-center rounded-[11px] bg-accent text-white" aria-hidden="true">
+				<svg viewBox="0 0 24 24" width="22" height="22"
+					><path d="M5 21V4m0 0h12l-2.5 4L17 12H5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" /></svg
+				>
+			</span>
+			<div class="min-w-0">
+				<h1 class="text-[21px] leading-[1.2] font-bold tracking-[-0.02em]">Outlap</h1>
+				<p class="mt-0.5 flex min-w-0 items-center gap-1 text-[13px] text-muted">
+					Times in <TimeZonePicker bind:value={zonePref} detected={detectedZone} />
+				</p>
+			</div>
+		</div>
+	</header>
+
+	{#if liveNow.length}
+		<section class={[hero, 'flex-col items-stretch gap-2.5 [--c:var(--color-live)]']} aria-live="polite">
+			<span class={[eyebrow, 'text-live']}><span class="size-2 animate-throb rounded-full bg-live"></span>Live now</span>
+			<div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+				{#each liveNow as { event, session } (event.id + session.name)}
+					<button
+						class="flex cursor-pointer flex-col rounded-xl border-l-3 border-(--c) bg-subtle px-3 py-2.5 text-left"
+						style:--c={SERIES[event.series].color}
+						onclick={() => expanded.add(event.id)}
+					>
+						<span class={heroBadge}>{SERIES[event.series].short}</span>
+						<span class={heroName}>{event.name}</span>
+						<span class={heroSession}>{session.name} · until {fmtTime(session.end, timeZone)}</span>
+					</button>
+				{/each}
+			</div>
+		</section>
+	{:else if nextUp}
+		{@const s = SERIES[nextUp.event.series]}
+		<section class={[hero, 'items-center gap-3.5 sm:gap-6']} style:--c={s.color}>
+			<div class="flex shrink-0 flex-col border-r border-line pr-3.5 sm:pr-6">
+				<span class={[eyebrow, 'text-muted']}>Next up</span>
+				<span class="text-[22px] leading-[1.15] font-bold tracking-[-0.03em] whitespace-nowrap tabular-nums sm:text-[30px]">
+					in {countdown(nextUp.session.start, now)}
+				</span>
+			</div>
+			<div class="flex min-w-0 flex-col">
+				<span class={heroBadge}>{s.short}</span>
+				<span class={heroName}>{nextUp.event.name}</span>
+				<span class={heroSession}>
+					{nextUp.session.name} · {fmtDay(nextUp.session.start, timeZone)}
+					{fmtDate(localDate(nextUp.session.start, timeZone), { day: 'numeric', month: 'short' })},
+					{fmtTime(nextUp.session.start, timeZone)}
+				</span>
+			</div>
+		</section>
+	{/if}
+
+	<nav
+		class="sticky top-0 z-20 -mx-4 flex flex-col gap-2.5 border-b border-line bg-bg/85 px-4 py-2.5 backdrop-blur-[14px] backdrop-saturate-[1.6]"
+		bind:clientHeight={barHeight}
+		aria-label="Filters"
+	>
+		<div class="-mx-4 flex gap-1.5 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="group" aria-label="Series">
+			<button
+				class={[chip, allSelected ? 'border-fg bg-fg text-bg' : chipOff]}
+				aria-pressed={allSelected}
+				onclick={() => (selected = allSelected ? [] : [...SERIES_IDS])}
+			>
+				All
+			</button>
+			{#each SERIES_IDS as id (id)}
+				{@const on = selected.includes(id)}
+				<button
+					class={[
+						chip,
+						on
+							? 'border-[color-mix(in_srgb,var(--c)_45%,var(--color-line))] bg-[color-mix(in_srgb,var(--c)_12%,var(--color-panel))] text-fg'
+							: chipOff
+					]}
+					style:--c={SERIES[id].color}
+					aria-pressed={on}
+					title="{SERIES[id].name}. Double-click to show only this series."
+					onclick={() => toggleSeries(id)}
+					ondblclick={() => (selected = [id])}
+				>
+					<span class={['box-border size-2 rounded-full border-[1.5px] border-(--c)', on && 'bg-(--c)']}></span>{SERIES[id].short}
+				</button>
+			{/each}
+		</div>
+		<div class="flex items-center justify-between gap-2.5">
+			<div class="inline-flex rounded-[10px] bg-subtle p-[3px]" role="radiogroup" aria-label="Sessions">
+				{#each FILTERS as f (f)}
+					<button
+						role="radio"
+						aria-checked={filter === f}
+						class={[
+							'cursor-pointer rounded-lg px-[9px] py-[5px] text-[13px] font-[550] whitespace-nowrap sm:px-3 sm:text-[13.5px]',
+							filter === f ? 'bg-panel text-fg shadow-[0_1px_3px_rgb(0_0_0/0.12)]' : 'text-muted'
+						]}
+						onclick={() => (filter = f)}
+					>
+						{FILTER_LABELS[f]}
+					</button>
+				{/each}
+			</div>
+			<button
+				class="inline-flex cursor-pointer items-center gap-[7px] rounded-[10px] bg-accent px-2.5 py-2 text-sm font-semibold whitespace-nowrap text-white hover:brightness-[1.08] sm:px-3.5"
+				onclick={() => (subscribeOpen = true)}
+				aria-label="Add to Calendar"
+			>
+				<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"
+					><rect x="2" y="3" width="12" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" /><path
+						d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3M8 8.5v3.5M6.25 10.25h3.5"
+						stroke="currentColor"
+						stroke-width="1.5"
+						stroke-linecap="round"
+					/></svg
+				>
+				<span class="hidden sm:inline">Add to Calendar</span>
+			</button>
+		</div>
+	</nav>
+
+	{#if failing.length}
+		<div
+			class="mt-3 rounded-xl border border-[color-mix(in_srgb,orange_45%,var(--color-line))] bg-[color-mix(in_srgb,orange_10%,var(--color-panel))] px-3.5 py-2.5 text-sm"
+			role="status"
+		>
+			Couldn't refresh {failing.map((f) => f.series.map((s) => SERIES[s].short).join('/')).join(', ')}.
+			{failing.some((f) => f.fetchedAt) ? 'Showing the last known schedule.' : ''}
+		</div>
+	{/if}
+
+	<main class="mt-1.5">
+		{#if pastCount > 0}
+			<button
+				class="mx-auto mt-4 block cursor-pointer rounded-full border border-dashed border-line px-4 py-[7px] text-[13.5px] text-muted hover:border-muted hover:text-fg"
+				onclick={() => (showPast = !showPast)}
+			>
+				{showPast ? 'Hide earlier weeks' : `Show ${pastCount} earlier event${pastCount === 1 ? '' : 's'}`}
+			</button>
+		{/if}
+
+		{#each weeks as item (item.start)}
+			{#if item.type === 'gap'}
+				<div
+					class="mt-[26px] flex items-center gap-3 text-[13px] text-muted before:flex-1 before:border-t before:border-dashed before:border-line before:content-[''] after:flex-1 after:border-t after:border-dashed after:border-line after:content-['']"
+				>
+					<span>{item.weeks === 1 ? 'Quiet week' : `${item.weeks} quiet weeks`}</span>
+					<span class="opacity-75">{fmtRange(item.start, addDays(item.start, item.weeks * 7 - 1))}</span>
+				</div>
+			{:else}
+				<section class="mt-[22px]" aria-labelledby="w-{item.start}">
+					<header class="sticky top-(--bar-h) z-10 flex items-baseline gap-2.5 bg-bg px-0.5 pt-2.5 pb-2">
+						<h2 id="w-{item.start}" class={['text-[17px] font-bold tracking-[-0.01em]', item.start === thisWeek && 'text-accent']}>
+							{weekTitle(item.start)}
+						</h2>
+						<span class="hidden text-[13.5px] text-muted sm:inline">{weekSubtitle(item.start)}</span>
+						<span class="ml-auto hidden gap-[3px] self-center sm:inline-flex" aria-hidden="true">
+							{#each item.events as e (e.id)}<span class="size-1.5 rounded-full" style:background={SERIES[e.series].color}></span>{/each}
+						</span>
+						<span class="ml-auto text-[13px] text-muted tabular-nums sm:ml-0">
+							{item.events.length} event{item.events.length === 1 ? '' : 's'}
+						</span>
+					</header>
+					<div class="flex flex-col gap-2">
+						{#each item.events as event (event.id)}
+							<EventRow
+								{event}
+								{timeZone}
+								{now}
+								{filter}
+								{today}
+								expanded={expanded.has(event.id)}
+								ontoggle={() => toggleExpanded(event.id)}
+							/>
+						{/each}
+					</div>
+				</section>
+			{/if}
+		{:else}
+			<div class="py-[60px] text-center text-muted">
+				<p class="my-1"><strong class="text-fg">Nothing to show</strong></p>
+				<p class="my-1">{selected.length === 0 ? 'Pick at least one series above.' : 'No upcoming sessions match these filters.'}</p>
+			</div>
+		{/each}
+	</main>
+
+	<footer class="mt-12 text-[13px] text-muted">
+		<details>
+			<summary class="cursor-pointer">Data sources{oldestRefresh ? ` · refreshed ${fmtTime(oldestRefresh, timeZone)}` : ''}</summary>
+			<ul class="my-3 grid gap-1.5">
+				{#each data.sources as src (src.source + src.series.join())}
+					<li class="flex flex-wrap items-center gap-2">
+						<span class={['size-[7px] rounded-full', src.ok ? 'bg-[#2fa866]' : 'bg-[orange]']}></span>
+						<strong class="text-fg">{src.series.map((x) => SERIES[x].short).join(', ')}</strong>
+						<span>{src.source}</span>
+						{#if src.error}<span class="wrap-anywhere text-[orange]">{src.error}</span>{/if}
+					</li>
+				{/each}
+			</ul>
+			<p class="my-[1em]">Schedules refresh hourly. Start times are official; end times are estimated unless the organiser publishes them.</p>
+		</details>
+	</footer>
+</div>
+
+<SubscribeDialog bind:open={subscribeOpen} {selected} bind:filter bind:alarm origin={page.url.origin} />
