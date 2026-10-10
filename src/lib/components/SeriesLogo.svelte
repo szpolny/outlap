@@ -1,0 +1,53 @@
+<script module lang="ts">
+	import type { SeriesId } from '#lib/series.ts';
+	import f1 from '#lib/assets/series/f1.svg';
+	import f2 from '#lib/assets/series/f2.svg';
+	import f3 from '#lib/assets/series/f3.svg';
+	import indycar from '#lib/assets/series/indycar.svg';
+	import indynxt from '#lib/assets/series/indynxt.png';
+	import motogp from '#lib/assets/series/motogp.svg';
+	import moto2 from '#lib/assets/series/moto2.svg';
+	import moto3 from '#lib/assets/series/moto3.svg';
+	import wec from '#lib/assets/series/wec.svg';
+	import elms from '#lib/assets/series/elms.png';
+	import wrc from '#lib/assets/series/wrc.svg';
+
+	// Single-colour marks applied as a CSS mask, so they take the surrounding text colour.
+	// The ratio is width / height of each trimmed asset.
+	const LOGOS: Record<SeriesId, [src: string, ratio: number]> = {
+		f1: [f1, 4],
+		f2: [f2, 3.0185],
+		f3: [f3, 3.0185],
+		indycar: [indycar, 6.531],
+		indynxt: [indynxt, 473 / 72],
+		motogp: [motogp, 6.255],
+		moto2: [moto2, 5.4786],
+		moto3: [moto3, 5.5028],
+		wec: [wec, 4.1914],
+		elms: [elms, 375 / 72],
+		wrc: [wrc, 5.0879]
+	};
+</script>
+
+<script lang="ts">
+	import type { ClassValue } from 'svelte/elements';
+	import { SERIES } from '#lib/series.ts';
+
+	interface Props {
+		series: SeriesId;
+		/** set the height here; the width follows the logo's aspect ratio */
+		class?: ClassValue;
+	}
+
+	let { series, class: className }: Props = $props();
+
+	const logo = $derived(LOGOS[series]);
+</script>
+
+<span
+	role="img"
+	aria-label={SERIES[series].name}
+	class={['inline-block shrink-0 bg-current', className]}
+	style:aspect-ratio={logo[1]}
+	style:mask="url(&quot;{logo[0]}&quot;) center / contain no-repeat"
+></span>

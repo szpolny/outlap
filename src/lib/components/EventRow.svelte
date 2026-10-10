@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { SERIES, type MotorEvent, type Session } from '#lib/series.ts';
+	import SeriesLogo from '#lib/components/SeriesLogo.svelte';
 	import {
 		anchorDate,
 		countdown,
@@ -84,7 +85,7 @@
 
 		<span class="flex min-w-0 flex-col gap-0.5">
 			<span class="flex flex-wrap items-center gap-2 text-[12.5px] text-muted">
-				<span class="font-bold tracking-[0.02em] text-(--c)">{series.short}</span>
+				<SeriesLogo series={event.series} class="h-[11px] text-(--c)" />
 				{#if event.round}<span class={sep}>Round {event.round}</span>{/if}
 				<span class={sep}>{eventRange(event, timeZone)}</span>
 			</span>

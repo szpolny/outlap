@@ -21,6 +21,7 @@
 		type SessionFilter
 	} from '#lib/format.ts';
 	import EventRow from '#lib/components/EventRow.svelte';
+	import SeriesLogo from '#lib/components/SeriesLogo.svelte';
 	import SubscribeDialog from '#lib/components/SubscribeDialog.svelte';
 	import TimeZonePicker from '#lib/components/TimeZonePicker.svelte';
 	import type { PageProps } from './$types';
@@ -178,7 +179,7 @@
 	const hero =
 		'mb-3.5 flex rounded-2xl border border-[color-mix(in_srgb,var(--c,var(--color-accent))_25%,var(--color-line))] bg-panel bg-[radial-gradient(120%_140%_at_0%_0%,color-mix(in_srgb,var(--c,var(--color-accent))_18%,transparent),transparent_60%)] px-4 py-3.5 sm:px-5 sm:py-[18px]';
 	const eyebrow = 'inline-flex items-center gap-[7px] text-[11.5px] font-bold tracking-[0.08em] uppercase';
-	const heroBadge = 'text-[12.5px] font-bold text-(--c)';
+	const heroBadge = 'mb-1 h-3 self-start text-(--c)';
 	const heroName = 'text-[15px] font-[650] tracking-[-0.01em] sm:text-[17px]';
 	const heroSession = 'text-[13px] text-muted sm:text-sm';
 	const chip =
@@ -219,7 +220,7 @@
 						style:--c={SERIES[event.series].color}
 						onclick={() => expanded.add(event.id)}
 					>
-						<span class={heroBadge}>{SERIES[event.series].short}</span>
+						<SeriesLogo series={event.series} class={heroBadge} />
 						<span class={heroName}>{event.name}</span>
 						<span class={heroSession}>{session.name} · until {fmtTime(session.end, timeZone)}</span>
 					</button>
@@ -236,7 +237,7 @@
 				</span>
 			</div>
 			<div class="flex min-w-0 flex-col">
-				<span class={heroBadge}>{s.short}</span>
+				<SeriesLogo series={nextUp.event.series} class={heroBadge} />
 				<span class={heroName}>{nextUp.event.name}</span>
 				<span class={heroSession}>
 					{nextUp.session.name} · {fmtDay(nextUp.session.start, timeZone)}
@@ -275,7 +276,7 @@
 					onclick={() => toggleSeries(id)}
 					ondblclick={() => (selected = [id])}
 				>
-					<span class={['box-border size-2 rounded-full border-[1.5px] border-(--c)', on && 'bg-(--c)']}></span>{SERIES[id].short}
+					<span class={['box-border size-2 rounded-full border-[1.5px] border-(--c)', on && 'bg-(--c)']}></span><SeriesLogo series={id} class="h-3" />
 				</button>
 			{/each}
 		</div>
@@ -392,6 +393,10 @@
 				{/each}
 			</ul>
 			<p class="my-[1em]">Schedules refresh hourly. Start times are official; end times are estimated unless the organiser publishes them.</p>
+			<p class="my-[1em]">
+				Series names and logos are trademarks of their respective owners, used only to identify each championship. Outlap is not
+				affiliated with or endorsed by any series.
+			</p>
 		</details>
 	</footer>
 </div>
