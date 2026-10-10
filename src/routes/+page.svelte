@@ -1,4 +1,7 @@
 <script lang="ts">
+	import CalendarPlus from '~icons/lucide/calendar-plus';
+	import ChevronDown from '~icons/lucide/chevron-down';
+	import GitHub from '~icons/simple-icons/github';
 	import { onMount } from 'svelte';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { page } from '$app/state';
@@ -302,9 +305,7 @@
 					{/each}
 				</span>
 				<span class="truncate">{seriesSummary}</span>
-				<svg class="ml-auto shrink-0 text-muted" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
-					<path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-				</svg>
+				<ChevronDown class="ml-auto shrink-0 text-muted" width="14" height="14" aria-hidden="true" />
 			</button>
 			<div
 				class="order-last grid w-full grid-cols-3 rounded-[10px] bg-subtle p-[3px] sm:order-none sm:inline-flex sm:w-auto"
@@ -330,14 +331,7 @@
 				onclick={() => (subscribeOpen = true)}
 				aria-label="Add to Calendar"
 			>
-				<svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"
-					><rect x="2" y="3" width="12" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.5" /><path
-						d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3M8 8.5v3.5M6.25 10.25h3.5"
-						stroke="currentColor"
-						stroke-width="1.5"
-						stroke-linecap="round"
-					/></svg
-				>
+				<CalendarPlus width="15" height="15" aria-hidden="true" />
 				<span class="hidden sm:inline">Add to Calendar</span>
 			</button>
 		</div>
@@ -408,8 +402,18 @@
 		{/each}
 	</main>
 
-	<footer class="mt-12 text-[13px] text-muted">
-		<details>
+	<footer class="relative mt-12 text-[13px] text-muted">
+		<a
+			class="absolute top-0 right-0 hover:text-fg"
+			href="https://github.com/szpolny/outlap"
+			target="_blank"
+			rel="noopener noreferrer"
+			aria-label="Source code on GitHub"
+			title="Source code on GitHub"
+		>
+			<GitHub width="18" height="18" aria-hidden="true" />
+		</a>
+		<details class="pr-7">
 			<summary class="cursor-pointer">Data sources{oldestRefresh ? ` · refreshed ${fmtTime(oldestRefresh, timeZone)}` : ''}</summary>
 			<ul class="my-3 grid gap-1.5">
 				{#each data.sources as src (src.source + src.series.join())}

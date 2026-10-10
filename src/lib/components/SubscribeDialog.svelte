@@ -1,4 +1,5 @@
 <script lang="ts">
+	import X from '~icons/lucide/x';
 	import { SERIES, SERIES_IDS, type SeriesId } from '#lib/series.ts';
 	import { FILTER_LABELS, type SessionFilter } from '#lib/format.ts';
 
@@ -61,7 +62,7 @@
 		<header class="flex items-center justify-between">
 			<h2 id="sub-title" class="text-[19px] font-bold tracking-[-0.01em]">Add to Apple Calendar</h2>
 			<button class="grid size-[30px] cursor-pointer place-items-center rounded-full bg-subtle text-muted" aria-label="Close" onclick={() => dialog.close()}>
-				<svg viewBox="0 0 16 16" width="16" height="16"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" /></svg>
+				<X width="16" height="16" aria-hidden="true" />
 			</button>
 		</header>
 

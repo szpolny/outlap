@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ChevronDown from '~icons/lucide/chevron-down';
 	interface Props {
 		/** 'auto' or an IANA zone */
 		value: string;
@@ -46,9 +47,7 @@
 		<span class="ml-1 font-normal text-muted">{offset(shown)}</span>
 		{#if value !== 'auto'}<span class="ml-1.5 text-[10.5px] font-bold tracking-[0.05em] text-accent uppercase">manual</span>{/if}
 	</span>
-	<svg class="shrink-0 text-muted" viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"
-		><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg
-	>
+	<ChevronDown class="shrink-0 text-muted" width="12" height="12" aria-hidden="true" />
 	<!-- Native select stretched invisibly over the pill: keeps keyboard, screen-reader and mobile pickers. -->
 	<select class="absolute inset-0 w-full cursor-pointer text-base opacity-0" bind:value aria-label="Time zone">
 		<option value="auto">Auto: this device ({pretty(detected)})</option>

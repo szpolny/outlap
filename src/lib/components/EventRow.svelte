@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Calendar from '~icons/lucide/calendar';
+	import ChevronDown from '~icons/lucide/chevron-down';
 	import { SERIES, type MotorEvent, type Session } from '#lib/series.ts';
 	import SeriesLogo from '#lib/components/SeriesLogo.svelte';
 	import {
@@ -156,15 +158,12 @@
 					aria-hidden="true"
 				></span>
 			{/if}
-			<svg
+			<ChevronDown
 				class={['text-muted transition-transform duration-200', expanded && 'rotate-180']}
-				viewBox="0 0 16 16"
 				width="16"
 				height="16"
 				aria-hidden="true"
-			>
-				<path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
-			</svg>
+			/>
 		</span>
 	</button>
 
@@ -213,7 +212,7 @@
 			{/if}
 			<div class="mt-4 flex flex-wrap gap-2">
 				<a class={[btn, 'bg-fg text-bg']} href="/calendar.ics?event={encodeURIComponent(event.id)}&download=1" download>
-					<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="1.4" /><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" /></svg>
+					<Calendar width="14" height="14" aria-hidden="true" />
 					Add to calendar
 				</a>
 				{#if event.url}

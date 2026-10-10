@@ -1,6 +1,7 @@
 import adapter from '@sveltejs/adapter-cloudflare';
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';
+import Icons from 'unplugin-icons/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
@@ -14,6 +15,7 @@ export default defineConfig({
 			},
 
 			adapter: adapter()
-		})
+		}),
+		Icons({ compiler: 'svelte' })
 	]
 });
