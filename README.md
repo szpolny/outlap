@@ -34,6 +34,10 @@ which publishes them.
 
 Event cards include track outlines and venue photos where available.
 
+Venue photos are Wikimedia Commons thumbnails kept in `static/photos/`, with
+their credits in `src/lib/server/photos.json`. A photo named in
+`src/lib/server/venues.ts` needs an entry there to be shown.
+
 ## Apple Calendar
 
 - **Subscribe**: `webcal://<host>/calendar.ics?...`. Calendar re-fetches it

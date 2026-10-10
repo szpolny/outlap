@@ -53,12 +53,12 @@ export interface MotorEvent {
 	url?: string;
 	/** outline in static/tracks/<track>.svg */
 	track?: string;
-	/** Wikimedia Commons photo of the venue or event */
+	/** Wikimedia Commons photo of the venue or event, served from static/photos/ */
 	photo?: EventImage;
 }
 
 export interface EventImage {
-	/** thumbnail URL */
+	/** static/photos/ path */
 	src: string;
 	width: number;
 	height: number;
@@ -66,6 +66,8 @@ export interface EventImage {
 	page: string;
 	/** "Author, CC BY-SA 4.0" */
 	credit: string;
+	/** CSS background-position for the card; centred by default */
+	focus?: string;
 }
 
 export interface SourceStatus {

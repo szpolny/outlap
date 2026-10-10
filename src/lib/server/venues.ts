@@ -1,9 +1,10 @@
 import type { EventImage, MotorEvent, SeriesId } from '#lib/series.ts';
-import { decodeEntities, fetchText } from './util';
+import PHOTOS from './photos.json';
 
 // Track outlines and venue photos, matched to events by venue. Outlines are plain SVGs in
 // static/tracks/ (see static/tracks/README.md for where they come from). Photos are Wikimedia
-// Commons files; the snapshot looks up their thumbnails, authors and licences.
+// Commons files whose thumbnails are kept in static/photos/, with sizes and credits in
+// photos.json. A photo missing from photos.json isn't shown.
 
 interface Venue {
 	/** tested against the event's location, name and URL */
@@ -14,9 +15,10 @@ interface Venue {
 	track?: string;
 	/** Commons file name */
 	photo?: string;
+	/** which part of the photo to show on the card, as a CSS background-position */
+	focus?: string;
 }
 
-const MOTO: SeriesId[] = ['motogp', 'moto2', 'moto3'];
 /** Rallies and speedway meetings only match venues that name their series. */
 const OFF_CIRCUIT = new Set<SeriesId>(['wrc', 'sgp']);
 
@@ -42,10 +44,11 @@ const VENUES: Venue[] = [
 
 	// Speedway GP: stadium photos.
 	{ series: ['sgp'], match: /prague/i, photo: 'Na_Markétě_speedway,_Zvoníčkova_street,_Praha.jpg' },
-	{ series: ['sgp'], match: /wroc[lł]aw/i, photo: 'Stadion_Olimpijski04.jpg' },
+	{ series: ['sgp'], match: /wroc[lł]aw/i, photo: 'Nowy_Olimpijski.jpg', focus: '50% 65%' },
 	{ series: ['sgp'], match: /[lł][oó]d[zź]/i, photo: 'Lodz_Moto_Arena.jpg' },
 	{ series: ['sgp'], match: /riga/i, photo: 'Stadion_żużlowy_w_Rydze.jpg' },
-	{ series: ['sgp'], match: /vojens/i, photo: 'VojensSpeedway.jpg' },
+	// Commons has no good photo of the Vojens track, so this is a heat at Lakeside.
+	{ series: ['sgp'], match: /vojens/i, photo: 'Lakeside_Hammers_43_Swindon_Robins_47.jpg', focus: '50% 55%' },
 	{ series: ['sgp'], match: /toru[nń]/i, photo: 'Stadion_unibax2.jpg' },
 	{ series: ['sgp'], match: /warsaw|warszawa/i, photo: 'National_Stadium_Warsaw_aerial_view_2.jpg' },
 	{ series: ['sgp'], match: /ipswich/i, photo: 'Foxhall_stadium.jpg' },
@@ -67,7 +70,12 @@ const VENUES: Venue[] = [
 		photo: 'Circuit_Gilles_Villeneuve_Hairpin.jpg'
 	},
 	{ match: /monaco|monte carlo/i, track: 'monaco', photo: 'Epingle_Monaco.jpg' },
-	{ match: /catalunya|barcelona/i, track: 'catalunya', photo: 'F1_Circuit_de_Catalunya_-_Tribuna.jpg' },
+	{
+		match: /catalunya|barcelona/i,
+		track: 'catalunya',
+		photo: '2022_4_Hours_of_Barcelona_-_Start_of_the_race.jpg',
+		focus: '50% 70%'
+	},
 	{
 		match: /red bull ring|spielberg/i,
 		track: 'redbullring',
@@ -78,14 +86,19 @@ const VENUES: Venue[] = [
 		track: 'silverstone',
 		photo: 'Silverstone_Circuit_with_Brackley_Hatch_behind,_aerial_2017,_geograph_5436763_by_Chris.jpg'
 	},
-	{ match: /\bspa\b|francorchamps/i, track: 'spa', photo: '©J.Breuer.jpg' },
+	{
+		match: /\bspa\b|francorchamps/i,
+		track: 'spa',
+		photo: '2024_6_Hours_of_Spa-Francorchamps_(DSC08757).jpg',
+		focus: '50% 60%'
+	},
 	{ match: /hungaroring|budapest/i, track: 'hungaroring', photo: 'Hungaroring_Exit.JPG' },
 	{ match: /zandvoort/i, track: 'zandvoort', photo: 'Circuit_Park_Zandvoort_from_air_2016-08-24.jpg' },
-	{ match: /monza/i, track: 'monza', photo: 'Autodromo_Nazionale_di_Monza,_Italy_(Ank_Kumar)_06.jpg' },
+	{ match: /monza/i, track: 'monza', photo: 'Monza_start_line.jpg', focus: '50% 45%' },
 	{ match: /madring|madrid/i, track: 'madring' },
 	{ match: /baku/i, track: 'baku', photo: 'Baku_City_Circuit,_April_9,_2018_SkySat.jpg' },
 	// Before Bahrain: the 2026 "Bahrain Grand Prix in Malaysia" runs at Sepang.
-	{ match: /sepang/i, track: 'sepang', photo: 'Sepang_International_Circuit.JPG' },
+	{ match: /sepang/i, track: 'sepang', photo: '4_Hours_of_Sepang_2019.jpg', focus: '50% 60%' },
 	{ match: /marina bay|singapore/i, track: 'marinabay', photo: '1_singapore_f1_night_race_2012_city_skyline.jpg' },
 	{
 		match: /circuit of the americas|austin|lone star/i,
@@ -99,8 +112,13 @@ const VENUES: Venue[] = [
 		photo: 'Grande_Prêmio_São_Paulo_de_Fórmula_1_(52497080967).jpg'
 	},
 	{ match: /las vegas motor speedway/i, photo: 'Las_Vegas_Motor_Speedway_in_March_2011.jpg' },
-	{ match: /las vegas/i, track: 'lasvegas', photo: 'Bellagio_Fountain_Club_(2023).jpg' },
-	{ match: /lusail|losail|qatar|doha/i, track: 'lusail', photo: 'Grand_Stand.JPG' },
+	{ match: /las vegas/i, track: 'lasvegas', photo: 'Las_Vegas_Grand_Prix_(54942393435).jpg', focus: '50% 65%' },
+	{
+		match: /lusail|losail|qatar|doha/i,
+		track: 'lusail',
+		photo: 'Qatar_GP_2021._Pol_Espargaro_y_Stefan_Bradl_en_carrera_-_51079776027.jpg',
+		focus: '50% 70%'
+	},
 	{ match: /yas marina|abu dhabi/i, track: 'yasmarina', photo: 'Yas_Marina_Circuit_at_Sunset.jpg' },
 	{
 		match: /bahrain|sakhir/i,
@@ -114,8 +132,7 @@ const VENUES: Venue[] = [
 	{ match: /jerez/i, track: 'jerez', photo: 'Circuito_de_Jerez.jpg' },
 	// Before Le Mans: Petit Le Mans runs at Road Atlanta.
 	{ match: /road atlanta|petit le mans/i, track: 'roadatlanta', photo: 'Road_atlanta_esses.JPG' },
-	{ series: MOTO, match: /le mans/i, photo: 'Dunlop_curves_2006_run_off_modifications.JPG' },
-	{ match: /le mans/i, photo: 'Mulsanne_Le_Mans.jpg' },
+	{ match: /le mans/i, photo: '2023_24_Hours_of_Le_Mans_(53272111149).jpg', focus: '50% 30%' },
 	{ match: /mugello/i, track: 'mugello', photo: "Partenza_del_Gran_Premio_d'Italia_TIM_2011.jpg" },
 	{ match: /balaton/i, photo: 'Balaton_Park_Circuit_-_Pitlane.jpg' },
 	{ match: /brno/i, track: 'brno', photo: 'Automotodrom_Brno_Omega.JPG' },
@@ -130,15 +147,22 @@ const VENUES: Venue[] = [
 	{
 		match: /mandalika/i,
 		track: 'mandalika',
-		photo: 'Mandalika_Circuit,_Gili_Angkus,_Gili_Lawang,_and_Gili_Batu_Ayok,_Viewed_from_Merese_Hill.jpg'
+		photo: 'MotoGP_di_Sirkuit_Balapan_Pertamina_Mandalika,_NTB,_Indonesia.jpg',
+		focus: '50% 70%'
 	},
 	{ match: /phillip island/i, track: 'phillipisland', photo: 'Phillip_Island_Aerial_View.jpg' },
 	{
 		match: /portim[aã]o|algarve/i,
 		track: 'portimao',
-		photo: 'Autódromo_Internacional_do_Algarve_-_Portimão_-_Portugal_🇵🇹_(53656876708).jpg'
+		photo: 'Autódromo_Internacional_do_Algarve_-_Portimão_-_Portugal_🇵🇹_(53656876708).jpg',
+		focus: '50% 75%'
 	},
-	{ match: /ricardo tormo|valencia/i, track: 'valencia', photo: 'Circuit_de_la_Comunitat_Valenciana_Ricardo_Tormo_2011_013.jpg' },
+	{
+		match: /ricardo tormo|valencia/i,
+		track: 'valencia',
+		photo: 'Álex_Márquez_in_the_pack_2020_Europe.jpg',
+		focus: '50% 60%'
+	},
 	{ match: /fuji/i, track: 'fuji', photo: 'Fuji_Speedway_with_Mount_Fuji.jpg' },
 	{
 		match: /paul ricard|le castellet/i,
@@ -227,67 +251,14 @@ export function findVenue(event: MotorEvent): Venue | undefined {
 	);
 }
 
-const API = 'https://en.wikipedia.org/w/api.php';
-/** Thumbnail width; about twice the size the photos are shown at. */
-const THUMB_WIDTH = 960;
-
-interface ImageInfo {
-	thumburl: string;
-	thumbwidth: number;
-	thumbheight: number;
-	descriptionurl: string;
-	extmetadata?: Record<string, { value: string } | undefined>;
-}
-
-function stripHtml(s: string): string {
-	return decodeEntities(s.replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim();
-}
-
-/** Look up thumbnails and attribution for Commons files, keyed by the given file name. */
-async function lookup(files: string[]): Promise<Map<string, EventImage>> {
-	const out = new Map<string, EventImage>();
-	// The API takes 50 titles per request.
-	for (let i = 0; i < files.length; i += 50) {
-		const chunk = files.slice(i, i + 50);
-		const params = new URLSearchParams({
-			action: 'query',
-			titles: chunk.map((f) => `File:${f}`).join('|'),
-			prop: 'imageinfo',
-			iiprop: 'url|extmetadata',
-			iiurlwidth: String(THUMB_WIDTH),
-			iiextmetadatafilter: 'Artist|LicenseShortName',
-			format: 'json',
-			formatversion: '2'
-		});
-		const data = JSON.parse(await fetchText(`${API}?${params}`));
-		// Titles come back normalized ("File:A b.svg"); map them back to the names asked for.
-		const asked = new Map<string, string>(
-			(data.query?.normalized ?? []).map((n: { from: string; to: string }) => [n.to, n.from.slice(5)])
-		);
-		for (const page of data.query?.pages ?? []) {
-			const info: ImageInfo | undefined = page.imageinfo?.[0];
-			if (!info?.thumburl) continue;
-			const meta = info.extmetadata ?? {};
-			const author = stripHtml(meta.Artist?.value ?? '');
-			const license = stripHtml(meta.LicenseShortName?.value ?? '');
-			out.set(asked.get(page.title) ?? page.title.slice(5), {
-				// Drop the utm_* tracking parameters the API appends.
-				src: info.thumburl.replace(/\?.*$/, ''),
-				width: info.thumbwidth,
-				height: info.thumbheight,
-				page: info.descriptionurl,
-				credit: [author.length > 80 ? `${author.slice(0, 79)}…` : author, license].filter(Boolean).join(', ')
-			});
-		}
-	}
-	return out;
-}
+const PHOTOS_BY_FILE: Record<string, EventImage | undefined> = PHOTOS;
 
 /** Add the track outline and photo to every event whose venue is known. */
-export async function attachVenues(events: MotorEvent[]): Promise<void> {
-	const venues = new Map(events.map((e) => [e, findVenue(e)]));
-	for (const [event, venue] of venues) if (venue?.track) event.track = venue.track;
-	const files = new Set([...venues.values()].map((v) => v?.photo).filter((f): f is string => !!f));
-	const photos = await lookup([...files]);
-	for (const [event, venue] of venues) if (venue?.photo) event.photo = photos.get(venue.photo);
+export function attachVenues(events: MotorEvent[]): void {
+	for (const event of events) {
+		const venue = findVenue(event);
+		if (venue?.track) event.track = venue.track;
+		const photo = venue?.photo && PHOTOS_BY_FILE[venue.photo];
+		if (photo) event.photo = venue.focus ? { ...photo, focus: venue.focus } : photo;
+	}
 }

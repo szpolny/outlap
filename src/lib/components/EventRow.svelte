@@ -82,6 +82,7 @@
 			<span
 				class="pointer-events-none absolute inset-y-0 right-0 w-[75%] bg-cover bg-center sm:w-[60%]"
 				style:background-image="url(&quot;{event.photo.src}&quot;)"
+				style:background-position={event.photo.focus}
 				aria-hidden="true"
 			></span>
 			<span
