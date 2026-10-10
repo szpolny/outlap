@@ -20,8 +20,11 @@ warning.
 | F1 | [Jolpica API](https://api.jolpi.ca) (Ergast successor); session times cross-checked against the sportstimes dataset |
 | F2, F3 | [sportstimes/f1](https://github.com/sportstimes/f1) dataset (behind f1calendar.com) |
 | MotoGP, Moto2, Moto3 | Official MotoGP API |
-| WEC, ELMS | Official race pages on fiawec.com / europeanlemansseries.com |
+| Speedway GP | Official calendar data on fimspeedway.com |
+| WEC, ELMS, Le Mans Cup | Official race pages on fiawec.com / europeanlemansseries.com / lemanscup.com |
+| IMSA | Wikipedia season article (imsa.com blocks automated clients); all-day race days |
 | IndyCar, Indy NXT | Official schedule pages on indycar.com / indynxt.com |
+| NASCAR Cup Series | The nascar.com schedule feed (cf.nascar.com) |
 | WRC | Wikipedia season article (wrc.com blocks automated clients); all-day events |
 
 Start times are as published. End times are estimates, except for MotoGP,
@@ -38,7 +41,7 @@ Feed parameters:
 
 | Param | Values |
 | --- | --- |
-| `series` | comma list of `f1,f2,f3,indycar,indynxt,motogp,moto2,moto3,wec,elms,wrc` (default: all) |
+| `series` | comma list of `f1,f2,f3,indycar,indynxt,nascar,motogp,moto2,moto3,sgp,wec,elms,lemanscup,imsa,wrc` (default: all) |
 | `sessions` | `all` (default), `main` (qualifying + sprints + races), `races` |
 | `alarm` | minutes before start, e.g. `15` |
 | `event` | a single event id |

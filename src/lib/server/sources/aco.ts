@@ -2,26 +2,30 @@ import type { MotorEvent, SeriesId } from '#lib/series.ts';
 import { decodeEntities, fetchOptional, finalizeEvent, guessKind, makeSession, mapLimit } from '../util';
 import type { Source } from './types';
 
-// The ACO runs WEC and ELMS on the same site platform. Each race page lists its
+// The ACO runs WEC, ELMS and the Le Mans Cup on the same site platform. Each race page lists its
 // sessions with a unix timestamp; unscheduled sessions show "TBC" instead.
 
-function raceMinutes(eventName: string): number {
+type AcoSeries = Extract<SeriesId, 'wec' | 'elms' | 'lemanscup'>;
+
+function raceMinutes(series: AcoSeries, eventName: string): number {
+	// Le Mans Cup races run two hours; its Road to Le Mans support races run 55 minutes.
+	if (series === 'lemanscup') return /road to le mans/i.test(eventName) ? 55 : 120;
 	const hours = eventName.match(/(\d+)\s*hours?/i);
 	if (hours) return Number(hours[1]) * 60;
 	if (/1812\s*km/i.test(eventName)) return 10 * 60;
 	return 6 * 60;
 }
 
-function sessionMinutes(name: string, eventName: string): number {
+function sessionMinutes(name: string, series: AcoSeries, eventName: string): number {
 	const kind = guessKind(name);
-	if (kind === 'race') return raceMinutes(eventName);
+	if (kind === 'race') return raceMinutes(series, eventName);
 	if (/hyperpole/i.test(name)) return 15;
 	if (kind === 'qualifying') return 20;
 	if (/test|prologue/i.test(name)) return 180;
 	return 90;
 }
 
-function parseRacePage(html: string, series: SeriesId, slug: string, base: string): MotorEvent | null {
+function parseRacePage(html: string, series: AcoSeries, slug: string, base: string): MotorEvent | null {
 	const title = html.match(/og:title" content="([^"]+)"/)?.[1];
 	if (!title) return null;
 	// "4 Hours of Portimão 2026: Schedule, News &amp; Start List | FIA WEC"
@@ -42,7 +46,7 @@ function parseRacePage(html: string, series: SeriesId, slug: string, base: strin
 			makeSession(
 				sessionName,
 				start,
-				sessionMinutes(sessionName, name),
+				sessionMinutes(sessionName, series, name),
 				/^race$/i.test(sessionName) ? 'race' : undefined
 			)
 		);
@@ -57,7 +61,7 @@ function parseRacePage(html: string, series: SeriesId, slug: string, base: strin
 	});
 }
 
-function acoSource(series: Extract<SeriesId, 'wec' | 'elms'>, base: string, label: string): Source {
+function acoSource(series: AcoSeries, base: string, label: string): Source {
 	return {
 		label,
 		series: [series],
@@ -85,3 +89,4 @@ function acoSource(series: Extract<SeriesId, 'wec' | 'elms'>, base: string, labe
 
 export const wec = acoSource('wec', 'https://www.fiawec.com', 'fiawec.com');
 export const elms = acoSource('elms', 'https://www.europeanlemansseries.com', 'europeanlemansseries.com');
+export const lemanscup = acoSource('lemanscup', 'https://www.lemanscup.com', 'lemanscup.com');

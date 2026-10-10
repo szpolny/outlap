@@ -22,6 +22,7 @@
 	} from '#lib/format.ts';
 	import EventRow from '#lib/components/EventRow.svelte';
 	import SeriesLogo from '#lib/components/SeriesLogo.svelte';
+	import SeriesSheet from '#lib/components/SeriesSheet.svelte';
 	import SubscribeDialog from '#lib/components/SubscribeDialog.svelte';
 	import TimeZonePicker from '#lib/components/TimeZonePicker.svelte';
 	import type { PageProps } from './$types';
@@ -36,6 +37,7 @@
 	let alarm = $state(0);
 	let showPast = $state(false);
 	let subscribeOpen = $state(false);
+	let seriesOpen = $state(false);
 	let prefsLoaded = $state(false);
 	let barHeight = $state(0);
 	const expanded = new SvelteSet<string>();
@@ -173,6 +175,15 @@
 	}
 
 	const allSelected = $derived(selected.length === SERIES_IDS.length);
+	const seriesSummary = $derived(
+		allSelected
+			? 'All series'
+			: selected.length === 0
+				? 'No series'
+				: selected.length === 1
+					? SERIES[selected[0]].name
+					: `${selected.length} of ${SERIES_IDS.length} series`
+	);
 	const failing = $derived(data.sources.filter((s) => !s.ok));
 	const oldestRefresh = $derived(data.sources.map((s) => s.fetchedAt).filter(Boolean).sort()[0]);
 
@@ -183,7 +194,7 @@
 	const heroName = 'text-[15px] font-[650] tracking-[-0.01em] sm:text-[17px]';
 	const heroSession = 'text-[13px] text-muted sm:text-sm';
 	const chip =
-		'inline-flex shrink-0 cursor-pointer items-center gap-[7px] rounded-full border px-3 py-1.5 text-[13.5px] font-[550] transition-colors duration-[120ms] select-none';
+		'inline-flex h-8 shrink-0 cursor-pointer items-center gap-[7px] rounded-full border px-3 text-[13.5px] font-[550] transition-colors duration-[120ms] select-none';
 	const chipOff = 'border-line bg-panel text-muted';
 </script>
 
@@ -253,7 +264,7 @@
 		bind:clientHeight={barHeight}
 		aria-label="Filters"
 	>
-		<div class="-mx-4 flex gap-1.5 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="group" aria-label="Series">
+		<div class="hidden flex-wrap gap-1.5 sm:flex" role="group" aria-label="Series">
 			<button
 				class={[chip, allSelected ? 'border-fg bg-fg text-bg' : chipOff]}
 				aria-pressed={allSelected}
@@ -280,8 +291,26 @@
 				</button>
 			{/each}
 		</div>
-		<div class="flex items-center justify-between gap-2.5">
-			<div class="inline-flex rounded-[10px] bg-subtle p-[3px]" role="radiogroup" aria-label="Sessions">
+		<div class="flex flex-wrap items-center gap-2.5 sm:justify-between">
+			<button
+				class="flex h-9 min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[10px] border border-line bg-panel px-3 text-sm font-[550] sm:hidden"
+				onclick={() => (seriesOpen = true)}
+			>
+				<span class="flex shrink-0 -space-x-[3px]" aria-hidden="true">
+					{#each selected.slice(0, 6) as id (id)}
+						<span class="size-2.5 rounded-full bg-(--c) ring-2 ring-panel" style:--c={SERIES[id].color}></span>
+					{/each}
+				</span>
+				<span class="truncate">{seriesSummary}</span>
+				<svg class="ml-auto shrink-0 text-muted" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+					<path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
+			</button>
+			<div
+				class="order-last grid w-full grid-cols-3 rounded-[10px] bg-subtle p-[3px] sm:order-none sm:inline-flex sm:w-auto"
+				role="radiogroup"
+				aria-label="Sessions"
+			>
 				{#each FILTERS as f (f)}
 					<button
 						role="radio"
@@ -374,7 +403,7 @@
 		{:else}
 			<div class="py-[60px] text-center text-muted">
 				<p class="my-1"><strong class="text-fg">Nothing to show</strong></p>
-				<p class="my-1">{selected.length === 0 ? 'Pick at least one series above.' : 'No upcoming sessions match these filters.'}</p>
+				<p class="my-1">{selected.length === 0 ? 'Pick at least one series.' : 'No upcoming sessions match these filters.'}</p>
 			</div>
 		{/each}
 	</main>
@@ -401,4 +430,5 @@
 	</footer>
 </div>
 
+<SeriesSheet bind:open={seriesOpen} bind:selected />
 <SubscribeDialog bind:open={subscribeOpen} {selected} bind:filter bind:alarm origin={page.url.origin} />

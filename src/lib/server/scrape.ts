@@ -1,13 +1,16 @@
 import type { MotorEvent, Schedule, SourceStatus } from '#lib/series.ts';
-import { elms, wec } from './sources/aco';
+import { elms, lemanscup, wec } from './sources/aco';
 import { f1 } from './sources/f1';
+import { imsa } from './sources/imsa';
 import { indycar, indynxt } from './sources/indycar';
 import { motogp } from './sources/motogp';
+import { nascar } from './sources/nascar';
+import { sgp } from './sources/sgp';
 import { f2, f3 } from './sources/sportstimes';
 import type { Source } from './sources/types';
 import { wrc } from './sources/wrc';
 
-const SOURCES: Source[] = [f1, f2, f3, motogp, wec, elms, indycar, indynxt, wrc];
+const SOURCES: Source[] = [f1, f2, f3, motogp, sgp, wec, elms, lemanscup, imsa, indycar, indynxt, nascar, wrc];
 
 function seasons(): number[] {
 	const year = new Date().getUTCFullYear();

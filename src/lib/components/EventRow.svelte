@@ -103,7 +103,10 @@
 			{:else if finished}
 				<span class={[pill, 'bg-subtle text-muted']}>Finished</span>
 			{:else if event.allDay}
-				<span class={[pill, 'bg-subtle text-fg']}>{fmtDate(event.start, { weekday: 'short' })} – {fmtDate(event.end, { weekday: 'short' })}</span>
+				<span class={[pill, 'bg-subtle text-fg']}
+					>{fmtDate(event.start, { weekday: 'short' })}{#if event.end !== event.start}
+						– {fmtDate(event.end, { weekday: 'short' })}{/if}</span
+				>
 			{:else if next}
 				<span
 					class={[
@@ -138,9 +141,14 @@
 	{#if expanded}
 		<div class="border-t border-dashed border-line px-4 pt-3 pb-4 sm:pt-3.5 sm:pr-5 sm:pb-[18px] sm:pl-[88px]" id={detailsId}>
 			{#if event.allDay}
+				{@const long = { weekday: 'long', day: 'numeric', month: 'long' } as const}
 				<p class="mt-3 text-[13px] text-muted">
-					Rally runs {fmtDate(event.start, { weekday: 'long', day: 'numeric', month: 'long' })} to
-					{fmtDate(event.end, { weekday: 'long', day: 'numeric', month: 'long' })}. Stage times aren't available from a reliable feed.
+					{#if event.series === 'wrc'}
+						Rally runs {fmtDate(event.start, long)} to {fmtDate(event.end, long)}. Stage times aren't available from a reliable feed.
+					{:else}
+						{event.end === event.start ? `Race day: ${fmtDate(event.start, long)}` : `Runs ${fmtDate(event.start, long)} to ${fmtDate(event.end, long)}`}.
+						Session times aren't available from a reliable feed.
+					{/if}
 				</p>
 			{:else}
 				<div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-7 gap-y-3.5">
