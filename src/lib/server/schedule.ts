@@ -1,88 +1,53 @@
-import type { MotorEvent, Schedule, SourceStatus } from '#lib/series.ts';
-import { elms, wec } from './sources/aco';
-import { f1 } from './sources/f1';
-import { indycar, indynxt } from './sources/indycar';
-import { motogp } from './sources/motogp';
-import { f2, f3 } from './sources/sportstimes';
-import type { Source } from './sources/types';
-import { wrc } from './sources/wrc';
+import { dev } from '$app/env';
+import type { Schedule } from '#lib/series.ts';
+import { scrapeSchedule } from './scrape';
 
-const SOURCES: Source[] = [f1, f2, f3, motogp, wec, elms, indycar, indynxt, wrc];
+/**
+ * In production the schedule is scraped hourly by a GitHub Action
+ * (.github/workflows/snapshot.yml) and published as JSON; the server only
+ * reads that snapshot. Scraping per request doesn't fit the Workers free
+ * plan's CPU and subrequest limits.
+ */
+const SNAPSHOT_URL = 'https://raw.githubusercontent.com/szpolny/outlap/data/schedule.json';
 
-/** Schedules change (session moves, cancellations), so refetch hourly. */
-const TTL_MS = 60 * 60 * 1000;
-/** After a failure, retry sooner than the normal TTL. */
-const RETRY_MS = 5 * 60 * 1000;
+/** How long a fetched snapshot is reused before checking for a newer one. */
+const TTL_MS = 5 * 60 * 1000;
+/** In dev the sources are scraped directly, so refetch less often. */
+const DEV_TTL_MS = 60 * 60 * 1000;
 
-interface Entry {
-	events: MotorEvent[];
-	/** time of last successful fetch */
-	fetchedAt?: number;
-	/** time of last attempt */
-	attemptedAt: number;
-	error?: string;
-	inflight?: Promise<void>;
+let cached: Schedule | undefined;
+let attemptedAt = 0;
+let inflight: Promise<void> | undefined;
+
+async function load(): Promise<Schedule> {
+	if (dev) return scrapeSchedule(cached);
+	const res = await fetch(SNAPSHOT_URL, { signal: AbortSignal.timeout(10_000) });
+	if (!res.ok) throw new Error(`HTTP ${res.status} for ${SNAPSHOT_URL}`);
+	return res.json();
 }
 
-const cache = new Map<Source, Entry>();
-
-function seasons(): number[] {
-	const year = new Date().getUTCFullYear();
-	return [year, year + 1];
-}
-
-function refresh(source: Source): Promise<void> {
-	const entry = cache.get(source) ?? { events: [], attemptedAt: 0 };
-	cache.set(source, entry);
-	entry.inflight ??= source
-		.load(seasons())
-		.then((events) => {
-			entry.events = events;
-			entry.fetchedAt = Date.now();
-			entry.error = undefined;
+function refresh(): Promise<void> {
+	inflight ??= load()
+		.then((schedule) => {
+			cached = schedule;
 		})
 		.catch((e: unknown) => {
-			// Keep serving the last good data; just record what went wrong.
-			entry.error = e instanceof Error ? e.message : String(e);
-			console.error(`[schedule] ${source.label} failed:`, entry.error);
+			// Keep serving the last good snapshot.
+			console.error('[schedule] snapshot failed:', e instanceof Error ? e.message : e);
 		})
 		.finally(() => {
-			entry.attemptedAt = Date.now();
-			entry.inflight = undefined;
+			attemptedAt = Date.now();
+			inflight = undefined;
 		});
-	return entry.inflight;
-}
-
-function isStale(entry: Entry | undefined): boolean {
-	if (!entry) return true;
-	const age = Date.now() - entry.attemptedAt;
-	return entry.error ? age > RETRY_MS : age > TTL_MS;
+	return inflight;
 }
 
 export async function getSchedule(): Promise<Schedule> {
-	const pending: Promise<void>[] = [];
-	for (const source of SOURCES) {
-		const entry = cache.get(source);
-		if (!isStale(entry)) continue;
-		const p = refresh(source);
-		// Only block on sources we have nothing for yet; otherwise revalidate in the background.
-		if (!entry?.fetchedAt) pending.push(p);
-	}
-	await Promise.all(pending);
-
-	const events: MotorEvent[] = [];
-	const sources: SourceStatus[] = [];
-	for (const source of SOURCES) {
-		const entry = cache.get(source)!;
-		events.push(...entry.events);
-		sources.push({
-			series: source.series,
-			source: source.label,
-			ok: !entry.error,
-			error: entry.error,
-			fetchedAt: entry.fetchedAt ? new Date(entry.fetchedAt).toISOString() : undefined
-		});
-	}
-	events.sort((a, b) => a.start.localeCompare(b.start));
-	return { events, sources, generatedAt: new Date().toISOString() };
+	const stale = Date.now() - attemptedAt > (dev ? DEV_TTL_MS : TTL_MS);
+	// Scraping takes seconds, so in dev revalidate in the background once there is data.
+	// Workers may cancel work left running after the response, so production waits.
+	if (!cached || (stale && !dev)) await refresh();
+	else if (stale) void refresh();
+	if (!cached) throw new Error('Schedule unavailable');
+	return cached;
 }

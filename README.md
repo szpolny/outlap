@@ -9,9 +9,9 @@ subscriptions that stay up to date. Built with SvelteKit 3 + TypeScript.
 
 ## Series and data sources
 
-Schedules are fetched live (no hardcoded dates), cached in memory for an hour,
-and re-validated in the background. If a source fails, the last good data keeps
-being served and the page shows a warning.
+Schedules are scraped from the sources below every hour (no hardcoded dates).
+If a source fails, its last good data keeps being served and the page shows a
+warning.
 
 | Series | Source |
 | --- | --- |
@@ -53,3 +53,10 @@ pnpm install
 pnpm dev
 pnpm check
 ```
+
+## Schedule snapshots
+
+GitHub Actions refreshes the schedule hourly and when scraper files change.
+The workflow runs `node scripts/snapshot.js` and publishes `schedule.json` to
+the `data` branch. If a source fails, its events from the previous snapshot
+are kept.

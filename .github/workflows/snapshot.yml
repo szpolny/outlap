@@ -1,0 +1,47 @@
+name: Schedule snapshot
+
+# Scrape every source and publish schedule.json to the `data` branch,
+# which the deployed Worker reads.
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths: ['src/lib/server/**', 'scripts/snapshot.js']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Fetch previous snapshot
+        run: curl -fsSL "https://raw.githubusercontent.com/${GITHUB_REPOSITORY}/data/schedule.json" -o previous.json || rm -f previous.json
+
+      - run: node scripts/snapshot.js schedule.json previous.json
+
+      - name: Publish to data branch
+        run: |
+          mkdir publish && mv schedule.json publish/
+          cd publish
+          git init -q -b data
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add schedule.json
+          git commit -qm "Schedule snapshot $(date -u +%FT%TZ)"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" data
