@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { page } from '$app/state';
+	import outlapMark from '#lib/assets/favicon.svg';
 	import { SERIES, SERIES_IDS, type MotorEvent, type SeriesId, type Session } from '#lib/series.ts';
 	import {
 		FILTER_KINDS,
@@ -198,11 +199,7 @@
 <div class="mx-auto max-w-[980px] px-4 pt-[18px] pb-20 sm:pt-7" style:--bar-h="{barHeight}px">
 	<header class="mb-[18px]">
 		<div class="flex items-center gap-3">
-			<span class="grid size-10 place-items-center rounded-[11px] bg-accent text-white" aria-hidden="true">
-				<svg viewBox="0 0 24 24" width="22" height="22"
-					><path d="M5 21V4m0 0h12l-2.5 4L17 12H5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" /></svg
-				>
-			</span>
+			<img src={outlapMark} alt="" class="size-10 rounded-[11px]" />
 			<div class="min-w-0">
 				<h1 class="text-[21px] leading-[1.2] font-bold tracking-[-0.02em]">Outlap</h1>
 				<p class="mt-0.5 flex min-w-0 items-center gap-1 text-[13px] text-muted">
