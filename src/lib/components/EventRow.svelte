@@ -153,7 +153,7 @@
 		>
 			{#if event.track}
 				<span
-					class="h-8 w-10 bg-current text-fg/75 sm:h-9 sm:w-12"
+					class={['h-8 w-10 bg-current text-fg/75 transition-opacity duration-200 sm:h-9 sm:w-12', expanded && 'opacity-0']}
 					style:mask="url(&quot;/tracks/{event.track}.svg&quot;) right top / contain no-repeat"
 					aria-hidden="true"
 				></span>
@@ -168,64 +168,78 @@
 	</button>
 
 	{#if expanded}
-		<div class="border-t border-dashed border-line px-4 pt-3 pb-4 sm:pt-3.5 sm:pr-5 sm:pb-[18px] sm:pl-[88px]" id={detailsId}>
-			{#if event.allDay}
-				{@const long = { weekday: 'long', day: 'numeric', month: 'long' } as const}
-				<p class="mt-3 text-[13px] text-muted">
-					{#if event.series === 'wrc'}
-						Rally runs {fmtDate(event.start, long)} to {fmtDate(event.end, long)}. Stage times aren't available from a reliable feed.
-					{:else}
-						{event.end === event.start ? `Race day: ${fmtDate(event.start, long)}` : `Runs ${fmtDate(event.start, long)} to ${fmtDate(event.end, long)}`}.
-						Session times aren't available from a reliable feed.
-					{/if}
-				</p>
-			{:else}
-				<div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-7 gap-y-3.5">
-					{#each days as [day, list] (day)}
-						<div>
-							<h4 class={['mb-1.5 text-xs font-semibold tracking-[0.06em] uppercase', day === today ? 'text-fg' : 'text-muted']}>
-								{fmtDate(day, { weekday: 'long' })}
-								<span class="ml-1 font-normal">{fmtDate(day, { day: 'numeric', month: 'short' })}</span>
-							</h4>
-							<ul>
-								{#each list as s (s.name + s.start)}
-									{@const st = sessionState(s, now)}
-									<li class={['flex items-baseline gap-3 py-1 text-sm', st === 'done' && 'opacity-45']}>
-										<time class="min-w-[3em] text-muted tabular-nums" datetime={s.start}>{fmtTime(s.start, timeZone)}</time>
-										<span
-											class={[
-												(s.kind === 'race' || s.kind === 'sprint') && 'font-[620]',
-												st === 'done' && 'line-through decoration-current/40'
-											]}>{s.name}</span
-										>
-										{#if st === 'live'}<span class={[tag, 'bg-live text-white']}>Live</span>{/if}
-										{#if s === next}<span class={[tag, 'bg-subtle text-muted']}>Next</span>{/if}
-									</li>
-								{/each}
-							</ul>
-						</div>
-					{/each}
-				</div>
-				{#if sessions.length < event.sessions.length}
-					<p class="mt-2.5 text-[13px] text-muted">{event.sessions.length - sessions.length} more sessions hidden by the session filter.</p>
-				{/if}
+		<div
+			class="flex flex-col gap-4 border-t border-dashed border-line px-4 pt-3 pb-4 sm:flex-row sm:gap-6 sm:pt-3.5 sm:pr-5 sm:pb-[18px] sm:pl-[88px]"
+			id={detailsId}
+		>
+			{#if event.track}
+				<!-- The header shows a small outline; the details repeat it large enough to read the corners. -->
+				<span
+					class="h-32 w-full shrink-0 bg-current text-fg/80 sm:order-last sm:h-40 sm:w-52"
+					style:mask="url(&quot;/tracks/{event.track}.svg&quot;) center / contain no-repeat"
+					role="img"
+					aria-label="Track layout"
+				></span>
 			{/if}
-			<div class="mt-4 flex flex-wrap gap-2">
-				<a class={[btn, 'bg-fg text-bg']} href="/calendar.ics?event={encodeURIComponent(event.id)}&download=1" download>
-					<Calendar width="14" height="14" aria-hidden="true" />
-					Add to calendar
-				</a>
-				{#if event.url}
-					<a class={[btn, 'border border-line text-fg']} href={event.url} target="_blank" rel="noopener">Event page ↗</a>
+			<div class="min-w-0 flex-1">
+				{#if event.allDay}
+					{@const long = { weekday: 'long', day: 'numeric', month: 'long' } as const}
+					<p class="mt-3 text-[13px] text-muted">
+						{#if event.series === 'wrc'}
+							Rally runs {fmtDate(event.start, long)} to {fmtDate(event.end, long)}. Stage times aren't available from a reliable feed.
+						{:else}
+							{event.end === event.start ? `Race day: ${fmtDate(event.start, long)}` : `Runs ${fmtDate(event.start, long)} to ${fmtDate(event.end, long)}`}.
+							Session times aren't available from a reliable feed.
+						{/if}
+					</p>
+				{:else}
+					<div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-7 gap-y-3.5">
+						{#each days as [day, list] (day)}
+							<div>
+								<h4 class={['mb-1.5 text-xs font-semibold tracking-[0.06em] uppercase', day === today ? 'text-fg' : 'text-muted']}>
+									{fmtDate(day, { weekday: 'long' })}
+									<span class="ml-1 font-normal">{fmtDate(day, { day: 'numeric', month: 'short' })}</span>
+								</h4>
+								<ul>
+									{#each list as s (s.name + s.start)}
+										{@const st = sessionState(s, now)}
+										<li class={['flex items-baseline gap-3 py-1 text-sm', st === 'done' && 'opacity-45']}>
+											<time class="min-w-[3em] text-muted tabular-nums" datetime={s.start}>{fmtTime(s.start, timeZone)}</time>
+											<span
+												class={[
+													(s.kind === 'race' || s.kind === 'sprint') && 'font-[620]',
+													st === 'done' && 'line-through decoration-current/40'
+												]}>{s.name}</span
+											>
+											{#if st === 'live'}<span class={[tag, 'bg-live text-white']}>Live</span>{/if}
+											{#if s === next}<span class={[tag, 'bg-subtle text-muted']}>Next</span>{/if}
+										</li>
+									{/each}
+								</ul>
+							</div>
+						{/each}
+					</div>
+					{#if sessions.length < event.sessions.length}
+						<p class="mt-2.5 text-[13px] text-muted">{event.sessions.length - sessions.length} more sessions hidden by the session filter.</p>
+					{/if}
+				{/if}
+				<div class="mt-4 flex flex-wrap gap-2">
+					<a class={[btn, 'bg-fg text-bg']} href="/calendar.ics?event={encodeURIComponent(event.id)}&download=1" download>
+						<Calendar width="14" height="14" aria-hidden="true" />
+						Add to calendar
+					</a>
+					{#if event.url}
+						<a class={[btn, 'border border-line text-fg']} href={event.url} target="_blank" rel="noopener">Event page ↗</a>
+					{/if}
+				</div>
+				{#if event.photo}
+					<p class="mt-3 truncate text-[11px] text-muted">
+						Photo: <a class="underline decoration-current/40 underline-offset-2" href={event.photo.page} target="_blank" rel="noopener"
+							>{event.photo.credit || 'Wikimedia Commons'}</a
+						>
+					</p>
 				{/if}
 			</div>
-			{#if event.photo}
-				<p class="mt-3 truncate text-[11px] text-muted">
-					Photo: <a class="underline decoration-current/40 underline-offset-2" href={event.photo.page} target="_blank" rel="noopener"
-						>{event.photo.credit || 'Wikimedia Commons'}</a
-					>
-				</p>
-			{/if}
 		</div>
 	{/if}
 </article>
