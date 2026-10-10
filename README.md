@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="src/lib/assets/favicon.svg" alt="Outlap logo" width="88" height="88">
+</p>
+
 # Outlap
 
 Upcoming motorsport sessions in your local time zone, with Apple Calendar
