@@ -7,7 +7,7 @@
 	import { SvelteSet } from 'svelte/reactivity';
 	import { page } from '$app/state';
 	import outlapMark from '#lib/assets/favicon.svg';
-	import { SERIES, SERIES_IDS, type MotorEvent, type SeriesId, type Session } from '#lib/series.ts';
+	import { SERIES, SERIES_IDS, DEFAULT_SERIES_IDS, type MotorEvent, type SeriesId, type Session } from '#lib/series.ts';
 	import {
 		FILTER_KINDS,
 		FILTER_LABELS,
@@ -19,13 +19,16 @@
 		fmtDay,
 		fmtRange,
 		fmtTime,
+		groupWeekends,
 		localDate,
 		sessionState,
 		weekStart,
-		type SessionFilter
+		type SessionFilter,
+		type Weekend
 	} from '#lib/format.ts';
 	import EventRow from '#lib/components/EventRow.svelte';
 	import SeriesLogo from '#lib/components/SeriesLogo.svelte';
+	import SeriesList from '#lib/components/SeriesList.svelte';
 	import SeriesSheet from '#lib/components/SeriesSheet.svelte';
 	import SubscribeDialog from '#lib/components/SubscribeDialog.svelte';
 	import TimeZonePicker from '#lib/components/TimeZonePicker.svelte';
@@ -36,16 +39,16 @@
 	const FILTERS = Object.keys(FILTER_LABELS) as SessionFilter[];
 	const STORAGE_KEY = 'outlap:prefs';
 
-	let selected = $state<SeriesId[]>([...SERIES_IDS]);
+	let selected = $state<SeriesId[]>([...DEFAULT_SERIES_IDS]);
 	let filter = $state<SessionFilter>('all');
 	let alarm = $state(0);
-	let showPast = $state(false);
 	let subscribeOpen = $state(false);
 	let seriesOpen = $state(false);
 	let prefsLoaded = $state(false);
 	let barHeight = $state(0);
 	let scrollY = $state(0);
 	let innerHeight = $state(0);
+	let showFinished = $state(false);
 	const expanded = new SvelteSet<string>();
 
 	// Server renders in UTC; the browser switches to the viewer's zone after hydration.
@@ -98,23 +101,21 @@
 	const thisWeek = $derived(weekStart(today));
 
 	const matching = $derived(
-		data.events.filter((e) => selected.includes(e.series) && (e.allDay || e.sessions.some((s) => kinds.includes(s.kind))))
+		data.events.filter(
+			(e) =>
+				weekStart(anchorDate(e, timeZone)) >= thisWeek &&
+				selected.includes(e.series) &&
+				(e.allDay || e.sessions.some((s) => kinds.includes(s.kind)))
+		)
 	);
 
-	const lastWeek = $derived(addDays(thisWeek, -7));
-	const isPast = (e: MotorEvent) => weekStart(anchorDate(e, timeZone)) < thisWeek && eventEndMs(e) <= now;
-	// Only the previous week stays reachable; anything older is dropped.
-	const isTooOld = (e: MotorEvent) => isPast(e) && weekStart(anchorDate(e, timeZone)) < lastWeek;
-	const pastCount = $derived(matching.filter((e) => isPast(e) && !isTooOld(e)).length);
-
 	type WeekItem =
-		| { type: 'week'; start: string; events: MotorEvent[] }
+		| { type: 'week'; start: string; upcoming: Weekend[]; finished: Weekend[] }
 		| { type: 'gap'; start: string; weeks: number };
 
 	const weeks = $derived.by((): WeekItem[] => {
 		const byWeek = new Map<string, MotorEvent[]>();
 		for (const e of matching) {
-			if (isTooOld(e) || (!showPast && isPast(e))) continue;
 			const week = weekStart(anchorDate(e, timeZone));
 			byWeek.set(week, [...(byWeek.get(week) ?? []), e]);
 		}
@@ -126,10 +127,14 @@
 		for (let week = keys[0]; week <= keys.at(-1)!; week = addDays(week, 7)) {
 			const events = byWeek.get(week);
 			if (events) {
-				events.sort(
-					(a, b) => anchorDate(a, timeZone).localeCompare(anchorDate(b, timeZone)) || a.start.localeCompare(b.start)
-				);
-				items.push({ type: 'week', start: week, events });
+				const weekends = groupWeekends(events, timeZone);
+				const isFinished = (w: Weekend) => w.events.every((e) => eventEndMs(e) <= now);
+				items.push({
+					type: 'week',
+					start: week,
+					upcoming: weekends.filter((w) => !isFinished(w)),
+					finished: weekends.filter(isFinished)
+				});
 			} else {
 				const last = items.at(-1);
 				if (last?.type === 'gap') last.weeks++;
@@ -138,6 +143,15 @@
 		}
 		return items;
 	});
+
+	/** Event id → id of the weekend card it is shown in, so the live hero can expand it. */
+	const weekendOf = $derived(
+		new Map(
+			weeks.flatMap((item) =>
+				item.type === 'week' ? [...item.upcoming, ...item.finished].flatMap((w) => w.events.map((e) => [e.id, w.id] as const)) : []
+			)
+		)
+	);
 
 	const liveNow = $derived(
 		matching.flatMap((event) =>
@@ -164,18 +178,13 @@
 		const diff = weeksFromNow(start);
 		if (diff === 0) return 'This week';
 		if (diff === 1) return 'Next week';
-		if (diff === -1) return 'Last week';
 		return fmtRange(start, addDays(start, 6));
 	}
 
 	function weekSubtitle(start: string): string {
 		const diff = weeksFromNow(start);
-		if (Math.abs(diff) <= 1) return fmtRange(start, addDays(start, 6));
-		return diff > 0 ? `in ${diff} weeks` : `${-diff} weeks ago`;
-	}
-
-	function toggleSeries(id: SeriesId) {
-		selected = selected.includes(id) ? selected.filter((s) => s !== id) : [...selected, id];
+		if (diff <= 1) return fmtRange(start, addDays(start, 6));
+		return `in ${diff} weeks`;
 	}
 
 	function toggleExpanded(id: string) {
@@ -197,14 +206,11 @@
 	const oldestRefresh = $derived(data.sources.map((s) => s.fetchedAt).filter(Boolean).sort()[0]);
 
 	const hero =
-		'mb-3.5 flex rounded-2xl border border-[color-mix(in_srgb,var(--c,var(--color-accent))_25%,var(--color-line))] bg-panel bg-[radial-gradient(120%_140%_at_0%_0%,color-mix(in_srgb,var(--c,var(--color-accent))_18%,transparent),transparent_60%)] px-4 py-3.5 sm:px-5 sm:py-[18px]';
+		'mb-5 flex rounded-2xl border border-[color-mix(in_srgb,var(--c,var(--color-accent))_25%,var(--color-line))] bg-panel bg-[radial-gradient(120%_140%_at_0%_0%,color-mix(in_srgb,var(--c,var(--color-accent))_18%,transparent),transparent_60%)] px-4 py-3.5 sm:px-5 sm:py-[18px]';
 	const eyebrow = 'inline-flex items-center gap-[7px] text-[11.5px] font-bold tracking-[0.08em] uppercase';
 	const heroBadge = 'mb-1 h-3 self-start text-(--c)';
 	const heroName = 'text-[15px] font-[650] tracking-[-0.01em] sm:text-[17px]';
 	const heroSession = 'text-[13px] text-muted sm:text-sm';
-	const chip =
-		'inline-flex h-8 shrink-0 cursor-pointer items-center gap-[7px] rounded-full border px-3 text-[13.5px] font-[550] transition-colors duration-[120ms] select-none';
-	const chipOff = 'border-line bg-panel text-muted';
 
 	function scrollToTop() {
 		const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -224,8 +230,8 @@
 	<meta name="theme-color" content="#f5f5f3" media="(prefers-color-scheme: light)" />
 </svelte:head>
 
-<div class="mx-auto max-w-[980px] px-4 pt-[18px] pb-20 sm:pt-7" style:--bar-h="{barHeight}px">
-	<header class="mb-[18px]">
+<div class="mx-auto max-w-[980px] px-4 lg:max-w-[1240px] pt-[18px] pb-20 sm:pt-7" style:--bar-h="{barHeight}px">
+	<header class="mb-6 sm:mb-8">
 		<div class="flex items-center gap-3">
 			<img src={outlapMark} alt="" class="size-10 rounded-[11px]" />
 			<div class="min-w-0">
@@ -237,219 +243,216 @@
 		</div>
 	</header>
 
-	{#if liveNow.length}
-		<section class={[hero, 'flex-col items-stretch gap-2.5 [--c:var(--color-live)]']} aria-live="polite">
-			<span class={[eyebrow, 'text-live']}><span class="size-2 animate-throb rounded-full bg-live"></span>Live now</span>
-			<div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
-				{#each liveNow as { event, session } (event.id + session.name)}
-					<button
-						class="flex cursor-pointer flex-col rounded-xl border-l-3 border-(--c) bg-subtle px-3 py-2.5 text-left"
-						style:--c={SERIES[event.series].color}
-						onclick={() => expanded.add(event.id)}
-					>
-						<SeriesLogo series={event.series} class={heroBadge} />
-						<span class={heroName}>{event.name}</span>
-						<span class={heroSession}>{session.name} · until {fmtTime(session.end, timeZone)}</span>
-					</button>
-				{/each}
-			</div>
-		</section>
-	{:else if nextUp}
-		{@const s = SERIES[nextUp.event.series]}
-		<section class={[hero, 'items-center gap-3.5 sm:gap-6']} style:--c={s.color}>
-			<div class="flex shrink-0 flex-col border-r border-line pr-3.5 sm:pr-6">
-				<span class={[eyebrow, 'text-muted']}>Next up</span>
-				<span class="text-[22px] leading-[1.15] font-bold tracking-[-0.03em] whitespace-nowrap tabular-nums sm:text-[30px]">
-					in {countdown(nextUp.session.start, now)}
-				</span>
-			</div>
-			<div class="flex min-w-0 flex-col">
-				<SeriesLogo series={nextUp.event.series} class={heroBadge} />
-				<span class={heroName}>{nextUp.event.name}</span>
-				<span class={heroSession}>
-					{nextUp.session.name} · {fmtDay(nextUp.session.start, timeZone)}
-					{fmtDate(localDate(nextUp.session.start, timeZone), { day: 'numeric', month: 'short' })},
-					{fmtTime(nextUp.session.start, timeZone)}
-				</span>
-			</div>
-		</section>
-	{/if}
-
-	<nav
-		class="sticky top-0 z-20 -mx-4 flex flex-col gap-2.5 border-b border-line bg-bg/85 px-4 py-2.5 backdrop-blur-[14px] backdrop-saturate-[1.6]"
-		bind:clientHeight={barHeight}
-		aria-label="Filters"
-	>
-		<div class="hidden flex-wrap gap-1.5 sm:flex" role="group" aria-label="Series">
-			<button
-				class={[chip, allSelected ? 'border-fg bg-fg text-bg' : chipOff]}
-				aria-pressed={allSelected}
-				onclick={() => (selected = allSelected ? [] : [...SERIES_IDS])}
-			>
-				All
-			</button>
-			{#each SERIES_IDS as id (id)}
-				{@const on = selected.includes(id)}
+	<div class="lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-12">
+		<aside class="sticky top-4 hidden max-h-[calc(100dvh-2rem)] flex-col gap-6 self-start overflow-y-auto pr-3 pb-4 [scrollbar-width:thin] lg:flex" aria-label="Series">
+			<div class="flex items-center justify-between gap-3 px-1">
+				<h2 class="text-[15px] font-bold tracking-[-0.01em]">Series</h2>
 				<button
-					class={[
-						chip,
-						on
-							? 'border-[color-mix(in_srgb,var(--c)_45%,var(--color-line))] bg-[color-mix(in_srgb,var(--c)_12%,var(--color-panel))] text-fg'
-							: chipOff
-					]}
-					style:--c={SERIES[id].color}
-					aria-pressed={on}
-					title="{SERIES[id].name}. Double-click to show only this series."
-					onclick={() => toggleSeries(id)}
-					ondblclick={() => (selected = [id])}
+					class="cursor-pointer text-[13px] text-muted hover:text-fg"
+					onclick={() => (selected = allSelected ? [] : [...SERIES_IDS])}
 				>
-					<span class={['box-border size-2 rounded-full border-[1.5px] border-(--c)', on && 'bg-(--c)']}></span><SeriesLogo series={id} class="h-3" />
+					{allSelected ? 'Clear' : 'Select all'}
 				</button>
-			{/each}
-		</div>
-		<div class="flex flex-wrap items-center gap-2.5 sm:justify-between">
-			<button
-				class="flex h-9 min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[10px] border border-line bg-panel px-3 text-sm font-[550] sm:hidden"
-				onclick={() => (seriesOpen = true)}
-			>
-				<span class="flex shrink-0 -space-x-[3px]" aria-hidden="true">
-					{#each selected.slice(0, 6) as id (id)}
-						<span class="size-2.5 rounded-full bg-(--c) ring-2 ring-panel" style:--c={SERIES[id].color}></span>
-					{/each}
-				</span>
-				<span class="truncate">{seriesSummary}</span>
-				<ChevronDown class="ml-auto shrink-0 text-muted" width="14" height="14" aria-hidden="true" />
-			</button>
-			<div
-				class="order-last grid w-full grid-cols-3 rounded-[10px] bg-subtle p-[3px] sm:order-none sm:inline-flex sm:w-auto"
-				role="radiogroup"
-				aria-label="Sessions"
-			>
-				{#each FILTERS as f (f)}
-					<button
-						role="radio"
-						aria-checked={filter === f}
-						class={[
-							'cursor-pointer rounded-lg px-[9px] py-[5px] text-[13px] font-[550] whitespace-nowrap sm:px-3 sm:text-[13.5px]',
-							filter === f ? 'bg-panel text-fg shadow-[0_1px_3px_rgb(0_0_0/0.12)]' : 'text-muted'
-						]}
-						onclick={() => (filter = f)}
-					>
-						{FILTER_LABELS[f]}
-					</button>
-				{/each}
 			</div>
-			<button
-				class="inline-flex cursor-pointer items-center gap-[7px] rounded-[10px] bg-accent px-2.5 py-2 text-sm font-semibold whitespace-nowrap text-white hover:brightness-[1.08] sm:px-3.5"
-				onclick={() => (subscribeOpen = true)}
-				aria-label="Add to Calendar"
-			>
-				<CalendarPlus width="15" height="15" aria-hidden="true" />
-				<span class="hidden sm:inline">Add to Calendar</span>
-			</button>
-		</div>
-	</nav>
+			<SeriesList bind:selected layout="list" />
+		</aside>
 
-	{#if failing.length}
-		<div
-			class="mt-3 rounded-xl border border-[color-mix(in_srgb,orange_45%,var(--color-line))] bg-[color-mix(in_srgb,orange_10%,var(--color-panel))] px-3.5 py-2.5 text-sm"
-			role="status"
-		>
-			Couldn't refresh {failing.map((f) => f.series.map((s) => SERIES[s].short).join('/')).join(', ')}.
-			{failing.some((f) => f.fetchedAt) ? 'Showing the last known schedule.' : ''}
-		</div>
-	{/if}
-
-	<main class="mt-1.5">
-		{#if pastCount > 0}
-			<button
-				class="mx-auto mt-4 block cursor-pointer rounded-full border border-dashed border-line px-4 py-[7px] text-[13.5px] text-muted hover:border-muted hover:text-fg"
-				onclick={() => (showPast = !showPast)}
-			>
-				{showPast ? 'Hide last week' : `Show ${pastCount} event${pastCount === 1 ? '' : 's'} from last week`}
-			</button>
-		{/if}
-
-		{#each weeks as item (item.start)}
-			{#if item.type === 'gap'}
-				<div
-					class="mt-[26px] flex items-center gap-3 text-[13px] text-muted before:flex-1 before:border-t before:border-dashed before:border-line before:content-[''] after:flex-1 after:border-t after:border-dashed after:border-line after:content-['']"
-				>
-					<span>{item.weeks === 1 ? 'Quiet week' : `${item.weeks} quiet weeks`}</span>
-					<span class="opacity-75">{fmtRange(item.start, addDays(item.start, item.weeks * 7 - 1))}</span>
-				</div>
-			{:else}
-				<section class="mt-[22px]" aria-labelledby="w-{item.start}">
-					<header class="sticky top-(--bar-h) z-10 flex items-baseline gap-2.5 bg-bg px-0.5 pt-2.5 pb-2">
-						<h2 id="w-{item.start}" class={['text-[17px] font-bold tracking-[-0.01em]', item.start === thisWeek && 'text-accent']}>
-							{weekTitle(item.start)}
-						</h2>
-						<span class="hidden text-[13.5px] text-muted sm:inline">{weekSubtitle(item.start)}</span>
-						<span class="ml-auto hidden gap-[3px] self-center sm:inline-flex" aria-hidden="true">
-							{#each item.events as e (e.id)}<span class="size-1.5 rounded-full" style:background={SERIES[e.series].color}></span>{/each}
-						</span>
-						<span class="ml-auto text-[13px] text-muted tabular-nums sm:ml-0">
-							{item.events.length} event{item.events.length === 1 ? '' : 's'}
-						</span>
-					</header>
-					<div class="flex flex-col gap-2">
-						{#each item.events as event (event.id)}
-							<EventRow
-								{event}
-								{timeZone}
-								{now}
-								{filter}
-								{today}
-								expanded={expanded.has(event.id)}
-								ontoggle={() => toggleExpanded(event.id)}
-							/>
+		<div class="min-w-0">
+			{#if liveNow.length}
+				<section class={[hero, 'flex-col items-stretch gap-2.5 [--c:var(--color-live)]']} aria-live="polite">
+					<span class={[eyebrow, 'text-live']}><span class="size-2 animate-throb rounded-full bg-live"></span>Live now</span>
+					<div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
+						{#each liveNow as { event, session } (event.id + session.name)}
+							<button
+								class="flex cursor-pointer flex-col rounded-xl border-l-3 border-(--c) bg-subtle px-3 py-2.5 text-left"
+								style:--c={SERIES[event.series].color}
+								onclick={() => expanded.add(weekendOf.get(event.id) ?? event.id)}
+							>
+								<SeriesLogo series={event.series} class={heroBadge} />
+								<span class={heroName}>{event.name}</span>
+								<span class={heroSession}>{session.name} · until {fmtTime(session.end, timeZone)}</span>
+							</button>
 						{/each}
 					</div>
 				</section>
+			{:else if nextUp}
+				{@const s = SERIES[nextUp.event.series]}
+				<section class={[hero, 'items-center gap-3.5 sm:gap-6']} style:--c={s.color}>
+					<div class="flex shrink-0 flex-col border-r border-line pr-3.5 sm:pr-6">
+						<span class={[eyebrow, 'text-muted']}>Next up</span>
+						<span class="text-[22px] leading-[1.15] font-bold tracking-[-0.03em] whitespace-nowrap tabular-nums sm:text-[30px]">
+							in {countdown(nextUp.session.start, now)}
+						</span>
+					</div>
+					<div class="flex min-w-0 flex-col">
+						<SeriesLogo series={nextUp.event.series} class={heroBadge} />
+						<span class={heroName}>{nextUp.event.name}</span>
+						<span class={heroSession}>
+							{nextUp.session.name} · {fmtDay(nextUp.session.start, timeZone)}
+							{fmtDate(localDate(nextUp.session.start, timeZone), { day: 'numeric', month: 'short' })},
+							{fmtTime(nextUp.session.start, timeZone)}
+						</span>
+					</div>
+				</section>
 			{/if}
-		{:else}
-			<div class="py-[60px] text-center text-muted">
-				<p class="my-1"><strong class="text-fg">Nothing to show</strong></p>
-				<p class="my-1">{selected.length === 0 ? 'Pick at least one series.' : 'No upcoming sessions match these filters.'}</p>
-			</div>
-		{/each}
-	</main>
 
-	<footer class="relative mt-12 text-[13px] text-muted">
-		<a
-			class="absolute top-0 right-0 hover:text-fg"
-			href="https://github.com/szpolny/outlap"
-			target="_blank"
-			rel="noopener noreferrer"
-			aria-label="Source code on GitHub"
-			title="Source code on GitHub"
-		>
-			<GitHub width="18" height="18" aria-hidden="true" />
-		</a>
-		<details class="pr-7">
-			<summary class="cursor-pointer">Data sources{oldestRefresh ? ` · refreshed ${fmtTime(oldestRefresh, timeZone)}` : ''}</summary>
-			<ul class="my-3 grid gap-1.5">
-				{#each data.sources as src (src.source + src.series.join())}
-					<li class="flex flex-wrap items-center gap-2">
-						<span class={['size-[7px] rounded-full', src.ok ? 'bg-[#2fa866]' : 'bg-[orange]']}></span>
-						<strong class="text-fg">{src.series.map((x) => SERIES[x].short).join(', ')}</strong>
-						<span>{src.source}</span>
-						{#if src.error}<span class="wrap-anywhere text-[orange]">{src.error}</span>{/if}
-					</li>
+			<nav
+				class="sticky top-0 z-20 -mx-4 border-b border-line bg-bg/85 px-4 py-2.5 backdrop-blur-[14px] backdrop-saturate-[1.6]"
+				bind:clientHeight={barHeight}
+				aria-label="Filters"
+			>
+				<div class="flex flex-wrap items-center gap-2.5">
+					<button
+						class="flex h-9 min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-[10px] border border-line bg-panel px-3 text-sm font-[550] hover:bg-subtle sm:min-w-[200px] sm:flex-none lg:hidden"
+						onclick={() => (seriesOpen = true)}
+					>
+						<span class="flex shrink-0 -space-x-[3px]" aria-hidden="true">
+							{#each selected.slice(0, 6) as id (id)}
+								<span class="size-2.5 rounded-full bg-(--c) ring-2 ring-panel" style:--c={SERIES[id].color}></span>
+							{/each}
+						</span>
+						<span class="truncate">{seriesSummary}</span>
+						<ChevronDown class="ml-auto shrink-0 text-muted" width="14" height="14" aria-hidden="true" />
+					</button>
+					<div
+						class="order-last grid w-full grid-cols-3 rounded-[10px] bg-subtle p-[3px] sm:order-none sm:inline-flex sm:w-auto"
+						role="radiogroup"
+						aria-label="Sessions"
+					>
+						{#each FILTERS as f (f)}
+							<button
+								role="radio"
+								aria-checked={filter === f}
+								class={[
+									'cursor-pointer rounded-lg px-[9px] py-[5px] text-[13px] font-[550] whitespace-nowrap sm:px-3 sm:text-[13.5px]',
+									filter === f ? 'bg-panel text-fg shadow-[0_1px_3px_rgb(0_0_0/0.12)]' : 'text-muted'
+								]}
+								onclick={() => (filter = f)}
+							>
+								{FILTER_LABELS[f]}
+							</button>
+						{/each}
+					</div>
+					<button
+						class="inline-flex cursor-pointer items-center gap-[7px] rounded-[10px] bg-accent px-2.5 py-2 sm:ml-auto text-sm font-semibold whitespace-nowrap text-white hover:brightness-[1.08] sm:px-3.5"
+						onclick={() => (subscribeOpen = true)}
+						aria-label="Add to Calendar"
+					>
+						<CalendarPlus width="15" height="15" aria-hidden="true" />
+						<span class="hidden sm:inline">Add to Calendar</span>
+					</button>
+				</div>
+			</nav>
+
+			{#if failing.length}
+				<div
+					class="mt-3 rounded-xl border border-[color-mix(in_srgb,orange_45%,var(--color-line))] bg-[color-mix(in_srgb,orange_10%,var(--color-panel))] px-3.5 py-2.5 text-sm"
+					role="status"
+				>
+					Couldn't refresh {failing.map((f) => f.series.map((s) => SERIES[s].short).join('/')).join(', ')}.
+					{failing.some((f) => f.fetchedAt) ? 'Showing the last known schedule.' : ''}
+				</div>
+			{/if}
+
+			<main class="mt-1.5">
+				{#each weeks as item (item.start)}
+					{#if item.type === 'gap'}
+						<div
+							class="mt-10 flex items-center gap-3 text-[13px] text-muted before:flex-1 before:border-t before:border-dashed before:border-line before:content-[''] after:flex-1 after:border-t after:border-dashed after:border-line after:content-['']"
+						>
+							<span>{item.weeks === 1 ? 'Quiet week' : `${item.weeks} quiet weeks`}</span>
+							<span class="opacity-75">{fmtRange(item.start, addDays(item.start, item.weeks * 7 - 1))}</span>
+						</div>
+					{:else}
+						{@const count = item.upcoming.length + item.finished.length}
+						<section class="mt-10 first:mt-6" aria-labelledby="w-{item.start}">
+							<header class="sticky top-(--bar-h) z-10 flex items-baseline gap-2.5 bg-bg px-0.5 pt-3 pb-3">
+								<h2 id="w-{item.start}" class={['text-[17px] font-bold tracking-[-0.01em]', item.start === thisWeek && 'text-accent']}>
+									{weekTitle(item.start)}
+								</h2>
+								<span class="hidden text-[13.5px] text-muted sm:inline">{weekSubtitle(item.start)}</span>
+								<span class="ml-auto text-[13px] text-muted tabular-nums">
+									{count} event{count === 1 ? '' : 's'}
+								</span>
+							</header>
+							<div class="flex flex-col gap-3">
+								{#if item.finished.length}
+									<!-- Finished weekends fold into one line so the list opens on what's next. -->
+									<button
+										class="flex cursor-pointer items-center gap-3 rounded-2xl border border-dashed border-line px-4 py-3 text-left text-[13.5px] text-muted hover:text-fg sm:px-5"
+										aria-expanded={showFinished}
+										onclick={() => (showFinished = !showFinished)}
+									>
+										<span class="font-[550] whitespace-nowrap">{item.finished.length} finished</span>
+										<span class="flex min-w-0 items-center gap-2.5 overflow-hidden opacity-70">
+											{#each item.finished.flatMap((w) => w.events) as e (e.id)}
+												<SeriesLogo series={e.series} class="h-2.5" />
+											{/each}
+										</span>
+										<ChevronDown
+											class={['ml-auto shrink-0 transition-transform duration-200', showFinished && 'rotate-180']}
+											width="16"
+											height="16"
+											aria-hidden="true"
+										/>
+									</button>
+									{#if showFinished}
+										{#each item.finished as weekend (weekend.id)}
+											{@render row(weekend)}
+										{/each}
+									{/if}
+								{/if}
+								{#each item.upcoming as weekend (weekend.id)}
+									{@render row(weekend)}
+								{/each}
+							</div>
+						</section>
+					{/if}
+				{:else}
+					<div class="py-[60px] text-center text-muted">
+						<p class="my-1"><strong class="text-fg">Nothing to show</strong></p>
+						<p class="my-1">{selected.length === 0 ? 'Pick at least one series.' : 'No upcoming sessions match these filters.'}</p>
+					</div>
 				{/each}
-			</ul>
-			<p class="my-[1em]">Schedules refresh hourly. Start times are official; end times are estimated unless the organiser publishes them.</p>
-			<p class="my-[1em]">
-				Series names and logos are trademarks of their respective owners, used only to identify each championship. Outlap is not
-				affiliated with or endorsed by any series.
-			</p>
-			<p class="my-[1em]">
-				Venue photos come from Wikimedia Commons; each event credits its photographer. Track outlines are based on
-				<a class="underline" href="https://github.com/bacinger/f1-circuits">f1-circuits</a> (MIT) and
-				<a class="underline" href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>.
-			</p>
-		</details>
-	</footer>
+			</main>
+
+			<footer class="relative mt-12 text-[13px] text-muted">
+				<a
+					class="absolute top-0 right-0 hover:text-fg"
+					href="https://github.com/szpolny/outlap"
+					target="_blank"
+					rel="noopener noreferrer"
+					aria-label="Source code on GitHub"
+					title="Source code on GitHub"
+				>
+					<GitHub width="18" height="18" aria-hidden="true" />
+				</a>
+				<details class="pr-7">
+					<summary class="cursor-pointer">Data sources{oldestRefresh ? ` · refreshed ${fmtTime(oldestRefresh, timeZone)}` : ''}</summary>
+					<ul class="my-3 grid gap-1.5">
+						{#each data.sources as src (src.source + src.series.join())}
+							<li class="flex flex-wrap items-center gap-2">
+								<span class={['size-[7px] rounded-full', src.ok ? 'bg-[#2fa866]' : 'bg-[orange]']}></span>
+								<strong class="text-fg">{src.series.map((x) => SERIES[x].short).join(', ')}</strong>
+								<span>{src.source}</span>
+								{#if src.error}<span class="wrap-anywhere text-[orange]">{src.error}</span>{/if}
+							</li>
+						{/each}
+					</ul>
+					<p class="my-[1em]">Schedules refresh hourly. Start times are official; end times are estimated unless the organiser publishes them.</p>
+					<p class="my-[1em]">
+						Series names and logos are trademarks of their respective owners, used only to identify each championship. Outlap is not
+						affiliated with or endorsed by any series.
+					</p>
+					<p class="my-[1em]">
+						Venue photos come from Wikimedia Commons; each event credits its photographer. Track outlines are based on
+						<a class="underline" href="https://github.com/bacinger/f1-circuits">f1-circuits</a> (MIT) and
+						<a class="underline" href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>.
+					</p>
+				</details>
+			</footer>
+		</div>
+	</div>
 </div>
 
 <button
@@ -464,6 +467,18 @@
 >
 	<ArrowUp width="20" height="20" aria-hidden="true" />
 </button>
+
+{#snippet row(weekend: Weekend)}
+	<EventRow
+		{weekend}
+		{timeZone}
+		{now}
+		{filter}
+		{today}
+		expanded={expanded.has(weekend.id)}
+		ontoggle={() => toggleExpanded(weekend.id)}
+	/>
+{/snippet}
 
 <SeriesSheet bind:open={seriesOpen} bind:selected />
 <SubscribeDialog bind:open={subscribeOpen} {selected} bind:filter bind:alarm origin={page.url.origin} />

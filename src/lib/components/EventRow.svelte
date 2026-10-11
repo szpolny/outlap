@@ -29,11 +29,12 @@
 		mainSession,
 		sessionState,
 		type SessionFilter,
+		type Weekend,
 		FILTER_KINDS
 	} from '#lib/format.ts';
 
 	interface Props {
-		event: MotorEvent;
+		weekend: Weekend;
 		timeZone: string;
 		now: number;
 		filter: SessionFilter;
@@ -42,28 +43,43 @@
 		ontoggle: () => void;
 	}
 
-	let { event, timeZone, now, filter, today, expanded, ontoggle }: Props = $props();
+	let { weekend, timeZone, now, filter, today, expanded, ontoggle }: Props = $props();
 
+	type Entry = { event: MotorEvent; session: Session };
+
+	/** The headline event names the card; the others share its track and week. */
+	const event = $derived(weekend.events[0]);
+	const shared = $derived(weekend.events.length > 1);
 	const series = $derived(SERIES[event.series]);
 	const anchor = $derived(anchorDate(event, timeZone));
-	const sessions = $derived(event.sessions.filter((s) => FILTER_KINDS[filter].includes(s.kind)));
+	const all = $derived(
+		weekend.events
+			.flatMap((e) => e.sessions.map((session) => ({ event: e, session })))
+			.sort((a, b) => a.session.start.localeCompare(b.session.start))
+	);
+	const entries = $derived(all.filter((x) => FILTER_KINDS[filter].includes(x.session.kind)));
 	const main = $derived(mainSession(event));
-	const live = $derived(event.sessions.filter((s) => sessionState(s, now) === 'live'));
-	const next = $derived(sessions.find((s) => sessionState(s, now) === 'upcoming'));
-	const finished = $derived(eventEndMs(event) <= now);
+	const live = $derived(all.filter((x) => sessionState(x.session, now) === 'live'));
+	const next = $derived(entries.find((x) => sessionState(x.session, now) === 'upcoming'));
+	const finished = $derived(weekend.events.every((e) => eventEndMs(e) <= now));
 	const raceDay = $derived(anchor === today);
-	const photo = $derived(event.photo && PHOTOS[`/src/lib/assets${event.photo.src}`]);
+	const pictured = $derived(weekend.events.find((e) => e.photo));
+	const photo = $derived(pictured?.photo && PHOTOS[`/src/lib/assets${pictured.photo.src}`]);
+	const location = $derived(weekend.events.find((e) => e.location)?.location);
 
 	const days = $derived.by(() => {
-		const groups = new Map<string, Session[]>();
-		for (const s of sessions) {
-			const key = localDate(s.start, timeZone);
-			groups.set(key, [...(groups.get(key) ?? []), s]);
+		const groups = new Map<string, Entry[]>();
+		for (const x of entries) {
+			const key = localDate(x.session.start, timeZone);
+			groups.set(key, [...(groups.get(key) ?? []), x]);
 		}
 		return [...groups];
 	});
 
-	const detailsId = $derived(`details-${event.id}`);
+	/** Session names repeat across series ("Race"), so shared weekends prefix the series. */
+	const label = (x: Entry) => (shared ? `${SERIES[x.event.series].short} ${x.session.name}` : x.session.name);
+
+	const detailsId = $derived(`details-${weekend.id}`);
 
 	const pill = 'inline-flex items-center gap-1.5 rounded-full px-[9px] py-[3px] text-[12.5px] whitespace-nowrap';
 	const tag = 'rounded-[4px] px-1.5 py-px text-[10.5px] font-bold tracking-[0.04em] uppercase';
@@ -73,7 +89,7 @@
 
 <article
 	class={[
-		"relative overflow-hidden rounded-[14px] border bg-panel transition-[border-color,box-shadow] duration-150 before:absolute before:inset-y-0 before:left-0 before:w-1 before:bg-(--c) before:content-['']",
+		'relative overflow-hidden rounded-2xl border bg-panel transition-[border-color,box-shadow] duration-150',
 		expanded
 			? 'border-[color-mix(in_srgb,var(--c)_35%,var(--color-line))] shadow-card'
 			: 'border-line hover:border-[color-mix(in_srgb,var(--c)_35%,var(--color-line))]'
@@ -82,7 +98,7 @@
 >
 	<button
 		class={[
-			'relative box-border grid w-full cursor-pointer items-center gap-3 py-3 pr-3 pl-4 text-left focus-visible:rounded-[14px] focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--c) sm:gap-4 sm:py-3.5 sm:pr-4 sm:pl-5',
+			'relative box-border grid w-full cursor-pointer items-center gap-x-4 gap-y-3 p-4 text-left focus-visible:rounded-2xl focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-(--c) sm:gap-x-5 sm:px-5 sm:py-[18px]',
 			event.track
 				? 'grid-cols-[44px_minmax(0,1fr)_40px] sm:grid-cols-[52px_minmax(0,1fr)_auto_48px]'
 				: 'grid-cols-[44px_minmax(0,1fr)_16px] sm:grid-cols-[52px_minmax(0,1fr)_auto_16px]',
@@ -92,7 +108,7 @@
 		aria-controls={detailsId}
 		onclick={ontoggle}
 	>
-		{#if event.photo && photo}
+		{#if pictured?.photo && photo}
 			<!-- The photo shows on the right and fades into the card, so the text stays readable. -->
 			<span class="pointer-events-none absolute inset-y-0 right-0 block w-[75%] sm:w-[60%]" aria-hidden="true">
 				<enhanced:img
@@ -102,7 +118,7 @@
 					decoding="async"
 					sizes="(min-width: 980px) 571px, (min-width: 640px) 60vw, 75vw"
 					class="absolute inset-0 h-full w-full object-cover"
-					style:object-position={event.photo.focus}
+					style:object-position={pictured.photo.focus}
 				/>
 			</span>
 			<span
@@ -122,14 +138,18 @@
 			<span class="mt-[3px] text-lg font-[650] tabular-nums sm:text-[21px]">{fmtDate(anchor, { day: 'numeric' })}</span>
 		</span>
 
-		<span class="relative flex min-w-0 flex-col gap-0.5">
-			<span class="flex flex-wrap items-center gap-2 text-[12.5px] text-muted">
-				<SeriesLogo series={event.series} class="h-[11px] text-(--c)" />
-				{#if event.round}<span class={sep}>Round {event.round}</span>{/if}
-				<span class={sep}>{eventRange(event, timeZone)}</span>
+		<span class="relative flex min-w-0 flex-col gap-1">
+			<span class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-muted">
+				<span class="flex items-center gap-2.5">
+					{#each weekend.events as e (e.id)}
+						<span class="flex" style:color={SERIES[e.series].color}><SeriesLogo series={e.series} class="h-[11px]" /></span>
+					{/each}
+				</span>
+				{#if event.round && !shared}<span class={sep}>Round {event.round}</span>{/if}
+				<span class={[sep, 'hidden sm:inline']}>{eventRange(event, timeZone)}</span>
 			</span>
 			<span class="overflow-hidden text-[16.5px] font-[620] text-ellipsis tracking-[-0.01em] sm:whitespace-nowrap">{event.name}</span>
-			{#if event.location}<span class="truncate text-[13px] text-muted">{event.location}</span>{/if}
+			{#if location}<span class="truncate text-[13px] text-muted">{location}</span>{/if}
 		</span>
 
 		<span
@@ -137,7 +157,7 @@
 		>
 			{#if live.length}
 				<span class={[pill, 'bg-live font-semibold text-white']}
-					><span class="size-[7px] animate-blink rounded-full bg-white"></span>Live · {live[0].name}</span
+					><span class="size-[7px] animate-blink rounded-full bg-white"></span>Live · {label(live[0])}</span
 				>
 			{:else if finished}
 				<span class={[pill, 'bg-subtle text-muted']}>Finished</span>
@@ -150,17 +170,17 @@
 				<span
 					class={[
 						pill,
-						Date.parse(next.start) - now < 86_400_000
+						Date.parse(next.session.start) - now < 86_400_000
 							? 'bg-(--c)/14 font-semibold text-[color-mix(in_srgb,var(--c)_70%,var(--color-fg))]'
 							: 'bg-subtle text-fg'
 					]}
 				>
-					{next === main ? 'Starts' : next.name} in {countdown(next.start, now)}
+					{next.session === main ? 'Starts' : label(next)} in {countdown(next.session.start, now)}
 				</span>
 			{/if}
 			{#if main && !event.allDay}
 				<span class="text-[13px] whitespace-nowrap text-muted">
-					{main.name}
+					{shared ? `${series.short} ${main.name}` : main.name}
 					<strong class="ml-1 font-semibold text-fg tabular-nums">{fmtDay(main.start, timeZone)} {fmtTime(main.start, timeZone)}</strong>
 				</span>
 			{/if}
@@ -190,7 +210,7 @@
 
 	{#if expanded}
 		<div
-			class="flex flex-col gap-4 border-t border-dashed border-line px-4 pt-3 pb-4 sm:flex-row sm:gap-6 sm:pt-3.5 sm:pr-5 sm:pb-[18px] sm:pl-[88px]"
+			class="flex flex-col gap-5 border-t border-dashed border-line px-4 pt-4 pb-5 sm:flex-row sm:gap-8 sm:pt-5 sm:pr-5 sm:pb-6 sm:pl-[92px]"
 			id={detailsId}
 		>
 			{#if event.track}
@@ -205,7 +225,7 @@
 			<div class="min-w-0 flex-1">
 				{#if event.allDay}
 					{@const long = { weekday: 'long', day: 'numeric', month: 'long' } as const}
-					<p class="mt-3 text-[13px] text-muted">
+					<p class="text-[13px] text-muted">
 						{#if event.series === 'wrc'}
 							Rally runs {fmtDate(event.start, long)} to {fmtDate(event.end, long)}. Stage times aren't available from a reliable feed.
 						{:else}
@@ -214,18 +234,24 @@
 						{/if}
 					</p>
 				{:else}
-					<div class="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-7 gap-y-3.5">
+					<div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-x-8 gap-y-5">
 						{#each days as [day, list] (day)}
 							<div>
-								<h4 class={['mb-1.5 text-xs font-semibold tracking-[0.06em] uppercase', day === today ? 'text-fg' : 'text-muted']}>
+								<h4 class={['mb-2 text-xs font-semibold tracking-[0.06em] uppercase', day === today ? 'text-fg' : 'text-muted']}>
 									{fmtDate(day, { weekday: 'long' })}
 									<span class="ml-1 font-normal">{fmtDate(day, { day: 'numeric', month: 'short' })}</span>
 								</h4>
 								<ul>
-									{#each list as s (s.name + s.start)}
+									{#each list as x (x.event.id + x.session.name + x.session.start)}
+										{@const s = x.session}
 										{@const st = sessionState(s, now)}
-										<li class={['flex items-baseline gap-3 py-1 text-sm', st === 'done' && 'opacity-45']}>
+										<li class={['flex items-center gap-3 py-1 text-sm', st === 'done' && 'opacity-45']}>
 											<time class="min-w-[3em] text-muted tabular-nums" datetime={s.start}>{fmtTime(s.start, timeZone)}</time>
+											{#if shared}
+												<span class="flex w-12 shrink-0" style:color={SERIES[x.event.series].color}>
+													<SeriesLogo series={x.event.series} class="h-2.5 max-w-full" />
+												</span>
+											{/if}
 											<span
 												class={[
 													(s.kind === 'race' || s.kind === 'sprint') && 'font-[620]',
@@ -233,30 +259,41 @@
 												]}>{s.name}</span
 											>
 											{#if st === 'live'}<span class={[tag, 'bg-live text-white']}>Live</span>{/if}
-											{#if s === next}<span class={[tag, 'bg-subtle text-muted']}>Next</span>{/if}
+											{#if x === next}<span class={[tag, 'bg-subtle text-muted']}>Next</span>{/if}
 										</li>
 									{/each}
 								</ul>
 							</div>
 						{/each}
 					</div>
-					{#if sessions.length < event.sessions.length}
-						<p class="mt-2.5 text-[13px] text-muted">{event.sessions.length - sessions.length} more sessions hidden by the session filter.</p>
+					{#if entries.length < all.length}
+						<p class="mt-3 text-[13px] text-muted">{all.length - entries.length} more sessions hidden by the session filter.</p>
 					{/if}
 				{/if}
-				<div class="mt-4 flex flex-wrap gap-2">
-					<a class={[btn, 'bg-fg text-bg']} href="/calendar.ics?event={encodeURIComponent(event.id)}&download=1" download>
-						<Calendar width="14" height="14" aria-hidden="true" />
-						Add to calendar
-					</a>
+				<div class="mt-5 flex flex-wrap gap-2">
+					{#each weekend.events as e (e.id)}
+						<a
+							class={[btn, 'bg-fg text-bg']}
+							href="/calendar.ics?event={encodeURIComponent(e.id)}&download=1"
+							download
+							title="Add {SERIES[e.series].name} · {e.name} to calendar"
+						>
+							<Calendar width="14" height="14" aria-hidden="true" />
+							{#if shared}
+								<SeriesLogo series={e.series} class="h-[11px]" />
+							{:else}
+								Add to calendar
+							{/if}
+						</a>
+					{/each}
 					{#if event.url}
 						<a class={[btn, 'border border-line text-fg']} href={event.url} target="_blank" rel="noopener">Event page ↗</a>
 					{/if}
 				</div>
-				{#if event.photo}
-					<p class="mt-3 truncate text-[11px] text-muted">
-						Photo: <a class="underline decoration-current/40 underline-offset-2" href={event.photo.page} target="_blank" rel="noopener"
-							>{event.photo.credit || 'Wikimedia Commons'}</a
+				{#if pictured?.photo}
+					<p class="mt-4 truncate text-[11px] text-muted">
+						Photo: <a class="underline decoration-current/40 underline-offset-2" href={pictured.photo.page} target="_blank" rel="noopener"
+							>{pictured.photo.credit || 'Wikimedia Commons'}</a
 						>
 					</p>
 				{/if}

@@ -9,6 +9,9 @@ Website: [outlap.lol](https://outlap.lol)
 Upcoming motorsport sessions in your local time zone, with Apple Calendar
 subscriptions that stay up to date. Built with SvelteKit 3 + TypeScript.
 
+First-time visitors start with F1, IndyCar, MotoGP, WEC and WRC selected.
+The series filters offer the full calendar, and selections are saved for future visits.
+
 ## Series and data sources
 
 Schedules are scraped from the sources below every hour (no hardcoded dates;

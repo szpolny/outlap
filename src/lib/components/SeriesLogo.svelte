@@ -21,8 +21,9 @@
 	import wrc from '#lib/assets/series/wrc.svg';
 
 	// Single-colour marks applied as a CSS mask, so they take the surrounding text colour.
-	// The ratio is width / height of each trimmed asset.
-	const LOGOS: Record<SeriesId, [src: string, ratio: number]> = {
+	// The ratio is width / height of each trimmed asset. Very wide wordmarks take an
+	// optional scale so they don't dwarf the others at the same height.
+	const LOGOS: Record<SeriesId, [src: string, ratio: number, scale?: number]> = {
 		f1: [f1, 4],
 		f2: [f2, 3.0185],
 		f3: [f3, 3.0185],
@@ -37,7 +38,7 @@
 		sgp: [sgp, 215 / 55],
 		wec: [wec, 4.1914],
 		elms: [elms, 375 / 72],
-		lemanscup: [lemanscup, 746 / 72],
+		lemanscup: [lemanscup, 746 / 72, 0.7],
 		imsa: [imsa, 4.5574],
 		dtm: [dtm, 3.6728],
 		supergt: [supergt, 8.0011],
@@ -65,5 +66,6 @@
 	aria-label={SERIES[series].name}
 	class={['inline-block shrink-0 bg-current', className]}
 	style:aspect-ratio={logo[1]}
+	style:zoom={logo[2]}
 	style:mask="url(&quot;{logo[0]}&quot;) center / contain no-repeat"
 ></span>
