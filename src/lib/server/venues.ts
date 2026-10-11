@@ -4,7 +4,7 @@ import PHOTOS from './photos.json';
 // Track outlines and venue photos, matched to events by venue. Outlines are plain SVGs in
 // static/tracks/ (see static/tracks/README.md for where they come from). Photos are Wikimedia
 // Commons files, or FIMSpeedway.com press photos (free for editorial use with credit) where
-// Commons has none. Their thumbnails are kept in static/photos/, with sizes and credits in
+// Commons has none. Their thumbnails are kept in src/lib/assets/photos/, with sizes and credits in
 // photos.json. A photo missing from photos.json isn't shown.
 
 interface Venue {
