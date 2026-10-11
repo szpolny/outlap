@@ -1,5 +1,6 @@
 <script lang="ts">
 	import CalendarPlus from '~icons/lucide/calendar-plus';
+	import ArrowUp from '~icons/lucide/arrow-up';
 	import ChevronDown from '~icons/lucide/chevron-down';
 	import GitHub from '~icons/simple-icons/github';
 	import { onMount } from 'svelte';
@@ -43,6 +44,8 @@
 	let seriesOpen = $state(false);
 	let prefsLoaded = $state(false);
 	let barHeight = $state(0);
+	let scrollY = $state(0);
+	let innerHeight = $state(0);
 	const expanded = new SvelteSet<string>();
 
 	// Server renders in UTC; the browser switches to the viewer's zone after hydration.
@@ -98,8 +101,11 @@
 		data.events.filter((e) => selected.includes(e.series) && (e.allDay || e.sessions.some((s) => kinds.includes(s.kind))))
 	);
 
+	const lastWeek = $derived(addDays(thisWeek, -7));
 	const isPast = (e: MotorEvent) => weekStart(anchorDate(e, timeZone)) < thisWeek && eventEndMs(e) <= now;
-	const pastCount = $derived(matching.filter(isPast).length);
+	// Only the previous week stays reachable; anything older is dropped.
+	const isTooOld = (e: MotorEvent) => isPast(e) && weekStart(anchorDate(e, timeZone)) < lastWeek;
+	const pastCount = $derived(matching.filter((e) => isPast(e) && !isTooOld(e)).length);
 
 	type WeekItem =
 		| { type: 'week'; start: string; events: MotorEvent[] }
@@ -108,7 +114,7 @@
 	const weeks = $derived.by((): WeekItem[] => {
 		const byWeek = new Map<string, MotorEvent[]>();
 		for (const e of matching) {
-			if (!showPast && isPast(e)) continue;
+			if (isTooOld(e) || (!showPast && isPast(e))) continue;
 			const week = weekStart(anchorDate(e, timeZone));
 			byWeek.set(week, [...(byWeek.get(week) ?? []), e]);
 		}
@@ -199,7 +205,14 @@
 	const chip =
 		'inline-flex h-8 shrink-0 cursor-pointer items-center gap-[7px] rounded-full border px-3 text-[13.5px] font-[550] transition-colors duration-[120ms] select-none';
 	const chipOff = 'border-line bg-panel text-muted';
+
+	function scrollToTop() {
+		const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+		window.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'instant' });
+	}
 </script>
+
+<svelte:window bind:scrollY bind:innerHeight />
 
 <svelte:head>
 	<title>Outlap · Motorsport Calendar</title>
@@ -353,7 +366,7 @@
 				class="mx-auto mt-4 block cursor-pointer rounded-full border border-dashed border-line px-4 py-[7px] text-[13.5px] text-muted hover:border-muted hover:text-fg"
 				onclick={() => (showPast = !showPast)}
 			>
-				{showPast ? 'Hide earlier weeks' : `Show ${pastCount} earlier event${pastCount === 1 ? '' : 's'}`}
+				{showPast ? 'Hide last week' : `Show ${pastCount} event${pastCount === 1 ? '' : 's'} from last week`}
 			</button>
 		{/if}
 
@@ -438,6 +451,19 @@
 		</details>
 	</footer>
 </div>
+
+<button
+	class={[
+		'fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-20 grid size-11 cursor-pointer place-items-center rounded-full border border-line bg-panel text-fg shadow-card transition-[opacity,translate] duration-200 hover:bg-subtle sm:right-6 sm:bottom-6',
+		scrollY > innerHeight * 1.5 ? 'opacity-100' : 'pointer-events-none translate-y-2 opacity-0'
+	]}
+	onclick={scrollToTop}
+	aria-label="Scroll to top"
+	title="Scroll to top"
+	tabindex={scrollY > innerHeight * 1.5 ? 0 : -1}
+>
+	<ArrowUp width="20" height="20" aria-hidden="true" />
+</button>
 
 <SeriesSheet bind:open={seriesOpen} bind:selected />
 <SubscribeDialog bind:open={subscribeOpen} {selected} bind:filter bind:alarm origin={page.url.origin} />

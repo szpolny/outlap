@@ -6,22 +6,29 @@ in a 100-unit box. `src/lib/server/venues.ts` assigns them to events.
 | Track | Source |
 | --- | --- |
 | `albertpark` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
+| `aragon` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `assen` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `atlanta` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
+| `autopolis` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `bahrain` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `baku` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
+| `balaton` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `bowmangray` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `brno` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `catalunya` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `charlotte` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `chicagoland` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `cota` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
+| `cremona` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `darlington` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `daytona` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
+| `donington` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `dover` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
+| `estoril` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `fuji` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `gateway` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `goiania` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
+| `hockenheim` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `homestead` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `hungaroring` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `imola` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
@@ -33,8 +40,10 @@ in a 100-unit box. `src/lib/server/venues.ts` assigns them to events.
 | `kansas` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `lagunaseca` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `lasvegas` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
+| `lausitzring` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL (Sprint layout) |
 | `lusail` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `madring` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
+| `magnycours` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `mandalika` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `marinabay` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `martinsville` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
@@ -42,14 +51,21 @@ in a 100-unit box. `src/lib/server/venues.ts` assigns them to events.
 | `miami` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `michigan` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `milwaukee` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
+| `misano` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `monaco` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `montreal` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `monza` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `mosport` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
+| `most` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
+| `motegi` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `mugello` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `nashville` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `newhampshire` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
+| `norisring` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `northwilkesboro` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
+| `nurburgring` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License (Sprint layout, cut from the GP circuit) |
+| `okayama` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
+| `oschersleben` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `paulricard` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `phillipisland` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `phoenix` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
@@ -64,6 +80,7 @@ in a 100-unit box. `src/lib/server/venues.ts` assigns them to events.
 | `shanghai` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `silverstone` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `spa` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
+| `sugo` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `suzuka` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `talladega` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `texas` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |

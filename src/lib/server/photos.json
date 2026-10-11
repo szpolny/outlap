@@ -6,12 +6,26 @@
 		"page": "https://commons.wikimedia.org/wiki/File:1_singapore_f1_night_race_2012_city_skyline.jpg",
 		"credit": "chensiyuan, CC BY-SA 4.0"
 	},
+	"2009_1000km_of_Okayama_(Race_1)_opening_lap.jpg": {
+		"src": "/photos/2009-1000km-of-okayama-race-1-opening-lap.jpg",
+		"width": 960,
+		"height": 509,
+		"page": "https://commons.wikimedia.org/wiki/File:2009_1000km_of_Okayama_(Race_1)_opening_lap.jpg",
+		"credit": "Morio, CC BY-SA 3.0"
+	},
 	"2012_Honda_Grand_Prix_of_St._Petersburg_Progress_Energy_Corners.jpg": {
 		"src": "/photos/2012-honda-grand-prix-of-st-petersburg-progress-energy-corners.jpg",
 		"width": 960,
 		"height": 754,
 		"page": "https://commons.wikimedia.org/wiki/File:2012_Honda_Grand_Prix_of_St._Petersburg_Progress_Energy_Corners.jpg",
 		"credit": "John O'Neill, CC BY-SA 3.0"
+	},
+	"2013_Norisring_DTM_35282b.jpg": {
+		"src": "/photos/2013-norisring-dtm-35282b.jpg",
+		"width": 960,
+		"height": 451,
+		"page": "https://commons.wikimedia.org/wiki/File:2013_Norisring_DTM_35282b.jpg",
+		"credit": "Michael KR, CC BY-SA 4.0"
 	},
 	"2015_Rally_Italia_Sardinia_20_Paddon-Kennard.jpg": {
 		"src": "/photos/2015-rally-italia-sardinia-20-paddon-kennard.jpg",
@@ -83,6 +97,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:4_Hours_of_Sepang_2019.jpg",
 		"credit": "United Autosports, CC BY-SA 2.0"
 	},
+	"Aerial_image_of_Motorsport_Arena_Oschersleben_(view_from_the_west).jpg": {
+		"src": "/photos/aerial-image-of-motorsport-arena-oschersleben-view-from-the-west.jpg",
+		"width": 960,
+		"height": 518,
+		"page": "https://commons.wikimedia.org/wiki/File:Aerial_image_of_Motorsport_Arena_Oschersleben_(view_from_the_west).jpg",
+		"credit": "Carsten Steger, CC BY-SA 4.0"
+	},
 	"Aerial_image_of_Sachsenring_(view_from_the_southwest).jpg": {
 		"src": "/photos/aerial-image-of-sachsenring-view-from-the-southwest.jpg",
 		"width": 960,
@@ -104,6 +125,20 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Albert_Park_circuit_main_straight,_pictured_from_above_teams%27_garages_in_2022.jpg",
 		"credit": "AllAussieTraveller, CC BY-SA 4.0"
 	},
+	"Andrea_Dovizioso_2011_Estoril_3.jpg": {
+		"src": "/photos/andrea-dovizioso-2011-estoril-3.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:Andrea_Dovizioso_2011_Estoril_3.jpg",
+		"credit": "Box Repsol, CC BY 2.0"
+	},
+	"Autodrom_Most_Tschechien_Originalgröße.jpg": {
+		"src": "/photos/autodrom-most-tschechien-originalgroe.jpg",
+		"width": 960,
+		"height": 639,
+		"page": "https://commons.wikimedia.org/wiki/File:Autodrom_Most_Tschechien_Originalgr%C3%B6%C3%9Fe.jpg",
+		"credit": "AutodromMost, CC BY-SA 4.0"
+	},
 	"Autodromo_aerea_poster.jpg": {
 		"src": "/photos/autodromo-aerea-poster.jpg",
 		"width": 960,
@@ -111,12 +146,12 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Autodromo_aerea_poster.jpg",
 		"credit": "Marpol, Public domain"
 	},
-	"Automotodrom_Brno_Omega.JPG": {
-		"src": "/photos/automotodrom-brno-omega.jpg",
+	"Autopolis_racing_circuit_(Kamitsue,_Oita,_Japan).JPG": {
+		"src": "/photos/autopolis-racing-circuit-kamitsue-oita-japan.jpg",
 		"width": 960,
 		"height": 720,
-		"page": "https://commons.wikimedia.org/wiki/File:Automotodrom_Brno_Omega.JPG",
-		"credit": "Lutz H, CC BY 2.0 de"
+		"page": "https://commons.wikimedia.org/wiki/File:Autopolis_racing_circuit_(Kamitsue,_Oita,_Japan).JPG",
+		"credit": "Bobo12345, Public domain"
 	},
 	"Autódromo_Internacional_do_Algarve_-_Portimão_-_Portugal_🇵🇹_(53656876708).jpg": {
 		"src": "/photos/autodromo-internacional-do-algarve-portimao-portugal-53656876708.jpg",
@@ -202,13 +237,6 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Circuit_Paul_Ricard,_April_22,_2018_SkySat_(cropped).jpg",
 		"credit": "Planet Labs, Inc., CC BY-SA 4.0"
 	},
-	"Circuito_de_Jerez.jpg": {
-		"src": "/photos/circuito-de-jerez.jpg",
-		"width": 960,
-		"height": 255,
-		"page": "https://commons.wikimedia.org/wiki/File:Circuito_de_Jerez.jpg",
-		"credit": "Andrés Cuesta from Fuengirola Málaga, España, CC BY-SA 2.0"
-	},
 	"Corkscrew_Turn,_Mazda_Raceway_Laguna_Seca.jpg": {
 		"src": "/photos/corkscrew-turn-mazda-raceway-laguna-seca.jpg",
 		"width": 960,
@@ -216,12 +244,19 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Corkscrew_Turn,_Mazda_Raceway_Laguna_Seca.jpg",
 		"credit": "MRLS PR at English Wikipedia, Public domain"
 	},
-	"Cro-7460.jpg": {
-		"src": "/photos/cro-7460.jpg",
+	"Croatia_Rally_2021_-_Ott_Tänak_cropped.jpg": {
+		"src": "/photos/croatia-rally-2021-ott-tanak-cropped.jpg",
+		"width": 960,
+		"height": 654,
+		"page": "https://commons.wikimedia.org/wiki/File:Croatia_Rally_2021_-_Ott_T%C3%A4nak_cropped.jpg",
+		"credit": "Ivan Vranić hvranic, CC0"
+	},
+	"Dani_Pedrosa_leads_the_pack_2014_Sepang.jpeg": {
+		"src": "/photos/dani-pedrosa-leads-the-pack-2014-sepang.jpg",
 		"width": 960,
 		"height": 640,
-		"page": "https://commons.wikimedia.org/wiki/File:Cro-7460.jpg",
-		"credit": "Dj masch hr, CC BY-SA 4.0"
+		"page": "https://commons.wikimedia.org/wiki/File:Dani_Pedrosa_leads_the_pack_2014_Sepang.jpeg",
+		"credit": "Box Repsol, CC BY 2.0"
 	},
 	"Epingle_Monaco.jpg": {
 		"src": "/photos/epingle-monaco.jpg",
@@ -237,12 +272,40 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Esapekka_Lappi_Rally_Finland_2022_Rannankyl%C3%A4.jpg",
 		"credit": "Antti Leppänen, CC BY 4.0"
 	},
-	"Formul'Academy_Euroseries_2009._Motorland_Aragón.jpg": {
-		"src": "/photos/formul-academy-euroseries-2009-motorland-aragon.jpg",
+	"FIMSpeedway_2024_Donji_Kraljevec_SGP.jpg": {
+		"src": "/photos/fim-speedway-gp-2024-donji-kraljevec.jpg",
 		"width": 960,
-		"height": 638,
-		"page": "https://commons.wikimedia.org/wiki/File:Formul%27Academy_Euroseries_2009._Motorland_Arag%C3%B3n.jpg",
-		"credit": "CC BY-SA 3.0"
+		"height": 640,
+		"page": "https://fimspeedway.com/albums/2024-round-1-donji-kraljevec-sgp",
+		"credit": "FIMSpeedway.com"
+	},
+	"FIMSpeedway_2026_Landshut_SGP.jpg": {
+		"src": "/photos/fim-speedway-gp-2026-landshut.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://fimspeedway.com/albums/2026-round-1-landshut-sgp",
+		"credit": "FIMSpeedway.com"
+	},
+	"FIMSpeedway_2026_Malilla_SGP.jpg": {
+		"src": "/photos/fim-speedway-gp-2026-malilla.jpg",
+		"width": 960,
+		"height": 768,
+		"page": "https://fimspeedway.com/albums/2026-round-6-malilla-sgp",
+		"credit": "FIMSpeedway.com"
+	},
+	"FIMSpeedway_2026_Manchester_SGP.jpg": {
+		"src": "/photos/fim-speedway-gp-2026-manchester.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://fimspeedway.com/albums/2026-round-3-manchester-sgp",
+		"credit": "FIMSpeedway.com"
+	},
+	"FIMSpeedway_2026_Vojens_SGP.jpg": {
+		"src": "/photos/fim-speedway-gp-2026-vojens.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://fimspeedway.com/albums/2026-round-9-vojens-sgp",
+		"credit": "FIMSpeedway.com"
 	},
 	"Foxhall_stadium.jpg": {
 		"src": "/photos/foxhall-stadium.jpg",
@@ -278,6 +341,13 @@
 		"height": 1061,
 		"page": "https://commons.wikimedia.org/wiki/File:Gtp_sports_cars.jpg",
 		"credit": "Rick Dikeman, CC BY-SA 3.0"
+	},
+	"Hockenheimring_start-ziel-gerade_2010.jpg": {
+		"src": "/photos/hockenheimring-start-ziel-gerade-2010.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:Hockenheimring_start-ziel-gerade_2010.jpg",
+		"credit": "Kmtextor, CC BY-SA 4.0"
 	},
 	"Hungaroring_Exit.JPG": {
 		"src": "/photos/hungaroring-exit.jpg",
@@ -328,6 +398,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:JimHug2006.JPG",
 		"credit": "Gusgon11, Public domain"
 	},
+	"Jorge_Lorenzo_leads_the_pack_2015_Jerez_2.jpeg": {
+		"src": "/photos/jorge-lorenzo-leads-the-pack-2015-jerez-2.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:Jorge_Lorenzo_leads_the_pack_2015_Jerez_2.jpeg",
+		"credit": "Box Repsol, CC BY 2.0"
+	},
 	"Kenya_KCB_Rally_Naivasha_3.jpg": {
 		"src": "/photos/kenya-kcb-rally-naivasha-3.jpg",
 		"width": 960,
@@ -349,13 +426,6 @@
 		"page": "https://commons.wikimedia.org/wiki/File:LBGP05.jpg",
 		"credit": "CCWSF1 at English Wikipedia, CC BY-SA 3.0"
 	},
-	"Lakeside_Hammers_43_Swindon_Robins_47.jpg": {
-		"src": "/photos/lakeside-hammers-43-swindon-robins-47.jpg",
-		"width": 960,
-		"height": 643,
-		"page": "https://commons.wikimedia.org/wiki/File:Lakeside_Hammers_43_Swindon_Robins_47.jpg",
-		"credit": "Loco Steve, CC BY-SA 2.0"
-	},
 	"Las_Vegas_Grand_Prix_(54942393435).jpg": {
 		"src": "/photos/las-vegas-grand-prix-54942393435.jpg",
 		"width": 960,
@@ -369,6 +439,13 @@
 		"height": 619,
 		"page": "https://commons.wikimedia.org/wiki/File:Las_Vegas_Motor_Speedway_in_March_2011.jpg",
 		"credit": "Maverick Helicopters, CC BY-SA 2.0"
+	},
+	"Lausitzring_Turn_3.jpg": {
+		"src": "/photos/lausitzring-turn-3.jpg",
+		"width": 960,
+		"height": 720,
+		"page": "https://commons.wikimedia.org/wiki/File:Lausitzring_Turn_3.jpg",
+		"credit": "Mr T, CC BY-SA 4.0"
 	},
 	"Lodz_Moto_Arena.jpg": {
 		"src": "/photos/lodz-moto-arena.jpg",
@@ -384,12 +461,47 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Luftaufnahme_(c)Red_Bull_Ring.jpg",
 		"credit": "Vanessa Machelett, CC BY-SA 4.0"
 	},
+	"Magny-Cours_(morning_before_the_race).JPG": {
+		"src": "/photos/magny-cours-morning-before-the-race.jpg",
+		"width": 960,
+		"height": 723,
+		"page": "https://commons.wikimedia.org/wiki/File:Magny-Cours_(morning_before_the_race).JPG",
+		"credit": "TwoWings, Public domain"
+	},
 	"Main_straight_and_turn_1_hill,_Circuit_of_the_Americas.jpg": {
 		"src": "/photos/main-straight-and-turn-1-hill-circuit-of-the-americas.jpg",
 		"width": 960,
 		"height": 623,
 		"page": "https://commons.wikimedia.org/wiki/File:Main_straight_and_turn_1_hill,_Circuit_of_the_Americas.jpg",
 		"credit": "Lars Plougmann, CC BY-SA 2.0"
+	},
+	"Marc_Márquez_(28235169747).jpg": {
+		"src": "/photos/marc-marquez-28235169747.jpg",
+		"width": 960,
+		"height": 540,
+		"page": "https://commons.wikimedia.org/wiki/File:Marc_M%C3%A1rquez_(28235169747).jpg",
+		"credit": "Anyul Rivas from Barcelona, Spain, CC BY 2.0"
+	},
+	"Marc_Márquez_and_Jorge_Lorenzo_2013_Aragón_2.jpg": {
+		"src": "/photos/marc-marquez-and-jorge-lorenzo-2013-aragon-2.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:Marc_M%C3%A1rquez_and_Jorge_Lorenzo_2013_Arag%C3%B3n_2.jpg",
+		"credit": "Box Repsol, CC BY 2.0"
+	},
+	"Marc_Márquez_leads_the_pack_2015_Le_Mans.jpeg": {
+		"src": "/photos/marc-marquez-leads-the-pack-2015-le-mans.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:Marc_M%C3%A1rquez_leads_the_pack_2015_Le_Mans.jpeg",
+		"credit": "Box Repsol, CC BY 2.0"
+	},
+	"Marc_Márquez_leads_the_pack_2019_Brno.jpeg": {
+		"src": "/photos/marc-marquez-leads-the-pack-2019-brno.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:Marc_M%C3%A1rquez_leads_the_pack_2019_Brno.jpeg",
+		"credit": "Box Repsol, CC BY 2.0"
 	},
 	"Marc_Márquez_wins_the_race_2018_Buriram.jpg": {
 		"src": "/photos/marc-marquez-wins-the-race-2018-buriram.jpg",
@@ -404,6 +516,13 @@
 		"height": 720,
 		"page": "https://commons.wikimedia.org/wiki/File:Martinsville_Speedway,_September_2011_overview.JPG",
 		"credit": "GalaxyTrooper, CC BY-SA 3.0"
+	},
+	"Mattias_Ekström,_Red_Bull_Audi_RS_5_DTM,_DTM_Nürburgring_2017_(36976865252).jpg": {
+		"src": "/photos/mattias-ekstrom-red-bull-audi-rs-5-dtm-dtm-nurburgring-2017-36976865252.jpg",
+		"width": 960,
+		"height": 679,
+		"page": "https://commons.wikimedia.org/wiki/File:Mattias_Ekstr%C3%B6m,_Red_Bull_Audi_RS_5_DTM,_DTM_N%C3%BCrburgring_2017_(36976865252).jpg",
+		"credit": "Mattias Ekström, CC BY 2.0"
 	},
 	"Miami_Grand_Prix_startfinish.jpg": {
 		"src": "/photos/miami-grand-prix-startfinish.jpg",
@@ -503,13 +622,6 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Ogier_Ingrassia_2009.jpg",
 		"credit": "RobindesB, CC BY-SA 3.0"
 	},
-	"Ott_Tänak_Rally_Estonia_2021.jpg": {
-		"src": "/photos/ott-tanak-rally-estonia-2021.jpg",
-		"width": 960,
-		"height": 553,
-		"page": "https://commons.wikimedia.org/wiki/File:Ott_T%C3%A4nak_Rally_Estonia_2021.jpg",
-		"credit": "Kasepats, CC BY-SA 4.0"
-	},
 	"Partenza_del_Gran_Premio_d'Italia_TIM_2011.jpg": {
 		"src": "/photos/partenza-del-gran-premio-d-italia-tim-2011.jpg",
 		"width": 960,
@@ -566,6 +678,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Rally_Acropolis_2011-SS3.jpg",
 		"credit": "Nickgleris ( talk ), CC0"
 	},
+	"Rally_Estonia_2018_-_Ott_Tänak.jpg": {
+		"src": "/photos/rally-estonia-2018-ott-tanak.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:Rally_Estonia_2018_-_Ott_T%C3%A4nak.jpg",
+		"credit": "Jan Hedström, CC BY 2.0"
+	},
 	"Rally_Islas_Canarias_2019_-_2.jpg": {
 		"src": "/photos/rally-islas-canarias-2019-2.jpg",
 		"width": 960,
@@ -601,6 +720,13 @@
 		"page": "https://en.wikipedia.org/wiki/File:Sakhir_tower_at_Bahrain_International_Circuit.jpg",
 		"credit": "Shihas.am, CC0"
 	},
+	"Sbk_2013_-_Donington_Park_-_panoramio_(1).jpg": {
+		"src": "/photos/sbk-2013-donington-park-panoramio-1.jpg",
+		"width": 960,
+		"height": 720,
+		"page": "https://commons.wikimedia.org/wiki/File:Sbk_2013_-_Donington_Park_-_panoramio_(1).jpg",
+		"credit": "Radi1981, CC BY 3.0"
+	},
 	"Sebastien_Ogier_Baiao_Rally_de_portugal_2016.jpg": {
 		"src": "/photos/sebastien-ogier-baiao-rally-de-portugal-2016.jpg",
 		"width": 960,
@@ -628,6 +754,13 @@
 		"height": 720,
 		"page": "https://commons.wikimedia.org/wiki/File:Sonoma_Raceway_Turn_7A.jpg",
 		"credit": "ZappaOMati, CC BY-SA 4.0"
+	},
+	"Sportsland_SUGO_(27169582042).jpg": {
+		"src": "/photos/sportsland-sugo-27169582042.jpg",
+		"width": 960,
+		"height": 720,
+		"page": "https://commons.wikimedia.org/wiki/File:Sportsland_SUGO_(27169582042).jpg",
+		"credit": "redlegsfan21 from Vandalia, OH, United States, CC BY-SA 2.0"
 	},
 	"Stadion_unibax2.jpg": {
 		"src": "/photos/stadion-unibax2.jpg",
@@ -698,6 +831,20 @@
 		"height": 1440,
 		"page": "https://commons.wikimedia.org/wiki/File:VirginiaInternationalRacewayPit_Road.jpg",
 		"credit": "Freewheeling Daredevil, CC BY 2.0"
+	},
+	"Vista_Cremona_Circuit_WSBK_2024.jpg": {
+		"src": "/photos/vista-cremona-circuit-wsbk-2024.jpg",
+		"width": 960,
+		"height": 720,
+		"page": "https://commons.wikimedia.org/wiki/File:Vista_Cremona_Circuit_WSBK_2024.jpg",
+		"credit": "Vale93b, CC BY-SA 4.0"
+	},
+	"WTCC_2016,_Qatar.jpg": {
+		"src": "/photos/wtcc-2016-qatar.jpg",
+		"width": 960,
+		"height": 540,
+		"page": "https://commons.wikimedia.org/wiki/File:WTCC_2016,_Qatar.jpg",
+		"credit": "Dmitry Racer, CC BY-SA 4.0"
 	},
 	"Will_Power_(7333133580).jpg": {
 		"src": "/photos/will-power-7333133580.jpg",

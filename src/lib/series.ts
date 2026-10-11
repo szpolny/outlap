@@ -6,15 +6,19 @@ export const SERIES = {
 	f3: { name: 'Formula 3', short: 'F3', color: '#e4002b', group: 'Single-seater' },
 	indycar: { name: 'IndyCar', short: 'IndyCar', color: '#1f3a93', group: 'Single-seater' },
 	indynxt: { name: 'Indy NXT', short: 'NXT', color: '#5b6b8c', group: 'Single-seater' },
+	superformula: { name: 'Super Formula', short: 'SF', color: '#0891b2', group: 'Single-seater' },
 	nascar: { name: 'NASCAR Cup Series', short: 'NASCAR', color: '#007ac2', group: 'Stock car' },
 	motogp: { name: 'MotoGP', short: 'MotoGP', color: '#c8102e', group: 'Motorcycle' },
 	moto2: { name: 'Moto2', short: 'Moto2', color: '#d4560f', group: 'Motorcycle' },
 	moto3: { name: 'Moto3', short: 'Moto3', color: '#8a5cc2', group: 'Motorcycle' },
+	worldsbk: { name: 'Superbike World Championship', short: 'WorldSBK', color: '#db2777', group: 'Motorcycle' },
 	sgp: { name: 'FIM Speedway Grand Prix', short: 'SGP', color: '#7a8c00', group: 'Motorcycle' },
 	wec: { name: 'FIA WEC', short: 'WEC', color: '#0a7d5a', group: 'Endurance' },
 	elms: { name: 'European Le Mans Series', short: 'ELMS', color: '#2c9c9c', group: 'Endurance' },
 	lemanscup: { name: 'Michelin Le Mans Cup', short: 'LMC', color: '#27509b', group: 'Endurance' },
 	imsa: { name: 'IMSA SportsCar Championship', short: 'IMSA', color: '#9b1b30', group: 'Endurance' },
+	dtm: { name: 'DTM', short: 'DTM', color: '#d49a00', group: 'GT' },
+	supergt: { name: 'Super GT', short: 'Super GT', color: '#7c3aed', group: 'GT' },
 	wrc: { name: 'World Rally Championship', short: 'WRC', color: '#b8860b', group: 'Rally' }
 } as const;
 

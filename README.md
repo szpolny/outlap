@@ -24,18 +24,25 @@ data keeps being served and the page shows a warning.
 | WEC, ELMS, Le Mans Cup | Official race pages on fiawec.com / europeanlemansseries.com / lemanscup.com |
 | IMSA | Wikipedia season article (imsa.com blocks automated clients); all-day race days |
 | IndyCar, Indy NXT | Official schedule pages on indycar.com / indynxt.com |
+| Super Formula | Official race pages on superformula.net (Japanese); rounds without a published timetable are all-day events |
+| WorldSBK | Official WorldSBK API |
+| DTM | The api.dtm.com feed behind dtm.com; events without a published timetable are all-day events |
+| Super GT | Official race pages on supergt.net (Japanese); rounds without a published timetable are all-day events |
 | NASCAR Cup Series | The nascar.com schedule feed (cf.nascar.com) |
 | WRC | Wikipedia season article (wrc.com blocks automated clients); all-day events |
 
-Start times are as published. End times are estimates, except for MotoGP,
-which publishes them.
+Start times are as published. End times are estimates, except where the
+source publishes them (MotoGP, DTM, and most non-race sessions for WorldSBK,
+Super GT and Super Formula).
 
 ## Event visuals
 
 Event cards include track outlines and venue photos where available.
 
 Venue photos are Wikimedia Commons thumbnails kept in `static/photos/`, with
-their credits in `src/lib/server/photos.json`. A photo named in
+their credits in `src/lib/server/photos.json`. Speedway GP venues without a
+freely licensed photo use FIMSpeedway.com press photos, which are free for
+editorial use when credited to FIMSpeedway.com. A photo named in
 `src/lib/server/venues.ts` needs an entry there to be shown.
 
 ## Apple Calendar
@@ -49,7 +56,7 @@ Feed parameters:
 
 | Param | Values |
 | --- | --- |
-| `series` | comma list of `f1,f2,f3,indycar,indynxt,nascar,motogp,moto2,moto3,sgp,wec,elms,lemanscup,imsa,wrc` (default: all) |
+| `series` | comma list of `f1,f2,f3,indycar,indynxt,superformula,nascar,motogp,moto2,moto3,worldsbk,sgp,wec,elms,lemanscup,imsa,dtm,supergt,wrc` (default: all) |
 | `sessions` | `all` (default), `main` (qualifying + sprints + races), `races` |
 | `alarm` | minutes before start, e.g. `15` |
 | `event` | a single event id |

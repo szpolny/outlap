@@ -3,7 +3,8 @@ import PHOTOS from './photos.json';
 
 // Track outlines and venue photos, matched to events by venue. Outlines are plain SVGs in
 // static/tracks/ (see static/tracks/README.md for where they come from). Photos are Wikimedia
-// Commons files whose thumbnails are kept in static/photos/, with sizes and credits in
+// Commons files, or FIMSpeedway.com press photos (free for editorial use with credit) where
+// Commons has none. Their thumbnails are kept in static/photos/, with sizes and credits in
 // photos.json. A photo missing from photos.json isn't shown.
 
 interface Venue {
@@ -13,7 +14,7 @@ interface Venue {
 	series?: SeriesId[];
 	/** static/tracks/<track>.svg */
 	track?: string;
-	/** Commons file name */
+	/** key in photos.json: the Commons file name, or a FIMSpeedway_* name for press photos */
 	photo?: string;
 	/** which part of the photo to show on the card, as a CSS background-position */
 	focus?: string;
@@ -22,18 +23,21 @@ interface Venue {
 /** Rallies and speedway meetings only match venues that name their series. */
 const OFF_CIRCUIT = new Set<SeriesId>(['wrc', 'sgp']);
 
+/** Bike series get their own photo where a venue's general one shows cars, and vice versa. */
+const BIKES: SeriesId[] = ['motogp', 'moto2', 'moto3', 'worldsbk'];
+
 // First match wins, so series-specific entries come before the venue's general entry.
 const VENUES: Venue[] = [
 	// WRC: no single track, so just a photo of the rally.
 	{ series: ['wrc'], match: /monte.?carlo/i, photo: 'Ogier_Ingrassia_2009.jpg' },
 	{ series: ['wrc'], match: /sweden/i, photo: 'Jari-Matti_Latvala_2015-02-14_001.jpg' },
 	{ series: ['wrc'], match: /safari|kenya/i, photo: 'Kenya_KCB_Rally_Naivasha_3.jpg' },
-	{ series: ['wrc'], match: /croatia/i, photo: 'Cro-7460.jpg' },
+	{ series: ['wrc'], match: /croatia/i, photo: 'Croatia_Rally_2021_-_Ott_Tänak_cropped.jpg' },
 	{ series: ['wrc'], match: /canarias|canary/i, photo: 'Rally_Islas_Canarias_2019_-_2.jpg' },
 	{ series: ['wrc'], match: /portugal/i, photo: 'Sebastien_Ogier_Baiao_Rally_de_portugal_2016.jpg' },
 	{ series: ['wrc'], match: /rally japan/i, photo: 'Sébastien_Loeb_-_2008_Rally_Japan_2.jpg' },
 	{ series: ['wrc'], match: /acropolis/i, photo: 'Rally_Acropolis_2011-SS3.jpg' },
-	{ series: ['wrc'], match: /estonia/i, photo: 'Ott_Tänak_Rally_Estonia_2021.jpg' },
+	{ series: ['wrc'], match: /estonia/i, photo: 'Rally_Estonia_2018_-_Ott_Tänak.jpg' },
 	{ series: ['wrc'], match: /finland/i, photo: 'Esapekka_Lappi_Rally_Finland_2022_Rannankylä.jpg' },
 	{ series: ['wrc'], match: /sardegna|sardinia/i, photo: "Chris_Atkinson_-_2008_Rally_d'Italia_Sardegna.jpg" },
 	// After Sardegna, which also has "Italia" in its name.
@@ -47,8 +51,11 @@ const VENUES: Venue[] = [
 	{ series: ['sgp'], match: /wroc[lł]aw/i, photo: 'Nowy_Olimpijski.jpg', focus: '50% 65%' },
 	{ series: ['sgp'], match: /[lł][oó]d[zź]/i, photo: 'Lodz_Moto_Arena.jpg' },
 	{ series: ['sgp'], match: /riga/i, photo: 'Stadion_żużlowy_w_Rydze.jpg' },
-	// Commons has no good photo of the Vojens track, so this is a heat at Lakeside.
-	{ series: ['sgp'], match: /vojens/i, photo: 'Lakeside_Hammers_43_Swindon_Robins_47.jpg', focus: '50% 55%' },
+	{ series: ['sgp'], match: /vojens/i, photo: 'FIMSpeedway_2026_Vojens_SGP.jpg', focus: '50% 25%' },
+	{ series: ['sgp'], match: /donji kraljevec/i, photo: 'FIMSpeedway_2024_Donji_Kraljevec_SGP.jpg', focus: '50% 65%' },
+	{ series: ['sgp'], match: /landshut/i, photo: 'FIMSpeedway_2026_Landshut_SGP.jpg', focus: '50% 20%' },
+	{ series: ['sgp'], match: /manchester/i, photo: 'FIMSpeedway_2026_Manchester_SGP.jpg' },
+	{ series: ['sgp'], match: /malilla/i, photo: 'FIMSpeedway_2026_Malilla_SGP.jpg', focus: '50% 80%' },
 	{ series: ['sgp'], match: /toru[nń]/i, photo: 'Stadion_unibax2.jpg' },
 	{ series: ['sgp'], match: /warsaw|warszawa/i, photo: 'National_Stadium_Warsaw_aerial_view_2.jpg' },
 	{ series: ['sgp'], match: /ipswich/i, photo: 'Foxhall_stadium.jpg' },
@@ -61,7 +68,7 @@ const VENUES: Venue[] = [
 		photo: "Albert_Park_circuit_main_straight,_pictured_from_above_teams'_garages_in_2022.jpg"
 	},
 	{ match: /shanghai/i, track: 'shanghai', photo: 'Shanghai_Circuit_Main_Grandstand_o.jpg' },
-	{ match: /suzuka/i, track: 'suzuka', photo: 'Suzuka_Circuit_2006.jpg' },
+	{ match: /suzuka/i, track: 'suzuka', photo: 'Suzuka_Circuit_2006.jpg', focus: '50% 70%' },
 	{ match: /homestead/i, track: 'homestead', photo: 'Race_start_(38904049411).jpg' },
 	{ match: /miami/i, track: 'miami', photo: 'Miami_Grand_Prix_startfinish.jpg' },
 	{
@@ -70,6 +77,7 @@ const VENUES: Venue[] = [
 		photo: 'Circuit_Gilles_Villeneuve_Hairpin.jpg'
 	},
 	{ match: /monaco|monte carlo/i, track: 'monaco', photo: 'Epingle_Monaco.jpg' },
+	{ series: BIKES, match: /catalunya|barcelona/i, track: 'catalunya', photo: 'Marc_Márquez_(28235169747).jpg' },
 	{
 		match: /catalunya|barcelona/i,
 		track: 'catalunya',
@@ -98,6 +106,13 @@ const VENUES: Venue[] = [
 	{ match: /madring|madrid/i, track: 'madring' },
 	{ match: /baku/i, track: 'baku', photo: 'Baku_City_Circuit,_April_9,_2018_SkySat.jpg' },
 	// Before Bahrain: the 2026 "Bahrain Grand Prix in Malaysia" runs at Sepang.
+	{
+		series: BIKES,
+		match: /sepang/i,
+		track: 'sepang',
+		photo: 'Dani_Pedrosa_leads_the_pack_2014_Sepang.jpeg',
+		focus: '50% 95%'
+	},
 	{ match: /sepang/i, track: 'sepang', photo: '4_Hours_of_Sepang_2019.jpg', focus: '50% 60%' },
 	{ match: /marina bay|singapore/i, track: 'marinabay', photo: '1_singapore_f1_night_race_2012_city_skyline.jpg' },
 	{
@@ -114,11 +129,13 @@ const VENUES: Venue[] = [
 	{ match: /las vegas motor speedway/i, photo: 'Las_Vegas_Motor_Speedway_in_March_2011.jpg' },
 	{ match: /las vegas/i, track: 'lasvegas', photo: 'Las_Vegas_Grand_Prix_(54942393435).jpg', focus: '50% 65%' },
 	{
+		series: BIKES,
 		match: /lusail|losail|qatar|doha/i,
 		track: 'lusail',
 		photo: 'Qatar_GP_2021._Pol_Espargaro_y_Stefan_Bradl_en_carrera_-_51079776027.jpg',
 		focus: '50% 70%'
 	},
+	{ match: /lusail|losail|qatar|doha/i, track: 'lusail', photo: 'WTCC_2016,_Qatar.jpg', focus: '50% 80%' },
 	{ match: /yas marina|abu dhabi/i, track: 'yasmarina', photo: 'Yas_Marina_Circuit_at_Sunset.jpg' },
 	{
 		match: /bahrain|sakhir/i,
@@ -129,19 +146,21 @@ const VENUES: Venue[] = [
 	{ match: /imola/i, track: 'imola', photo: 'Autodromo_aerea_poster.jpg' },
 	{ match: /buriram|chang international|thailand/i, photo: 'Marc_Márquez_wins_the_race_2018_Buriram.jpg' },
 	{ match: /goi[aâ]nia/i, track: 'goiania' },
-	{ match: /jerez/i, track: 'jerez', photo: 'Circuito_de_Jerez.jpg' },
+	{ match: /jerez/i, track: 'jerez', photo: 'Jorge_Lorenzo_leads_the_pack_2015_Jerez_2.jpeg', focus: '50% 90%' },
 	// Before Le Mans: Petit Le Mans runs at Road Atlanta.
 	{ match: /road atlanta|petit le mans/i, track: 'roadatlanta', photo: 'Road_atlanta_esses.JPG' },
-	{ match: /le mans/i, photo: '2023_24_Hours_of_Le_Mans_(53272111149).jpg', focus: '50% 30%' },
+	{ series: BIKES, match: /le mans/i, photo: 'Marc_Márquez_leads_the_pack_2015_Le_Mans.jpeg' },
+	{ match: /le mans/i, photo: '2023_24_Hours_of_Le_Mans_(53272111149).jpg', focus: '50% 70%' },
 	{ match: /mugello/i, track: 'mugello', photo: "Partenza_del_Gran_Premio_d'Italia_TIM_2011.jpg" },
-	{ match: /balaton/i, photo: 'Balaton_Park_Circuit_-_Pitlane.jpg' },
-	{ match: /brno/i, track: 'brno', photo: 'Automotodrom_Brno_Omega.JPG' },
+	{ match: /balaton/i, track: 'balaton', photo: 'Balaton_Park_Circuit_-_Pitlane.jpg' },
+	{ match: /brno/i, track: 'brno', photo: 'Marc_Márquez_leads_the_pack_2019_Brno.jpeg', focus: '50% 85%' },
 	{ match: /assen/i, track: 'assen', photo: 'Moto3_riders_racing_at_2025_Dutch_TT.jpg' },
 	{ match: /sachsenring/i, track: 'sachsenring', photo: 'Aerial_image_of_Sachsenring_(view_from_the_southwest).jpg' },
-	{ match: /arag[oó]n/i, photo: "Formul'Academy_Euroseries_2009._Motorland_Aragón.jpg" },
-	{ match: /misano/i, photo: 'Misano_World_Circuit_Marco_Simoncelli.jpg' },
+	{ match: /arag[oó]n/i, track: 'aragon', photo: 'Marc_Márquez_and_Jorge_Lorenzo_2013_Aragón_2.jpg' },
+	{ match: /misano/i, track: 'misano', photo: 'Misano_World_Circuit_Marco_Simoncelli.jpg' },
 	{
 		match: /motegi/i,
+		track: 'motegi',
 		photo: 'View_of_the_Oval_at_Twin_Ring_Motegi_from_the_South.jpg'
 	},
 	{
@@ -164,6 +183,45 @@ const VENUES: Venue[] = [
 		focus: '50% 60%'
 	},
 	{ match: /fuji/i, track: 'fuji', photo: 'Fuji_Speedway_with_Mount_Fuji.jpg' },
+	{ match: /okayama/i, track: 'okayama', photo: '2009_1000km_of_Okayama_(Race_1)_opening_lap.jpg' },
+	{ match: /\bsugo\b/i, track: 'sugo', photo: 'Sportsland_SUGO_(27169582042).jpg' },
+	{ match: /autopolis/i, track: 'autopolis', photo: 'Autopolis_racing_circuit_(Kamitsue,_Oita,_Japan).JPG' },
+	{ match: /hockenheim/i, track: 'hockenheim', photo: 'Hockenheimring_start-ziel-gerade_2010.jpg' },
+	// DTM races the Sprint layouts of the Lausitzring and the Nürburgring.
+	{ match: /lausitzring/i, track: 'lausitzring', photo: 'Lausitzring_Turn_3.jpg' },
+	{
+		series: ['dtm'],
+		match: /n[uü]rburgring/i,
+		track: 'nurburgring',
+		photo: 'Mattias_Ekström,_Red_Bull_Audi_RS_5_DTM,_DTM_Nürburgring_2017_(36976865252).jpg',
+		focus: '50% 90%'
+	},
+	{
+		match: /n[uü]rburgring/i,
+		photo: 'Mattias_Ekström,_Red_Bull_Audi_RS_5_DTM,_DTM_Nürburgring_2017_(36976865252).jpg',
+		focus: '50% 90%'
+	},
+	{ match: /norisring/i, track: 'norisring', photo: '2013_Norisring_DTM_35282b.jpg' },
+	{
+		match: /oschersleben/i,
+		track: 'oschersleben',
+		photo: 'Aerial_image_of_Motorsport_Arena_Oschersleben_(view_from_the_west).jpg'
+	},
+	{ match: /autodrom most/i, track: 'most', photo: 'Autodrom_Most_Tschechien_Originalgröße.jpg' },
+	{ match: /cremona/i, track: 'cremona', photo: 'Vista_Cremona_Circuit_WSBK_2024.jpg', focus: '50% 65%' },
+	{
+		match: /estoril/i,
+		track: 'estoril',
+		photo: 'Andrea_Dovizioso_2011_Estoril_3.jpg',
+		focus: '50% 65%'
+	},
+	{
+		match: /magny.?cours/i,
+		track: 'magnycours',
+		photo: 'Magny-Cours_(morning_before_the_race).JPG',
+		focus: '50% 60%'
+	},
+	{ match: /donington/i, track: 'donington', photo: 'Sbk_2013_-_Donington_Park_-_panoramio_(1).jpg' },
 	{
 		match: /paul ricard|le castellet/i,
 		track: 'paulricard',
