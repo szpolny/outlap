@@ -37,6 +37,19 @@
 
 	let { data }: PageProps = $props();
 
+	const siteUrl = 'https://outlap.lol/';
+	const siteTitle = 'Outlap · Motorsport Calendar & Race Schedules';
+	const siteDescription =
+		'Follow F1, MotoGP, WEC, IndyCar and more with race, qualifying and practice times in your local time zone. Subscribe to stay updated in Apple Calendar.';
+	const websiteSchema = JSON.stringify({
+		'@context': 'https://schema.org',
+		'@type': 'WebSite',
+		name: 'Outlap',
+		url: siteUrl,
+		description: siteDescription,
+		inLanguage: 'en'
+	});
+
 	const FILTERS = Object.keys(FILTER_LABELS) as SessionFilter[];
 	const STORAGE_KEY = 'outlap:prefs';
 
@@ -222,11 +235,18 @@
 <svelte:window bind:scrollY bind:innerHeight />
 
 <svelte:head>
-	<title>Outlap · Motorsport Calendar</title>
-	<meta
-		name="description"
-		content="Every F1, MotoGP, WEC, IndyCar and WRC session in your time zone, with Apple Calendar subscriptions."
-	/>
+	<title>{siteTitle}</title>
+	<meta name="description" content={siteDescription} />
+	<link rel="canonical" href={siteUrl} />
+	<meta property="og:type" content="website" />
+	<meta property="og:site_name" content="Outlap" />
+	<meta property="og:title" content={siteTitle} />
+	<meta property="og:description" content={siteDescription} />
+	<meta property="og:url" content={siteUrl} />
+	<meta name="twitter:card" content="summary" />
+	<meta name="twitter:title" content={siteTitle} />
+	<meta name="twitter:description" content={siteDescription} />
+	{@html `<script type="application/ld+json">${websiteSchema}</script>`}
 	<meta name="theme-color" content="#0f1012" media="(prefers-color-scheme: dark)" />
 	<meta name="theme-color" content="#f5f5f3" media="(prefers-color-scheme: light)" />
 </svelte:head>
