@@ -14,6 +14,7 @@
 	import sgp from '#lib/assets/series/sgp.png';
 	import wec from '#lib/assets/series/wec.svg';
 	import elms from '#lib/assets/series/elms.png';
+	import alms from '#lib/assets/series/alms.svg';
 	import lemanscup from '#lib/assets/series/lemanscup.png';
 	import imsa from '#lib/assets/series/imsa.svg';
 	import dtm from '#lib/assets/series/dtm.svg';
@@ -38,6 +39,7 @@
 		sgp: [sgp, 215 / 55],
 		wec: [wec, 4.1914],
 		elms: [elms, 375 / 72],
+		alms: [alms, 13.8546, 0.6],
 		lemanscup: [lemanscup, 746 / 72, 0.7],
 		imsa: [imsa, 4.5574],
 		dtm: [dtm, 3.6728],

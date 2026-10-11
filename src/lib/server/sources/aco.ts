@@ -2,10 +2,27 @@ import type { MotorEvent, SeriesId } from '#lib/series.ts';
 import { decodeEntities, fetchOptional, finalizeEvent, guessKind, makeSession, mapLimit } from '../util';
 import type { Source } from './types';
 
-// The ACO runs WEC, ELMS and the Le Mans Cup on the same site platform. Each race page lists its
+// The ACO runs WEC, ELMS, ALMS and the Le Mans Cup on the same site platform. Each race page lists its
 // sessions with a unix timestamp; unscheduled sessions show "TBC" instead.
 
-type AcoSeries = Extract<SeriesId, 'wec' | 'elms' | 'lemanscup'>;
+type AcoSeries = Extract<SeriesId, 'wec' | 'elms' | 'alms' | 'lemanscup'>;
+
+/** ALMS publishes meeting dates before session times. JSON-LD session times can still be placeholders. */
+function meetingInfo(html: string): { start: string; end: string; location?: string } | null {
+	for (const script of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+		try {
+			const data = JSON.parse(script[1]);
+			if (data['@type'] !== 'SportsEvent') continue;
+			const start = typeof data.startDate === 'string' ? data.startDate.slice(0, 10) : '';
+			const end = typeof data.endDate === 'string' ? data.endDate.slice(0, 10) : '';
+			if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end) || end < start) continue;
+			return { start, end, location: data.location?.name };
+		} catch {
+			// A malformed metadata block need not prevent reading another one.
+		}
+	}
+	return null;
+}
 
 function raceMinutes(series: AcoSeries, eventName: string): number {
 	// Le Mans Cup races run two hours; its Road to Le Mans support races run 55 minutes.
@@ -29,7 +46,7 @@ function parseRacePage(html: string, series: AcoSeries, slug: string, base: stri
 	const title = html.match(/og:title" content="([^"]+)"/)?.[1];
 	if (!title) return null;
 	// "4 Hours of Portimão 2026: Schedule, News &amp; Start List | FIA WEC"
-	const name = decodeEntities(title).replace(/:.*$/, '').trim();
+	const name = decodeEntities(title).replace(/:.*$/, '').replace(/ by ALMS/i, '').trim();
 
 	const sessions = [];
 	const seen = new Set<string>();
@@ -52,13 +69,17 @@ function parseRacePage(html: string, series: AcoSeries, slug: string, base: stri
 		);
 	}
 
-	return finalizeEvent({
+	const meeting = series === 'alms' ? meetingInfo(html) : null;
+	const event = {
 		id: `${series}-${slug}`,
 		series,
 		name,
+		...(meeting?.location ? { location: meeting.location } : {}),
 		sessions,
 		url: `${base}/en/race/${slug}`
-	});
+	};
+	if (sessions.length > 0) return finalizeEvent(event);
+	return meeting ? { ...event, start: meeting.start, end: meeting.end, allDay: true } : null;
 }
 
 function acoSource(series: AcoSeries, base: string, label: string): Source {
@@ -67,7 +88,9 @@ function acoSource(series: AcoSeries, base: string, label: string): Source {
 		series: [series],
 		async load(years) {
 			const slugs = new Set<string>();
-			for (const year of years) {
+			// Winter ALMS seasons are indexed by their starting year, including the following year's rounds.
+			const seasonYears = series === 'alms' ? [...new Set(years.flatMap((y) => [y - 1, y]))] : years;
+			for (const year of seasonYears) {
 				const html = await fetchOptional(`${base}/en/season/${year}`);
 				if (!html) continue;
 				for (const m of html.matchAll(/href="\/en\/race\/([a-z0-9-]+)\s*"/g)) {
@@ -80,13 +103,16 @@ function acoSource(series: AcoSeries, base: string, label: string): Source {
 				const html = await fetchOptional(`${base}/en/race/${slug}`);
 				return html ? parseRacePage(html, series, slug, base) : null;
 			});
-			return events
+			const parsed = events
 				.filter((e): e is MotorEvent => e !== null)
 				.sort((a, b) => a.start.localeCompare(b.start));
+			if (series === 'alms' && parsed.length === 0) throw new Error('no dated meetings found on race pages');
+			return parsed;
 		}
 	};
 }
 
 export const wec = acoSource('wec', 'https://www.fiawec.com', 'fiawec.com');
 export const elms = acoSource('elms', 'https://www.europeanlemansseries.com', 'europeanlemansseries.com');
+export const alms = acoSource('alms', 'https://www.asianlemansseries.com', 'asianlemansseries.com');
 export const lemanscup = acoSource('lemanscup', 'https://www.lemanscup.com', 'lemanscup.com');

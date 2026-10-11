@@ -15,6 +15,7 @@ export const SERIES = {
 	sgp: { name: 'FIM Speedway Grand Prix', short: 'SGP', color: '#7a8c00', group: 'Motorcycle' },
 	wec: { name: 'FIA WEC', short: 'WEC', color: '#0a7d5a', group: 'Endurance' },
 	elms: { name: 'European Le Mans Series', short: 'ELMS', color: '#2c9c9c', group: 'Endurance' },
+	alms: { name: 'Asian Le Mans Series', short: 'ALMS', color: '#e8710a', group: 'Endurance' },
 	lemanscup: { name: 'Michelin Le Mans Cup', short: 'LMC', color: '#27509b', group: 'Endurance' },
 	imsa: { name: 'IMSA SportsCar Championship', short: 'IMSA', color: '#9b1b30', group: 'Endurance' },
 	dtm: { name: 'DTM', short: 'DTM', color: '#d49a00', group: 'GT' },

@@ -1,5 +1,5 @@
 import type { MotorEvent, Schedule, SourceStatus } from '#lib/series.ts';
-import { elms, lemanscup, wec } from './sources/aco';
+import { alms, elms, lemanscup, wec } from './sources/aco';
 import { dtm } from './sources/dtm';
 import { f1 } from './sources/f1';
 import { imsa } from './sources/imsa';
@@ -16,7 +16,7 @@ import { wrc } from './sources/wrc';
 import { attachVenues } from './venues';
 
 const SOURCES: Source[] = [
-	f1, f2, f3, motogp, worldsbk, sgp, wec, elms, lemanscup, imsa, dtm, supergt,
+	f1, f2, f3, motogp, worldsbk, sgp, wec, elms, alms, lemanscup, imsa, dtm, supergt,
 	indycar, indynxt, superformula, nascar, wrc
 ];
 
