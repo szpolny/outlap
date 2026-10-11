@@ -5,6 +5,15 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="text-scale" content="scale" />
 		%sveltekit.head%
+		<script>
+			try {
+				let theme = localStorage.getItem('outlap:theme');
+				if (theme !== 'light' && theme !== 'dark') theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+				document.documentElement.dataset.theme = theme;
+				const bg = theme === 'dark' ? '#0f1012' : '#f5f5f3';
+				for (const meta of document.querySelectorAll('meta[name="theme-color"]')) meta.content = bg;
+			} catch {}
+		</script>
 	</head>
 	<body class="bg-bg text-[15px]/[1.45] text-fg antialiased" data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>

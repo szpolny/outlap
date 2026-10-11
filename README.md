@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="src/lib/assets/favicon.svg" alt="Outlap logo" width="88" height="88">
+  <img src="src/lib/assets/wordmark.svg" alt="Outlap" height="56">
 </p>
 
 # Outlap

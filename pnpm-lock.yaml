@@ -191,6 +191,9 @@ importers:
 
   .:
     devDependencies:
+      '@fontsource-variable/saira':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@iconify-json/lucide':
         specifier: ^1.2.142
         version: 1.2.142
@@ -450,6 +453,9 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@fontsource-variable/saira@5.3.0':
+    resolution: {integrity: sha512-C1rm7n1OuEx4Se/SAB/5EeUuCviGFFnYTr5vxuQQm2YIOfgbQWx/P6qqhdXlVCBRm/1UzNWCtDK5jNbVmO6W2w==}
 
   '@iconify-json/lucide@1.2.142':
     resolution: {integrity: sha512-vEGX5X52/l77jRMcmxXk3PiEebldDUs8WFdM8X3Evq1S9p5F+o0VZhx8sqaQsmFEB9Ukp5ND5Q/0g2kQ/LF+rQ==}
@@ -1610,6 +1616,8 @@ snapshots:
 
   '@esbuild/win32-x64@0.28.2':
     optional: true
+
+  '@fontsource-variable/saira@5.3.0': {}
 
   '@iconify-json/lucide@1.2.142':
     dependencies:

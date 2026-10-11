@@ -31,6 +31,7 @@
 	import SeriesList from '#lib/components/SeriesList.svelte';
 	import SeriesSheet from '#lib/components/SeriesSheet.svelte';
 	import SubscribeDialog from '#lib/components/SubscribeDialog.svelte';
+	import ThemeToggle from '#lib/components/ThemeToggle.svelte';
 	import TimeZonePicker from '#lib/components/TimeZonePicker.svelte';
 	import type { PageProps } from './$types';
 
@@ -231,16 +232,19 @@
 </svelte:head>
 
 <div class="mx-auto max-w-[980px] px-4 lg:max-w-[1240px] pt-[18px] pb-20 sm:pt-7" style:--bar-h="{barHeight}px">
-	<header class="mb-6 sm:mb-8">
-		<div class="flex items-center gap-3">
-			<img src={outlapMark} alt="" class="size-10 rounded-[11px]" />
-			<div class="min-w-0">
-				<h1 class="text-[21px] leading-[1.2] font-bold tracking-[-0.02em]">Outlap</h1>
-				<p class="mt-0.5 flex min-w-0 items-center gap-1 text-[13px] text-muted">
-					Times in <TimeZonePicker bind:value={zonePref} detected={detectedZone} />
-				</p>
-			</div>
+	<header class="mb-6 flex items-center justify-between gap-3 sm:mb-8">
+		<div class="min-w-0">
+			<h1 class="flex items-center gap-2 font-display text-[28px] leading-none font-black uppercase italic tracking-[0.02em] [font-stretch:112%] sm:text-[32px]">
+				Outlap
+				<span class="size-[1em] bg-accent mask-(--mark) mask-contain mask-center mask-no-repeat" style:--mark={`url("${outlapMark}")`} aria-hidden="true"></span>
+			</h1>
+			<p class="mt-1 flex min-w-0 items-center gap-1 text-[13px] text-muted">
+				<span class="font-display text-[12px] font-semibold uppercase italic tracking-[0.08em]">Motorsport calendar</span>
+				<span aria-hidden="true">·</span>
+				Times in <TimeZonePicker bind:value={zonePref} detected={detectedZone} />
+			</p>
 		</div>
+		<ThemeToggle />
 	</header>
 
 	<div class="lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-12">
