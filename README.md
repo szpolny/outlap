@@ -44,6 +44,10 @@ their credits in `src/lib/server/photos.json`. Speedway GP venues without a
 freely licensed photo use FIMSpeedway.com press photos, which are free for
 editorial use when credited to FIMSpeedway.com. A photo named in
 `src/lib/server/venues.ts` needs an entry there to be shown.
+SvelteKit's enhanced image plugin generates responsive formats at build time.
+The event cards choose a size for the screen and defer photos below the viewport.
+The source photo directory is linked under `src/lib/assets/` so Vite can process
+it while `/photos/` URLs remain available to API clients.
 
 ## Apple Calendar
 

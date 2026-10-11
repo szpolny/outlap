@@ -1,3 +1,17 @@
+<script module lang="ts">
+	import type { Picture } from '@sveltejs/enhanced-img';
+
+	const PHOTOS = import.meta.glob<Picture>('/src/lib/assets/photos/*.{jpg,png}', {
+		eager: true,
+		query: {
+			enhanced: true,
+			imgSizes: '(min-width: 980px) 571px, (min-width: 640px) 60vw, 75vw',
+			format: 'avif;webp'
+		},
+		import: 'default'
+	});
+</script>
+
 <script lang="ts">
 	import Calendar from '~icons/lucide/calendar';
 	import ChevronDown from '~icons/lucide/chevron-down';
@@ -38,6 +52,7 @@
 	const next = $derived(sessions.find((s) => sessionState(s, now) === 'upcoming'));
 	const finished = $derived(eventEndMs(event) <= now);
 	const raceDay = $derived(anchor === today);
+	const photo = $derived(event.photo && PHOTOS[`/src/lib/assets${event.photo.src}`]);
 
 	const days = $derived.by(() => {
 		const groups = new Map<string, Session[]>();
@@ -77,14 +92,19 @@
 		aria-controls={detailsId}
 		onclick={ontoggle}
 	>
-		{#if event.photo}
+		{#if event.photo && photo}
 			<!-- The photo shows on the right and fades into the card, so the text stays readable. -->
-			<span
-				class="pointer-events-none absolute inset-y-0 right-0 w-[75%] bg-cover bg-center sm:w-[60%]"
-				style:background-image="url(&quot;{event.photo.src}&quot;)"
-				style:background-position={event.photo.focus}
-				aria-hidden="true"
-			></span>
+			<span class="pointer-events-none absolute inset-y-0 right-0 block w-[75%] sm:w-[60%]" aria-hidden="true">
+				<enhanced:img
+					src={photo}
+					alt=""
+					loading="lazy"
+					decoding="async"
+					sizes="(min-width: 980px) 571px, (min-width: 640px) 60vw, 75vw"
+					class="absolute inset-0 h-full w-full object-cover"
+					style:object-position={event.photo.focus}
+				/>
+			</span>
 			<span
 				class="pointer-events-none absolute inset-0 bg-linear-to-r from-panel from-25% via-panel/85 via-60% to-panel/65 sm:from-40%"
 				aria-hidden="true"
