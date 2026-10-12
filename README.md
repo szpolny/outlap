@@ -42,3 +42,8 @@ uncertain coverage is labelled explicitly. See [viewing data and sources](docs/w
 Logos, track outlines and photos belong to their respective creators and are
 used under their applicable terms. See [photo credits](src/lib/server/photos.json)
 and [track credits](static/tracks/README.md).
+
+## License
+
+Source code is licensed under the [MIT License](LICENSE). Third-party assets
+remain subject to their respective licenses and terms listed above.
