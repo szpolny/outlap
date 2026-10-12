@@ -264,7 +264,19 @@
 				Times in <TimeZonePicker bind:value={zonePref} detected={detectedZone} />
 			</p>
 		</div>
-		<ThemeToggle />
+		<div class="flex shrink-0 items-center gap-2">
+			<a
+				class="grid size-9 place-items-center rounded-full bg-subtle text-muted hover:bg-[color-mix(in_srgb,var(--color-fg)_12%,var(--color-subtle))] hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-accent"
+				href="https://github.com/szpolny/outlap"
+				target="_blank"
+				rel="noopener noreferrer"
+				aria-label="Source code on GitHub"
+				title="Source code on GitHub"
+			>
+				<GitHub width="17" height="17" aria-hidden="true" />
+			</a>
+			<ThemeToggle />
+		</div>
 	</header>
 
 	<div class="lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-12">
@@ -440,18 +452,8 @@
 				{/each}
 			</main>
 
-			<footer class="relative mt-12 text-[13px] text-muted">
-				<a
-					class="absolute top-0 right-0 hover:text-fg"
-					href="https://github.com/szpolny/outlap"
-					target="_blank"
-					rel="noopener noreferrer"
-					aria-label="Source code on GitHub"
-					title="Source code on GitHub"
-				>
-					<GitHub width="18" height="18" aria-hidden="true" />
-				</a>
-				<details class="pr-7">
+			<footer class="mt-12 text-[13px] text-muted">
+				<details>
 					<summary class="cursor-pointer">Data sources{oldestRefresh ? ` · refreshed ${fmtTime(oldestRefresh, timeZone)}` : ''}</summary>
 					<ul class="my-3 grid gap-1.5">
 						{#each data.sources as src (src.source + src.series.join())}
