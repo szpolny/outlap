@@ -1,0 +1,52 @@
+name: Viewing information
+description: A broadcaster or stream is missing, wrong or no longer available.
+title: "[Watch] "
+labels: ["viewing-info"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping keep the "Where to watch" guide accurate. Rights change by season and country, so a link to an official source helps most.
+  - type: input
+    id: country
+    attributes:
+      label: Country
+      description: The country you watch from, as an ISO code or name.
+      placeholder: PL
+    validations:
+      required: true
+  - type: input
+    id: series
+    attributes:
+      label: Series
+      placeholder: Super GT
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What is the problem?
+      options:
+        - A provider is missing
+        - A provider is listed but does not carry it
+        - Details are wrong (link, price type, note)
+        - Something else
+    validations:
+      required: true
+  - type: input
+    id: provider
+    attributes:
+      label: Provider
+      description: The broadcaster, streaming service or channel.
+      placeholder: RACER+
+  - type: input
+    id: source
+    attributes:
+      label: Source
+      description: An official guide, broadcaster page or announcement that confirms it.
+      placeholder: https://
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: Anything else, e.g. only some rounds or sessions, or a subscription tier.

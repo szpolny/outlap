@@ -1,0 +1,39 @@
+name: Bug or wrong schedule
+description: Something on the site is broken, or an event time or session is wrong.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What kind of problem?
+      options:
+        - Wrong or missing event, session or time
+        - Calendar export
+        - Something looks or behaves wrong
+        - Something else
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you saw and what you expected. For a schedule issue, name the series and event.
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Source
+      description: For a wrong time, an official timetable link.
+      placeholder: https://
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and device
+      placeholder: Firefox 140, Android
+  - type: input
+    id: timezone
+    attributes:
+      label: Time zone selected on the site
+      placeholder: Europe/Warsaw

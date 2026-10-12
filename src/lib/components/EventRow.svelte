@@ -17,6 +17,7 @@
 	import ChevronDown from '~icons/lucide/chevron-down';
 	import { SERIES, type MotorEvent, type Session } from '#lib/series.ts';
 	import SeriesLogo from '#lib/components/SeriesLogo.svelte';
+	import WatchPanel from '#lib/components/WatchPanel.svelte';
 	import {
 		anchorDate,
 		countdown,
@@ -36,6 +37,10 @@
 	interface Props {
 		weekend: Weekend;
 		timeZone: string;
+		/** 'auto' or an ISO country code, shared by every row */
+		countryPref: string;
+		detectedCountry: string;
+		country: string;
 		now: number;
 		filter: SessionFilter;
 		today: string;
@@ -43,7 +48,7 @@
 		ontoggle: () => void;
 	}
 
-	let { weekend, timeZone, now, filter, today, expanded, ontoggle }: Props = $props();
+	let { weekend, timeZone, countryPref = $bindable(), detectedCountry, country, now, filter, today, expanded, ontoggle }: Props = $props();
 
 	type Entry = { event: MotorEvent; session: Session };
 
@@ -106,6 +111,7 @@
 		]}
 		aria-expanded={expanded}
 		aria-controls={detailsId}
+		title="Session schedule and where to watch"
 		onclick={ontoggle}
 	>
 		{#if pictured?.photo && photo}
@@ -270,6 +276,7 @@
 						<p class="mt-3 text-[13px] text-muted">{all.length - entries.length} more sessions hidden by the session filter.</p>
 					{/if}
 				{/if}
+				<WatchPanel events={weekend.events} bind:countryPref {detectedCountry} {country} />
 				<div class="mt-5 flex flex-wrap gap-2">
 					{#each weekend.events as e (e.id)}
 						<a

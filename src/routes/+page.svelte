@@ -33,6 +33,7 @@
 	import SubscribeDialog from '#lib/components/SubscribeDialog.svelte';
 	import ThemeToggle from '#lib/components/ThemeToggle.svelte';
 	import TimeZonePicker from '#lib/components/TimeZonePicker.svelte';
+	import { isCountry } from '#lib/countries.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -69,6 +70,10 @@
 	let detectedZone = $state('UTC');
 	/** 'auto' follows the device; otherwise an IANA zone picked by the viewer */
 	let zonePref = $state('auto');
+	/** 'auto' follows the request's Cloudflare country; otherwise an ISO code picked by the viewer */
+	let countryPref = $state('auto');
+	const detectedCountry = $derived(isCountry(data.country) ? data.country : '');
+	const country = $derived(countryPref === 'auto' ? detectedCountry : countryPref);
 	const timeZone = $derived(zonePref === 'auto' ? detectedZone : zonePref);
 	let now = $state(Date.now());
 
@@ -80,6 +85,7 @@
 				if (Array.isArray(prefs.selected)) selected = prefs.selected.filter((s: string) => s in SERIES);
 				if (prefs.filter in FILTER_KINDS) filter = prefs.filter;
 				alarm = Number(prefs.alarm) || 0;
+				if (isCountry(prefs.country)) countryPref = prefs.country;
 				if (typeof prefs.timeZone === 'string' && isValidZone(prefs.timeZone)) zonePref = prefs.timeZone;
 			}
 		} catch {
@@ -92,7 +98,7 @@
 
 	$effect(() => {
 		if (!prefsLoaded) return;
-		const prefs = JSON.stringify({ selected, filter, alarm, timeZone: zonePref });
+		const prefs = JSON.stringify({ selected, filter, alarm, timeZone: zonePref, country: countryPref });
 		try {
 			localStorage.setItem(STORAGE_KEY, prefs);
 		} catch {
@@ -258,11 +264,11 @@
 				Outlap
 				<span class="size-[1em] bg-accent mask-(--mark) mask-contain mask-center mask-no-repeat" style:--mark={`url("${outlapMark}")`} aria-hidden="true"></span>
 			</h1>
-			<p class="mt-1 flex min-w-0 items-center gap-1 text-[13px] text-muted">
+			<div class="mt-1 flex min-w-0 items-center gap-1 text-[13px] text-muted">
 				<span class="font-display text-[12px] font-semibold uppercase italic tracking-[0.08em]">Motorsport calendar</span>
 				<span aria-hidden="true">·</span>
 				Times in <TimeZonePicker bind:value={zonePref} detected={detectedZone} />
-			</p>
+			</div>
 		</div>
 		<div class="flex shrink-0 items-center gap-2">
 			<a
@@ -467,6 +473,10 @@
 					</ul>
 					<p class="my-[1em]">Schedules refresh hourly. Start times are official; end times are estimated unless the organiser publishes them.</p>
 					<p class="my-[1em]">
+						Spotted a bug, a wrong time or missing viewing information?
+						<a class="underline" href="https://github.com/szpolny/outlap/issues/new/choose">Open an issue on GitHub</a>.
+					</p>
+					<p class="my-[1em]">
 						Series names and logos are trademarks of their respective owners, used only to identify each championship. Outlap is not
 						affiliated with or endorsed by any series.
 					</p>
@@ -498,6 +508,9 @@
 	<EventRow
 		{weekend}
 		{timeZone}
+		bind:countryPref
+		{detectedCountry}
+		{country}
 		{now}
 		{filter}
 		{today}

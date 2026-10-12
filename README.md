@@ -5,8 +5,8 @@
 </p>
 
 [Outlap](https://outlap.lol) shows upcoming motorsport sessions in your local
-time zone, with series filters and Apple Calendar subscriptions that stay up
-to date. Built with SvelteKit and TypeScript.
+time zone, with series filters, country-specific viewing guides and Apple
+Calendar subscriptions that stay up to date. Built with SvelteKit and TypeScript.
 
 ## Development
 
@@ -28,6 +28,14 @@ retain their last good data. Local development fetches sources directly.
 
 See [source adapters](src/lib/server/sources) for data providers. Session end
 times are estimated when unpublished.
+
+## Viewing guides
+
+Expand a race to see where to watch it in your country: TV channels,
+subscriptions and free streams. The country is detected from your connection
+and can be changed in the panel. Availability and geoblocking depend on country,
+series and round. Curated options include official guide links and checked dates;
+uncertain coverage is labelled explicitly. See [viewing data and sources](docs/watching.md).
 
 ## Credits
 
