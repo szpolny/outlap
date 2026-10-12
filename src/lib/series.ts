@@ -27,7 +27,19 @@ export type SeriesId = keyof typeof SERIES;
 export const SERIES_IDS = Object.keys(SERIES) as SeriesId[];
 
 /** A focused starting selection for visitors without saved preferences. */
-export const DEFAULT_SERIES_IDS: SeriesId[] = ['f1', 'indycar', 'motogp', 'wec', 'wrc'];
+export const DEFAULT_SERIES_IDS: SeriesId[] = [
+	'f1',
+	'indycar',
+	'superformula',
+	'nascar',
+	'motogp',
+	'worldsbk',
+	'sgp',
+	'wec',
+	'imsa',
+	'dtm',
+	'wrc'
+];
 
 /** Categories in metadata order, shared by the quick filters and series picker. */
 export const SERIES_GROUPS = [...new Set(SERIES_IDS.map((id) => SERIES[id].group))].map((group) => ({
