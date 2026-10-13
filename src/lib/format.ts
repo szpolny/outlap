@@ -19,6 +19,10 @@ export const FILTER_LABELS: Record<SessionFilter, string> = {
 	races: 'Races only'
 };
 
+export function isSessionFilter(value: unknown): value is SessionFilter {
+	return typeof value === 'string' && value in FILTER_KINDS;
+}
+
 /** The main race of the weekend, used to place an event in a week and in order. */
 export function mainSession(e: MotorEvent): Session | undefined {
 	return e.sessions.findLast((s) => s.kind === 'race') ?? e.sessions.at(-1);

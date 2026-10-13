@@ -1,6 +1,5 @@
 <script lang="ts">
 	import CalendarPlus from '~icons/lucide/calendar-plus';
-	import ArrowUp from '~icons/lucide/arrow-up';
 	import ChevronDown from '~icons/lucide/chevron-down';
 	import GitHub from '~icons/simple-icons/github';
 	import { onMount } from 'svelte';
@@ -20,6 +19,7 @@
 		fmtRange,
 		fmtTime,
 		groupWeekends,
+		isSessionFilter,
 		localDate,
 		sessionState,
 		weekStart,
@@ -31,9 +31,12 @@
 	import SelectionList from '@szpolny/calendar-kit/SelectionList.svelte';
 	import SelectionSheet from '@szpolny/calendar-kit/SelectionSheet.svelte';
 	import SubscribeDialog from '#lib/components/SubscribeDialog.svelte';
+	import BackToTop from '@szpolny/calendar-kit/BackToTop.svelte';
 	import ThemeToggle from '@szpolny/calendar-kit/ThemeToggle.svelte';
 	import TimeZonePicker from '@szpolny/calendar-kit/TimeZonePicker.svelte';
 	import { isCountry } from '#lib/countries.ts';
+	import { isTimeZone } from '@szpolny/calendar-kit/dates';
+	import { readPrefs, writePrefs } from '@szpolny/calendar-kit/prefs';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -61,8 +64,6 @@
 	let seriesOpen = $state(false);
 	let prefsLoaded = $state(false);
 	let barHeight = $state(0);
-	let scrollY = $state(0);
-	let innerHeight = $state(0);
 	let showFinished = $state(false);
 	const expanded = new SvelteSet<string>();
 
@@ -79,17 +80,13 @@
 
 	onMount(() => {
 		detectedZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-		try {
-			const prefs = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null');
-			if (prefs) {
-				if (Array.isArray(prefs.selected)) selected = prefs.selected.filter((s: string) => s in SERIES);
-				if (prefs.filter in FILTER_KINDS) filter = prefs.filter;
-				alarm = Number(prefs.alarm) || 0;
-				if (isCountry(prefs.country)) countryPref = prefs.country;
-				if (typeof prefs.timeZone === 'string' && isValidZone(prefs.timeZone)) zonePref = prefs.timeZone;
-			}
-		} catch {
-			// storage unavailable; defaults are fine
+		const prefs = readPrefs(STORAGE_KEY);
+		if (prefs) {
+			if (Array.isArray(prefs.selected)) selected = prefs.selected.filter((s: string) => s in SERIES);
+			if (isSessionFilter(prefs.filter)) filter = prefs.filter;
+			alarm = Number(prefs.alarm) || 0;
+			if (isCountry(prefs.country)) countryPref = prefs.country;
+			if (typeof prefs.timeZone === 'string' && (prefs.timeZone === 'auto' || isTimeZone(prefs.timeZone))) zonePref = prefs.timeZone;
 		}
 		prefsLoaded = true;
 		const timer = setInterval(() => (now = Date.now()), 20_000);
@@ -98,23 +95,8 @@
 
 	$effect(() => {
 		if (!prefsLoaded) return;
-		const prefs = JSON.stringify({ selected, filter, alarm, timeZone: zonePref, country: countryPref });
-		try {
-			localStorage.setItem(STORAGE_KEY, prefs);
-		} catch {
-			// ignore
-		}
+		writePrefs(STORAGE_KEY, { selected, filter, alarm, timeZone: zonePref, country: countryPref });
 	});
-
-	function isValidZone(zone: string): boolean {
-		if (zone === 'auto') return true;
-		try {
-			new Intl.DateTimeFormat('en', { timeZone: zone });
-			return true;
-		} catch {
-			return false;
-		}
-	}
 
 	const kinds = $derived(FILTER_KINDS[filter]);
 	const today = $derived(localDate(new Date(now).toISOString(), timeZone));
@@ -231,14 +213,7 @@
 	const heroBadge = 'mb-1 h-3 self-start text-(--c)';
 	const heroName = 'text-[15px] font-[650] tracking-[-0.01em] sm:text-[17px]';
 	const heroSession = 'text-[13px] text-muted sm:text-sm';
-
-	function scrollToTop() {
-		const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
-		window.scrollTo({ top: 0, behavior: smooth ? 'smooth' : 'instant' });
-	}
 </script>
-
-<svelte:window bind:scrollY bind:innerHeight />
 
 <svelte:head>
 	<title>{siteTitle}</title>
@@ -491,18 +466,7 @@
 	</div>
 </div>
 
-<button
-	class={[
-		'fixed right-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-20 grid size-11 cursor-pointer place-items-center rounded-full border border-line bg-panel text-fg shadow-card transition-[opacity,translate] duration-200 hover:bg-subtle sm:right-6 sm:bottom-6',
-		scrollY > innerHeight * 1.5 ? 'opacity-100' : 'pointer-events-none translate-y-2 opacity-0'
-	]}
-	onclick={scrollToTop}
-	aria-label="Scroll to top"
-	title="Scroll to top"
-	tabindex={scrollY > innerHeight * 1.5 ? 0 : -1}
->
-	<ArrowUp width="20" height="20" aria-hidden="true" />
-</button>
+<BackToTop />
 
 {#snippet row(weekend: Weekend)}
 	<EventRow
