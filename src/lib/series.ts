@@ -1,3 +1,4 @@
+import type { SourceStatus as KitSourceStatus } from '@szpolny/calendar-kit/snapshot';
 // Shared between server and client: series metadata and the normalized event shape.
 
 export const SERIES = {
@@ -96,12 +97,8 @@ export interface EventImage {
 	focus?: string;
 }
 
-export interface SourceStatus {
+export interface SourceStatus extends KitSourceStatus {
 	series: SeriesId[];
-	source: string;
-	ok: boolean;
-	error?: string;
-	fetchedAt?: string;
 }
 
 export interface Schedule {
