@@ -24,7 +24,12 @@ pnpm build
 
 The [snapshot workflow](.github/workflows/snapshot.yml) fetches schedules hourly
 and publishes `schedule.json` to the `data` branch for production. Failed sources
-retain their last good data. Local development fetches sources directly.
+retain their last good data. Local development reuses the same GitHub snapshot,
+fetching providers directly only for newly added series absent from that snapshot.
+Series listed in the snapshot's source statuses count as present even when their
+calendar is empty or their latest refresh failed. Dev rechecks the snapshot hourly;
+if GitHub is unavailable, it keeps the in-memory schedule rather than scraping all
+providers.
 
 See [source adapters](src/lib/server/sources) for data providers. Session end
 times are estimated when unpublished.

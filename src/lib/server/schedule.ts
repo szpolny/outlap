@@ -2,7 +2,7 @@ import { dev } from '$app/env';
 import type { Schedule } from '#lib/series.ts';
 
 /**
- * In production the schedule is scraped hourly by a GitHub Action
+ * The schedule is scraped hourly by a GitHub Action
  * (.github/workflows/snapshot.yml) and published as JSON; the server only
  * reads that snapshot. Scraping per request doesn't fit the Workers free
  * plan's CPU and subrequest limits.
@@ -11,7 +11,7 @@ const SNAPSHOT_URL = 'https://raw.githubusercontent.com/szpolny/outlap/data/sche
 
 /** How long a fetched snapshot is reused before checking for a newer one. */
 const TTL_MS = 5 * 60 * 1000;
-/** In dev the sources are scraped directly, so refetch less often. */
+/** Dev may scrape newly added series, so refetch less often. */
 const DEV_TTL_MS = 60 * 60 * 1000;
 
 let cached: Schedule | undefined;
@@ -19,13 +19,14 @@ let attemptedAt = 0;
 let inflight: Promise<void> | undefined;
 
 async function load(): Promise<Schedule> {
-	if (dev) {
-		const { scrapeSchedule } = await import('./scrape');
-		return scrapeSchedule(cached);
-	}
 	const res = await fetch(SNAPSHOT_URL, { signal: AbortSignal.timeout(10_000) });
 	if (!res.ok) throw new Error(`HTTP ${res.status} for ${SNAPSHOT_URL}`);
-	return res.json();
+	const snapshot: Schedule = await res.json();
+	if (dev) {
+		const { scrapeSchedule } = await import('./scrape');
+		return scrapeSchedule(snapshot, { onlyMissing: true });
+	}
+	return snapshot;
 }
 
 function refresh(): Promise<void> {
