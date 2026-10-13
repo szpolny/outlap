@@ -1,3 +1,4 @@
+import { createSnapshotCache, fetchSnapshot } from '@szpolny/calendar-kit/snapshot';
 import { dev } from '$app/env';
 import type { Schedule } from '#lib/series.ts';
 
@@ -14,43 +15,17 @@ const TTL_MS = 5 * 60 * 1000;
 /** Dev may scrape newly added series, so refetch less often. */
 const DEV_TTL_MS = 60 * 60 * 1000;
 
-let cached: Schedule | undefined;
-let attemptedAt = 0;
-let inflight: Promise<void> | undefined;
-
-async function load(): Promise<Schedule> {
-	const res = await fetch(SNAPSHOT_URL, { signal: AbortSignal.timeout(10_000) });
-	if (!res.ok) throw new Error(`HTTP ${res.status} for ${SNAPSHOT_URL}`);
-	const snapshot: Schedule = await res.json();
-	if (dev) {
-		const { scrapeSchedule } = await import('./scrape');
-		return scrapeSchedule(snapshot, { onlyMissing: true });
-	}
-	return snapshot;
-}
-
-function refresh(): Promise<void> {
-	inflight ??= load()
-		.then((schedule) => {
-			cached = schedule;
-		})
-		.catch((e: unknown) => {
-			// Keep serving the last good snapshot.
-			console.error('[schedule] snapshot failed:', e instanceof Error ? e.message : e);
-		})
-		.finally(() => {
-			attemptedAt = Date.now();
-			inflight = undefined;
-		});
-	return inflight;
-}
-
-export async function getSchedule(): Promise<Schedule> {
-	const stale = Date.now() - attemptedAt > (dev ? DEV_TTL_MS : TTL_MS);
-	// Scraping takes seconds, so in dev revalidate in the background once there is data.
-	// Workers may cancel work left running after the response, so production waits.
-	if (!cached || (stale && !dev)) await refresh();
-	else if (stale) void refresh();
-	if (!cached) throw new Error('Schedule unavailable');
-	return cached;
-}
+export const getSchedule = createSnapshotCache<Schedule>({
+	load: async () => {
+		const snapshot = await fetchSnapshot<Schedule>(SNAPSHOT_URL);
+		if (dev) {
+			const { scrapeSchedule } = await import('./scrape');
+			return scrapeSchedule(snapshot, { onlyMissing: true });
+		}
+		return snapshot;
+	},
+	ttlMs: dev ? DEV_TTL_MS : TTL_MS,
+	// Workers may cancel background work after the response; production waits.
+	backgroundRefresh: dev,
+	onError: (error) => console.error('[schedule] snapshot failed:', error instanceof Error ? error.message : error)
+});

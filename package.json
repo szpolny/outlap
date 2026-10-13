@@ -6,13 +6,13 @@
 	"type": "module",
 	"packageManager": "pnpm@12.9.0",
 	"scripts": {
-		"dev": "vite dev",
-		"build": "vite build",
+		"dev": "pnpm --filter @szpolny/calendar-kit build && vite dev",
+		"build": "pnpm --filter @szpolny/calendar-kit build && vite build",
 		"preview": "vite preview",
-		"prepare": "svelte-kit sync || echo ''",
-		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-		"test": "node --test tests/*.test.js"
+		"prepare": "pnpm --filter @szpolny/calendar-kit build && svelte-kit sync",
+		"check": "pnpm --filter @szpolny/calendar-kit build && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "pnpm --filter @szpolny/calendar-kit build && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"test": "pnpm --filter @szpolny/calendar-kit build && node --test tests/*.test.js"
 	},
 	"devDependencies": {
 		"@fontsource-variable/saira": "^5.3.0",
@@ -35,5 +35,8 @@
 	"imports": {
 		"#lib": "./src/lib/index.js",
 		"#lib/*": "./src/lib/*"
+	},
+	"dependencies": {
+		"@szpolny/calendar-kit": "workspace:*"
 	}
 }

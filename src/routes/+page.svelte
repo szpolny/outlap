@@ -31,8 +31,8 @@
 	import SeriesList from '#lib/components/SeriesList.svelte';
 	import SeriesSheet from '#lib/components/SeriesSheet.svelte';
 	import SubscribeDialog from '#lib/components/SubscribeDialog.svelte';
-	import ThemeToggle from '#lib/components/ThemeToggle.svelte';
-	import TimeZonePicker from '#lib/components/TimeZonePicker.svelte';
+	import ThemeToggle from '@szpolny/calendar-kit/ThemeToggle.svelte';
+	import TimeZonePicker from '@szpolny/calendar-kit/TimeZonePicker.svelte';
 	import { isCountry } from '#lib/countries.ts';
 	import type { PageProps } from './$types';
 
@@ -281,7 +281,7 @@
 			>
 				<GitHub width="17" height="17" aria-hidden="true" />
 			</a>
-			<ThemeToggle />
+			<ThemeToggle storageKey="outlap:theme" colors={{ light: '#f5f5f3', dark: '#0f1012' }} />
 		</div>
 	</header>
 

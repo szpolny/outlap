@@ -11,6 +11,7 @@ Calendar subscriptions that stay up to date. Built with SvelteKit and TypeScript
 ## Development
 
 ```bash
+git submodule update --init --recursive
 pnpm install
 pnpm dev
 ```
@@ -52,3 +53,20 @@ and [track credits](static/tracks/README.md).
 
 Source code is licensed under the [MIT License](LICENSE). Third-party assets
 remain subject to their respective licenses and terms listed above.
+
+## Shared calendar package
+
+Common controls, date and ICS helpers, HTTP utilities, and schedule caching live
+in [calendar-kit](https://github.com/szpolny/calendar-kit), included as a Git
+submodule at `packages/calendar-kit`. Sport-specific behavior stays in this app.
+The pnpm workspace dependency uses the exact commit pinned by this repo.
+
+Clone with `--recurse-submodules`, or run `git submodule update --init --recursive`
+after cloning or pulling. `pnpm install` and the app's development, check, test,
+and build scripts build the package automatically. CI checks out submodules.
+For external build services, initialize submodules before installing dependencies.
+
+For shared changes, follow `packages/calendar-kit/README.md`: publish the package
+commit to its Git remote first, then update and review the submodule pin here.
+No npm publication is needed. Keep the first-paint theme script in `src/app.html`
+and the shared theme toggle's configuration in agreement.

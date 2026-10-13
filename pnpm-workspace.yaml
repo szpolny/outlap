@@ -1,3 +1,6 @@
+packages:
+  - packages/calendar-kit
+
 allowBuilds:
   esbuild: true
   workerd: true

@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@source '../packages/calendar-kit/dist';
 @import '@fontsource-variable/saira/wdth-italic.css';
 
 @custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));

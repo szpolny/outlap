@@ -12,7 +12,7 @@
 
 <script lang="ts">
 	import Locate from '~icons/lucide/locate-fixed';
-	import SearchPicker from '#lib/components/SearchPicker.svelte';
+	import SearchPicker from '@szpolny/calendar-kit/SearchPicker.svelte';
 	import { COUNTRIES, countryName } from '#lib/countries.ts';
 	import { LOCAL_COUNTRIES } from '#lib/watch.ts';
 

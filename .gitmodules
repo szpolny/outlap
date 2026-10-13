@@ -1,0 +1,3 @@
+[submodule "packages/calendar-kit"]
+	path = packages/calendar-kit
+	url = https://github.com/szpolny/calendar-kit.git
