@@ -71,12 +71,13 @@ test('free account streams and conditional subscriptions are distinguished', () 
 	assert.equal(option(getWatchInfo(event('f1'), 'US'), 'Apple TV').availability, 'available');
 });
 
-test('every provider has a logo except REV TV, which has none on Wikimedia', async () => {
+test('providers without logo assets retain the supported monogram fallback', async () => {
 	const { WATCH_GUIDES } = await server.ssrLoadModule('/src/lib/watch.ts');
 	const { providerLogo } = await server.ssrLoadModule('/src/lib/providers.ts');
 	const names = new Set(Object.values(WATCH_GUIDES).flatMap((guide) => guide.options.map((entry) => entry.name)));
 	for (const channel of ['FOX', 'FS1', 'TNT', 'USA Network', 'NBC', 'Prime Video']) names.add(channel);
-	assert.deepEqual([...names].filter((name) => !providerLogo(name)), ['REV TV']);
+	assert.deepEqual([...names].filter((name) => !providerLogo(name)).sort(),
+		['REV TV', 'RTBF Auvio', 'Sporty TV', 'TV 2 Play', 'L’Équipe', 'RTL+', 'BandSports', 'SPOTV', 'beIN SPORTS'].sort());
 });
 
 test('later seasons keep series-run streams as unconfirmed, without local broadcasters', () => {
@@ -106,7 +107,34 @@ test('country rules replace the note and link only where they apply', () => {
 test('local countries come from provider data, and worldwide streams still reach the rest', async () => {
 	const { LOCAL_COUNTRIES } = await server.ssrLoadModule('/src/lib/watch.ts');
 	for (const country of ['US', 'CA', 'PL', 'GB', 'JP']) assert.ok(LOCAL_COUNTRIES.has(country));
-	assert.equal(LOCAL_COUNTRIES.has('IN'), false);
+	assert.equal(LOCAL_COUNTRIES.has('IN'), true);
+	assert.equal(LOCAL_COUNTRIES.has('AQ'), false);
 	assert.equal(getWatchInfo(event('wec'), 'IN').options[0].name, 'FIAWEC+');
 	assert.equal(option(getWatchInfo(event('supergt'), 'US'), 'RACER+').availability, 'available');
+});
+
+
+test('WEC includes Polish TV and HBO Sport, with a Le Mans exception only for Polsat', () => {
+	const pl = getWatchInfo(event('wec'), 'PL');
+	for (const name of ['Eurosport', 'Polsat Sport / Polsat Box Go', 'HBO Max', 'FIAWEC+']) {
+		assert.equal(option(pl, name).availability, 'available');
+	}
+	assert.match(option(pl, 'HBO Max').note, /Sport add-on/);
+	const leMans = getWatchInfo(event('wec', '2026-06-13T14:00:00Z', '24 Hours of Le Mans'), 'PL');
+	assert.equal(option(leMans, 'Polsat Sport / Polsat Box Go').availability, 'blocked');
+	assert.equal(option(leMans, 'Eurosport').availability, 'available');
+	const cota = getWatchInfo(event('wec', '2026-09-06T18:00:00Z', 'Lone Star Le Mans'), 'PL');
+	assert.equal(option(cota, 'Polsat Sport / Polsat Box Go').availability, 'available');
+	assert.doesNotMatch(option(getWatchInfo(event('wec'), 'US'), 'HBO Max').note, /Sport add-on/);
+});
+
+test('WEC local rights stay within their territories, round evidence and season', () => {
+	assert.equal(option(getWatchInfo(event('wec'), 'GB'), 'TNT Sports').availability, 'available');
+	assert.equal(option(getWatchInfo(event('wec'), 'GB'), 'Eurosport'), undefined);
+	assert.equal(option(getWatchInfo(event('wec'), 'DE'), 'Eurosport').availability, 'available');
+	assert.equal(option(getWatchInfo(event('wec'), 'CA'), 'Eurosport'), undefined);
+	assert.equal(option(getWatchInfo(event('wec'), 'JP'), 'J SPORTS').availability, 'check');
+	const spa = event('wec', '2026-05-09T12:00:00Z', '6 Hours of Spa-Francorchamps');
+	assert.equal(option(getWatchInfo(spa, 'JP'), 'J SPORTS').availability, 'available');
+	assert.deepEqual(getWatchInfo(event('wec', '2027-06-12T14:00:00Z'), 'PL').options.map(({ name }) => name), ['FIAWEC+']);
 });

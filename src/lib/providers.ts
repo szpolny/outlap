@@ -70,6 +70,7 @@ const BRANDS: Record<string, string> = {
 	'NBC': nbc,
 	'NBC / USA Network': nbc,
 	'ORF / ServusTV': orf,
+	'ORF Sport +': orf,
 	'Peacock Premium': peacock,
 	'Polsat Sport / Polsat Box Go': polsatboxgo,
 	'Premier Sports': premiersports,

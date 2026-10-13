@@ -111,6 +111,32 @@ const motoOptions = [motoPass,
 	stream('ServusTV On', 'https://www.servustv.com/', 'Free', 'Austrian race coverage. Check supporting-class listings.', { countries: ['AT'] })
 ];
 
+// WBD's mainland-Europe rights; UK/Ireland use TNT Sports instead.
+// Regional announcements do not establish availability in Russia or Belarus.
+const wecEurope = ['AL', 'AD', 'AT', 'BE', 'BA', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 'FR', 'DE', 'GR', 'HU', 'IS', 'IT', 'LV', 'LI', 'LT', 'LU', 'MT', 'MD', 'MC', 'ME', 'NL', 'MK', 'NO', 'PL', 'PT', 'RO', 'SM', 'RS', 'SK', 'SI', 'ES', 'SE', 'CH', 'TR', 'UA', 'VA'];
+const WEC_GUIDE = 'https://www.fiawec.com/en/page/ou-regarder-1/36';
+// The official Spa distribution sheet confirms these services for that round.
+// Keep other rounds conditional rather than extrapolating a season-long deal.
+const wecRoundProvider = (option: WatchOption): WatchOption => ({ ...option, check: true,
+	note: `${option.note} Listed for Spa 2026; check this round in the official guide.`,
+	rules: [{ countries: option.countries ?? [], event: (event) => /spa/i.test(event.name) && event.start.startsWith('2026-05-'), availability: 'available' }]
+});
+const wecLocal = [
+	{ ...tv('ORF Sport +', WEC_GUIDE, ['AT']), access: 'Free' as const },
+	stream('RTBF Auvio', WEC_GUIDE, 'Free', 'Belgian race stream.', { countries: ['BE'] }),
+	{ ...tv('Sporty TV', WEC_GUIDE, ['CZ']), access: 'Free' as const },
+	stream('TV 2 Play', WEC_GUIDE, 'Subscription', 'Danish race stream.', { countries: ['DK'] }),
+	{ ...tv("L’Équipe", WEC_GUIDE, ['FR'], 'Selected live race coverage; TV may show only part of the race.'), access: 'Free' as const },
+	stream('RTL+', WEC_GUIDE, 'Subscription', 'German race stream.', { countries: ['DE'] }),
+	tv('Sky Sport Italia', 'https://sport.sky.it/', ['IT']),
+	tv('BandSports', WEC_GUIDE, ['BR']),
+	stream('Stan Sport', 'https://www.stan.com.au/sport', 'Subscription', 'Requires Stan and the Sport add-on.', { countries: ['AU'] }),
+	tv('Eurosport', 'https://www.eurosport.com/', ['IN', 'LK', 'BD', 'MV'], 'Selected live race coverage; may not include the entire race.'),
+	tv('J SPORTS', 'https://www.jsports.co.jp/motor/', ['JP']),
+	tv('SPOTV', WEC_GUIDE, ['KR']),
+	tv('beIN SPORTS', WEC_GUIDE, ['HK', 'SG', 'MY', 'BN', 'TH', 'KH', 'LA', 'ID', 'TL', 'PH', 'NZ'])
+].map(wecRoundProvider);
+
 /** Curated 2026 rights. Sources and limits are documented in docs/watching.md. */
 export const WATCH_GUIDES: Record<SeriesId, WatchGuide> = {
 	f1: guide(F1_GUIDE, [f1tv, ...formulaTv, apple,
@@ -162,9 +188,15 @@ export const WATCH_GUIDES: Record<SeriesId, WatchGuide> = {
 		tv('Eurosport 3 / Player', 'https://player.pl/', ['PL']),
 		stream('RACER+', 'https://racerplus.com/', 'Subscription', 'Live Speedway GP coverage.', { countries: ['US', 'CA'] }),
 		stream('FIM-MOTO.TV', 'https://fim-moto.tv/', 'Subscription', 'For countries without HBO Max or discovery+ coverage. Check your territory before subscribing.', { check: true })]),
-	wec: guide('https://www.fiawec.com/en/news/fiawec-now-available-via-app-store-and-google-play/13256', [
+	wec: { ...guide(WEC_GUIDE, [
 		stream('FIAWEC+', 'https://plus.fiawec.com/', 'Subscription', 'Full live races worldwide, including Le Mans. The 2026 service has no race geoblocking.', { ongoing: true }),
-		stream('HBO Max', 'https://www.hbomax.com/', 'Subscription', 'All 2026 races live in the US; Le Mans, São Paulo and Austin also air on truTV.', { countries: ['US'] })]),
+		tv('Eurosport', 'https://www.eurosport.com/', wecEurope, 'Live WEC coverage, including Le Mans. Linear TV may show only part of a race; check the channel schedule.'),
+		tv('TNT Sports', 'https://www.tntsports.co.uk/', ['GB', 'IE'], 'Live WEC coverage, including Le Mans. Check the channel schedule.'),
+		{ ...tv('Polsat Sport / Polsat Box Go', 'https://polsatboxgo.pl/', ['PL'], 'Seven rounds announced for 2026, with qualifying; excludes the 24 Hours of Le Mans. Check the channel and package for this round.'),
+			rules: [{ countries: ['PL'], event: (event) => /24.*(?:le mans|mans)|(?:le mans|mans).*24/i.test(event.name), availability: 'blocked', note: 'The 24 Hours of Le Mans is outside Polsat’s announced coverage. Use Eurosport, HBO Max with Sport, or FIAWEC+.' }] },
+		stream('HBO Max', 'https://www.hbomax.com/', 'Subscription', 'Full live races, including Le Mans. In Poland, requires a base subscription plus the Sport add-on.', { countries: ['PL', 'US'],
+			rules: [{ countries: ['US'], availability: 'available', note: 'All 2026 races live in the US; Le Mans, São Paulo and Austin also air on truTV. Check the eligible US plan.' }] }),
+		...wecLocal]), checked: '2026-10-13' },
 	elms: guide('https://plus.fiawec.com/en/european-le-mans-series', [
 		stream('FIAWEC+', 'https://plus.fiawec.com/en/european-le-mans-series', 'Free account', 'Full live races and replays worldwide. Create a free account.', { ongoing: true })]),
 	alms: guide('https://www.asianlemansseries.com/', [

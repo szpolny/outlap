@@ -83,7 +83,7 @@
 		{/each}
 	</div>
 	<p class="mt-3 text-[11px] leading-relaxed text-muted">
-		Race coverage shown. Practice, qualifying, highlights and replays can have different rights. Check the broadcaster’s listing for this round.
+		This is a partial list of viewing options. Practice, qualifying, highlights and replays can have different rights. Check the broadcaster’s listing for this round.
 		Missing or wrong provider?
 		<a class="underline decoration-current/40 underline-offset-2 hover:text-fg" href={issueUrl} target="_blank" rel="noopener noreferrer">Open an issue on GitHub ↗</a>
 	</p>

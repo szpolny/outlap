@@ -16,8 +16,9 @@ FIAWEC+, SFgo and YouTube marks were supplied separately and trimmed to 96 px
 WebP. Logos are shown in colour on a white tile in both themes, except
 white-on-transparent marks (FIAWEC+, SFgo), which get a dark tile. Other
 series-run services (INDYCAR LIVE, MotoGP VideoPass and so on) use the series
-wordmark. REV TV has no logo on Wikimedia and falls back to a monogram. A test
-fails if a new provider is added without a logo.
+wordmark. Providers without a logo asset use the existing monogram fallback. Missing artwork
+must not prevent verified broadcaster information from being listed; tests keep
+the fallback list explicit.
 
 The initial guide covers 2026 and was checked on 12 October 2026. It is not a
 live rights feed. Events outside 2026 link to the official guide without carrying
@@ -90,6 +91,35 @@ because they vary by territory, package and offer.
 - [WRC broadcast guide](https://www.wrc.com/en/misc/broadcast-guide). The page
   is undated, so its local broadcasters (RACER+, REV TV, Sky, CANAL+, Stan) are
   conditional until it confirms 2026. Rally.TV is global.
+
+## WEC audit — 13 October 2026
+
+The original WEC list contained only FIAWEC+ and US HBO Max, so it omitted
+local television in Poland and other countries. It was not an exhaustive list.
+
+- [WBD’s 2026–2030 agreement](https://www.fiawec.com/en/news/warner-bros-discovery-diffusera-le-fia-wec-au-minimum-jusqu-en-2030/8626)
+  confirms Eurosport in mainland Europe and TNT Sports in the UK and Ireland.
+  The country list represents the European distribution footprint; it does not
+  include Russia or Belarus. Linear coverage may cover only part of a race.
+- [WBD Poland announcement](https://prasa.wbdpoland.pl/post/fia-world-endurance-championship-w-eurosporcie-do-2030-roku)
+  confirms Eurosport and HBO Max, including Le Mans. HBO Max needs a base plan
+  and the Sport add-on in Poland; this condition is not applied to the US plan.
+- [Polsat’s season announcement](https://www.polsatsport.pl/wiadomosc/2026-04-17/siedem-wyscigow-nowego-sezonu-fia-wec-z-robertem-kubica-w-kanalach-polsat-sport/)
+  lists seven rounds with qualifying and Polsat Box Go access, excluding the
+  24 Hours of Le Mans. The exception must not accidentally exclude COTA’s
+  “Lone Star Le Mans”. Check revised rounds against current listings.
+- [Official Spa 2026 distribution sheet](https://www.fiawec.com/umbrella_media/fia-wec-distribution-spa-v8-2026-69fc43bd7cf21403337243.pdf)
+  supplies additional local options in Europe, Brazil, Australia, India and
+  neighbouring territories, Japan, Korea and Southeast Asia/New Zealand.
+  These entries are confirmed for Spa only and conditional for other rounds.
+  Links without a verified provider destination go to the official WEC guide.
+
+The audit does **not** establish completeness for every country or other series.
+Remaining gaps include regional deals without an exact territory list, European
+HBO Max/discovery+ package differences, additional free streams and Le Mans-only
+broadcasters. Existing MotoGP omissions are documented above. The panel explicitly
+labels the overall list as partial. Only WEC’s checked date was advanced;
+other series have not received a fresh full rights audit.
 
 ## Maintenance
 
