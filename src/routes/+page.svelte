@@ -7,7 +7,7 @@
 	import { SvelteSet } from 'svelte/reactivity';
 	import { page } from '$app/state';
 	import outlapMark from '#lib/assets/favicon.svg';
-	import { SERIES, SERIES_IDS, DEFAULT_SERIES_IDS, type MotorEvent, type SeriesId, type Session } from '#lib/series.ts';
+	import { SERIES, SERIES_IDS, SERIES_GROUPS, DEFAULT_SERIES_IDS, type MotorEvent, type SeriesId, type Session } from '#lib/series.ts';
 	import {
 		FILTER_KINDS,
 		FILTER_LABELS,
@@ -28,8 +28,8 @@
 	} from '#lib/format.ts';
 	import EventRow from '#lib/components/EventRow.svelte';
 	import SeriesLogo from '#lib/components/SeriesLogo.svelte';
-	import SeriesList from '#lib/components/SeriesList.svelte';
-	import SeriesSheet from '#lib/components/SeriesSheet.svelte';
+	import SelectionList from '@szpolny/calendar-kit/SelectionList.svelte';
+	import SelectionSheet from '@szpolny/calendar-kit/SelectionSheet.svelte';
 	import SubscribeDialog from '#lib/components/SubscribeDialog.svelte';
 	import ThemeToggle from '@szpolny/calendar-kit/ThemeToggle.svelte';
 	import TimeZonePicker from '@szpolny/calendar-kit/TimeZonePicker.svelte';
@@ -296,7 +296,7 @@
 					{allSelected ? 'Clear' : 'Select all'}
 				</button>
 			</div>
-			<SeriesList bind:selected layout="list" />
+			<SelectionList bind:selected groups={SERIES_GROUPS} items={SERIES} logo={seriesMark} layout="list" />
 		</aside>
 
 		<div class="min-w-0">
@@ -519,5 +519,9 @@
 	/>
 {/snippet}
 
-<SeriesSheet bind:open={seriesOpen} bind:selected />
+{#snippet seriesMark(id: SeriesId)}
+	<SeriesLogo series={id} class="h-3.5 max-w-full" />
+{/snippet}
+
+<SelectionSheet bind:open={seriesOpen} bind:selected title="Series" groups={SERIES_GROUPS} items={SERIES} logo={seriesMark} />
 <SubscribeDialog bind:open={subscribeOpen} {selected} bind:filter bind:alarm origin={page.url.origin} />
