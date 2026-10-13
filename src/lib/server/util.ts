@@ -1,6 +1,7 @@
 export { fetchText, HttpError, mapLimit, fetchOptional } from '@szpolny/calendar-kit/fetch';
 import { addMinutes } from '@szpolny/calendar-kit/dates';
 export { zonedToUtc, addMinutes } from '@szpolny/calendar-kit/dates';
+export { slugify, decodeEntities } from '@szpolny/calendar-kit/text';
 import type { MotorEvent, Session, SessionKind } from '#lib/series.ts';
 
 export function guessKind(name: string): SessionKind {
@@ -36,27 +37,6 @@ export function finalizeEvent(e: Omit<MotorEvent, 'start' | 'end' | 'allDay'>): 
 	};
 }
 
-export function slugify(s: string): string {
-	return s
-		.normalize('NFKD')
-		.replace(/[̀-ͯ]/g, '')
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, '-')
-		.replace(/^-|-$/g, '');
-}
-
-export function decodeEntities(s: string): string {
-	return s
-		.replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
-		.replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
-		.replace(/&quot;/g, '"')
-		.replace(/&#39;|&apos;/g, "'")
-		.replace(/&lt;/g, '<')
-		.replace(/&gt;/g, '>')
-		.replace(/&nbsp;/g, ' ')
-		.replace(/&amp;/g, '&')
-		.trim();
-}
 
 /** "GRAND PRIX OF THE NETHERLANDS" -> "Grand Prix of the Netherlands" */
 export function titleCase(s: string): string {

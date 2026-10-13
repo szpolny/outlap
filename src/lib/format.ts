@@ -1,5 +1,5 @@
-import { DAY_MS, localDate, fmtRange } from '@szpolny/calendar-kit/dates';
-export { localDate, addDays, weekStart, fmtDate, fmtTime, fmtDay, fmtRange, countdown } from '@szpolny/calendar-kit/dates';
+import { localDate, fmtRange } from '@szpolny/calendar-kit/dates';
+export { endMs as eventEndMs, localDate, addDays, weekStart, fmtDate, fmtTime, fmtDay, fmtRange, countdown } from '@szpolny/calendar-kit/dates';
 // Client-side date helpers. Everything takes an explicit time zone so the server
 // can render in UTC and the browser can re-render in the viewer's zone.
 
@@ -31,9 +31,6 @@ export function anchorDate(e: MotorEvent, timeZone: string): string {
 	return localDate(main?.start ?? e.end, timeZone);
 }
 
-export function eventEndMs(e: MotorEvent): number {
-	return e.allDay ? Date.parse(`${e.end}T00:00:00Z`) + DAY_MS : Date.parse(e.end);
-}
 
 export function eventRange(e: MotorEvent, timeZone: string): string {
 	return e.allDay ? fmtRange(e.start, e.end) : fmtRange(localDate(e.start, timeZone), localDate(e.end, timeZone));

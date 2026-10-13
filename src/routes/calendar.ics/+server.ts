@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { SERIES, SERIES_IDS, isSeriesId } from '#lib/series.ts';
-import { buildIcs, SESSION_FILTERS, type SessionFilter } from '#lib/server/ics.ts';
+import { FILTER_KINDS, type SessionFilter } from '#lib/format.ts';
+import { buildIcs } from '#lib/server/ics.ts';
 import { getSchedule } from '#lib/server/schedule.ts';
 import type { RequestHandler } from './$types';
 
@@ -11,7 +12,7 @@ export const GET: RequestHandler = async ({ url }) => {
 	if (series.length === 0 || !series.every(isSeriesId)) error(400, 'Unknown series');
 
 	const sessions = (url.searchParams.get('sessions') ?? 'all') as SessionFilter;
-	if (!(sessions in SESSION_FILTERS)) error(400, 'sessions must be all, main or races');
+	if (!(sessions in FILTER_KINDS)) error(400, 'sessions must be all, main or races');
 
 	const alarm = Number(url.searchParams.get('alarm') ?? 0) || undefined;
 	const eventId = url.searchParams.get('event');
