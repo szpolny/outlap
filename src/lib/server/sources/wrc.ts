@@ -1,10 +1,13 @@
-import type { MotorEvent } from '#lib/series.ts';
+import type { MotorEvent, SeriesId } from '#lib/series.ts';
 import { slugify } from '../util';
 import type { Source } from './types';
 import { MONTHS, fetchWikitext, stripWiki, tableRows } from './wikipedia';
 
 // wrc.com blocks automated clients, so the calendar table of the Wikipedia season
-// article is used instead. Rallies run Thursday–Sunday, so they are all-day events.
+// article is used instead; the ERC article has the same table. Rallies run over several
+// days, so they are all-day events.
+
+type RallySeries = Extract<SeriesId, 'wrc' | 'erc'>;
 
 function parseDate(cell: string, year: number): string | null {
 	const m = stripWiki(cell).match(/^(\d{1,2})\s+([A-Za-z]+)/);
@@ -13,7 +16,7 @@ function parseDate(cell: string, year: number): string | null {
 	return `${year}-${String(month).padStart(2, '0')}-${m[1].padStart(2, '0')}`;
 }
 
-function parseCalendar(wikitext: string, year: number): MotorEvent[] {
+function parseCalendar(wikitext: string, year: number, series: RallySeries, article: string): MotorEvent[] {
 	const events: MotorEvent[] = [];
 	for (const cells of tableRows(wikitext, /==\s*Calendar\s*==/)) {
 		const round = Number(stripWiki(cells[0] ?? ''));
@@ -23,8 +26,8 @@ function parseCalendar(wikitext: string, year: number): MotorEvent[] {
 		const name = stripWiki(cells[3]);
 		if (!from || !to || !name) continue;
 		events.push({
-			id: `wrc-${year}-${slugify(name)}`,
-			series: 'wrc',
+			id: `${series}-${year}-${slugify(name)}`,
+			series,
 			name,
 			round,
 			location: stripWiki(cells[4]),
@@ -32,21 +35,23 @@ function parseCalendar(wikitext: string, year: number): MotorEvent[] {
 			end: to,
 			allDay: true,
 			sessions: [],
-			url: `https://en.wikipedia.org/wiki/${year}_World_Rally_Championship`
+			url: `https://en.wikipedia.org/wiki/${article}`
 		});
 	}
 	return events;
 }
 
-export const wrc: Source = {
-	label: 'Wikipedia (WRC season article)',
-	series: ['wrc'],
-	async load(years) {
-		const events: MotorEvent[] = [];
-		for (const year of years) {
-			const wikitext = await fetchWikitext(`${year}_World_Rally_Championship`);
-			if (wikitext) events.push(...parseCalendar(wikitext, year));
+function rallySource(series: RallySeries, championship: string): Source {
+	return {
+		label: `Wikipedia (${series.toUpperCase()} season article)`,
+		series: [series],
+		async load(years) {
+			const articles = years.map((year) => `${year}_${championship}`);
+			const texts = await Promise.all(articles.map(fetchWikitext));
+			return years.flatMap((year, i) => (texts[i] ? parseCalendar(texts[i], year, series, articles[i]) : []));
 		}
-		return events;
-	}
-};
+	};
+}
+
+export const wrc = rallySource('wrc', 'World_Rally_Championship');
+export const erc = rallySource('erc', 'European_Rally_Championship');

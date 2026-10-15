@@ -137,6 +137,13 @@ const wecLocal = [
 	tv('beIN SPORTS', WEC_GUIDE, ['HK', 'SG', 'MY', 'BN', 'TH', 'KH', 'LA', 'ID', 'TL', 'PH', 'NZ'])
 ].map(wecRoundProvider);
 
+// SRO streams every GT World Challenge and IGTC race on its GT World channel; local TV deals
+// can geoblock it, so it stays a lead to check.
+const gtWorld = (site: string) => guide(`${site}/live/tv-schedule`, [
+	stream('GT World on YouTube', 'https://www.youtube.com/@GTWorld/streams', 'Free', 'Official live race streams. Local broadcast deals can block them; check the round’s TV schedule.', { medium: 'YouTube', check: true, ongoing: true })]);
+// The newer series below link to the official site; only long-standing services are listed.
+const officialOnly = (url: string) => guide(url, []);
+
 /** Curated 2026 rights. Sources and limits are documented in docs/watching.md. */
 export const WATCH_GUIDES: Record<SeriesId, WatchGuide> = {
 	f1: guide(F1_GUIDE, [f1tv, ...formulaTv, apple,
@@ -219,6 +226,31 @@ export const WATCH_GUIDES: Record<SeriesId, WatchGuide> = {
 	supergt: guide('https://supergt.net/about-super-gt/media', [
 		tv('J SPORTS', 'https://www.jsports.co.jp/motor/supergt/', ['JP'], 'Live qualifying and races in Japan; subscription required.'),
 		stream('RACER+', 'https://racerplus.com/', 'Subscription', 'All 2026 races live and on demand with English commentary; RACER Network airs highlights.', { countries: ['US', 'CA'] })]),
+	f1academy: guide('https://www.f1academy.com/', [f1tv]),
+	formulae: officialOnly('https://www.fiaformulae.com/en/'),
+	sfl: officialOnly('https://superformula.net/sf3/en/'),
+	oreilly: guide('https://www.nascar.com/international/how-to-watch', [
+		tv('The CW', 'https://www.cwtv.com/', ['US'], 'US home of the O’Reilly Series; some races air on other networks. Check the race listing.')]),
+	truck: guide('https://www.nascar.com/international/how-to-watch', [
+		tv('FS1', 'https://www.foxsports.com/motor/nascar-truck-series', ['US'], 'US home of the Truck Series; some races air on FOX. Check the race listing.')]),
+	gtwce: gtWorld('https://www.gt-world-challenge-europe.com'),
+	gtwca: gtWorld('https://www.gt-world-challenge-america.com'),
+	gtwcasia: gtWorld('https://www.gt-world-challenge-asia.com'),
+	igtc: gtWorld('https://www.intercontinentalgtchallenge.com'),
+	nls: guide('https://www.nuerburgring-langstrecken-serie.de/', [
+		stream('NLS livestream', 'https://www.nuerburgring-langstrecken-serie.de/', 'Free', 'Free live race stream from the series. Check the round page for the link.', { check: true, ongoing: true })]),
+	btcc: guide('https://www.btcc.net/', [
+		stream('ITVX', 'https://www.itv.com/watch/categories/sport', 'Free', 'Live race-day coverage on ITV4 and ITVX.', { countries: ['GB'], check: true })]),
+	supercars: guide('https://www.supercars.com/', [
+		stream('Kayo Sports', 'https://www.kayosports.com.au/', 'Subscription', 'Live sessions and races in Australia.', { countries: ['AU'], check: true })]),
+	bsb: officialOnly('https://www.britishsuperbike.com/'),
+	iomtt: officialOnly('https://www.iomttraces.com/'),
+	mxgp: guide('https://www.mxgp.com/', [
+		stream('MXGP-TV', 'https://www.mxgp-tv.com/', 'Subscription', 'The series’ own live and on-demand service. Check your country before subscribing.', { check: true, ongoing: true })]),
+	supercross: guide('https://www.supercrosslive.com/', [
+		stream('Peacock Premium', 'https://www.peacocktv.com/', 'Subscription', 'Live races in the US.', { countries: ['US'], check: true })]),
+	erc: officialOnly('https://www.fiaerc.com/'),
+	dakar: officialOnly('https://www.dakar.com/en/'),
 	wrc: guide('https://www.wrc.com/en/misc/broadcast-guide', [
 		stream('Rally.TV', 'https://www.rally.tv/', 'Subscription', 'Every WRC stage live and on demand worldwide.', { ongoing: true }),
 		tv('Motowizja', 'https://motowizja.pl/', ['PL'], 'Local WRC coverage. Check the stage listing for this rally.'),

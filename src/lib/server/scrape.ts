@@ -5,20 +5,24 @@ import { dtm } from './sources/dtm';
 import { f1 } from './sources/f1';
 import { imsa } from './sources/imsa';
 import { indycar, indynxt } from './sources/indycar';
+import { iomtt } from './sources/iomtt';
 import { motogp } from './sources/motogp';
 import { nascar } from './sources/nascar';
+import { btcc, bsb, dakar, mxgp, nls, sfl, supercars, supercross } from './sources/seasons';
 import { sgp } from './sources/sgp';
-import { f2, f3 } from './sources/sportstimes';
+import { f1academy, f2, f3, formulae } from './sources/sportstimes';
+import { gtwca, gtwcasia, gtwce, igtc } from './sources/sro';
 import { superformula } from './sources/superformula';
 import { supergt } from './sources/supergt';
 import type { Source } from './sources/types';
 import { worldsbk } from './sources/worldsbk';
-import { wrc } from './sources/wrc';
+import { erc, wrc } from './sources/wrc';
 import { attachVenues } from './venues';
 
 const SOURCES: Source[] = [
-	f1, f2, f3, motogp, worldsbk, sgp, wec, elms, alms, lemanscup, imsa, dtm, supergt,
-	indycar, indynxt, superformula, nascar, wrc
+	f1, f2, f3, f1academy, formulae, motogp, worldsbk, sgp, wec, elms, alms, lemanscup, imsa, dtm, supergt,
+	indycar, indynxt, superformula, sfl, nascar, wrc, erc, gtwce, gtwca, gtwcasia, igtc, btcc, supercars,
+	bsb, iomtt, mxgp, supercross, nls, dakar
 ];
 
 function seasons(): number[] {

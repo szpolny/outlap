@@ -1,12 +1,14 @@
 <script lang="ts">
 	import CalendarPlus from '~icons/lucide/calendar-plus';
 	import ChevronDown from '~icons/lucide/chevron-down';
+	import Sparkles from '~icons/lucide/sparkles';
+	import X from '~icons/lucide/x';
 	import GitHub from '~icons/simple-icons/github';
 	import { onMount } from 'svelte';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { page } from '$app/state';
 	import outlapMark from '#lib/assets/favicon.svg';
-	import { SERIES, SERIES_IDS, SERIES_GROUPS, DEFAULT_SERIES_IDS, type MotorEvent, type SeriesId, type Session } from '#lib/series.ts';
+	import { SERIES, SERIES_IDS, SERIES_GROUPS, DEFAULT_SERIES_IDS, NEW_SERIES, type MotorEvent, type SeriesId, type Session } from '#lib/series.ts';
 	import {
 		FILTER_KINDS,
 		FILTER_LABELS,
@@ -65,6 +67,8 @@
 	let prefsLoaded = $state(false);
 	let barHeight = $state(0);
 	let showFinished = $state(false);
+	/** id of the last NEW_SERIES batch this visitor has seen or dismissed */
+	let seenNews = $state('');
 	const expanded = new SvelteSet<string>();
 
 	// Server renders in UTC; the browser switches to the viewer's zone after hydration.
@@ -81,6 +85,8 @@
 	onMount(() => {
 		detectedZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 		const prefs = readPrefs(STORAGE_KEY);
+		// First-time visitors see every series already, so only returning visitors get the notice.
+		seenNews = prefs && prefs.news !== NEW_SERIES.id ? (typeof prefs.news === 'string' ? prefs.news : '') : NEW_SERIES.id;
 		if (prefs) {
 			if (Array.isArray(prefs.selected)) selected = prefs.selected.filter((s: string) => s in SERIES);
 			if (isSessionFilter(prefs.filter)) filter = prefs.filter;
@@ -95,7 +101,7 @@
 
 	$effect(() => {
 		if (!prefsLoaded) return;
-		writePrefs(STORAGE_KEY, { selected, filter, alarm, timeZone: zonePref, country: countryPref });
+		writePrefs(STORAGE_KEY, { selected, filter, alarm, timeZone: zonePref, country: countryPref, news: seenNews });
 	});
 
 	const kinds = $derived(FILTER_KINDS[filter]);
@@ -205,6 +211,14 @@
 					: `${selected.length} of ${SERIES_IDS.length} series`
 	);
 	const failing = $derived(data.sources.filter((s) => !s.ok));
+	const showNews = $derived(prefsLoaded && seenNews !== NEW_SERIES.id);
+	const unselectedNew = $derived(NEW_SERIES.ids.filter((id) => !selected.includes(id)));
+	const newsHighlights = $derived(NEW_SERIES.ids.slice(0, 4).map((id) => SERIES[id].name));
+
+	function addNewSeries() {
+		selected = [...selected, ...unselectedNew];
+		seenNews = NEW_SERIES.id;
+	}
 	const oldestRefresh = $derived(data.sources.map((s) => s.fetchedAt).filter(Boolean).sort()[0]);
 
 	const hero =
@@ -275,6 +289,48 @@
 		</aside>
 
 		<div class="min-w-0">
+			{#if showNews}
+				<section
+					class="mb-5 flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-accent)_30%,var(--color-line))] bg-[color-mix(in_srgb,var(--color-accent)_8%,var(--color-panel))] px-4 py-3.5 sm:px-5"
+					aria-labelledby="news-title"
+				>
+					<Sparkles class="mt-0.5 shrink-0 text-accent" width="17" height="17" aria-hidden="true" />
+					<div class="min-w-0 flex-1">
+						<h2 id="news-title" class="text-[15px] font-semibold tracking-[-0.01em]">{NEW_SERIES.ids.length} new series added</h2>
+						<p class="mt-0.5 text-[13.5px] text-muted">
+							{newsHighlights.join(', ')} and {NEW_SERIES.ids.length - newsHighlights.length} more.
+							{unselectedNew.length ? 'They aren’t in your saved selection yet.' : 'They’re already in your selection.'}
+						</p>
+						<div class="mt-2.5 flex flex-wrap gap-2">
+							{#if unselectedNew.length}
+								<button
+									class="cursor-pointer rounded-[10px] bg-accent px-3 py-1.5 text-[13.5px] font-semibold text-white hover:brightness-[1.08]"
+									onclick={addNewSeries}
+								>
+									Add all to my series
+								</button>
+							{/if}
+							<button
+								class="cursor-pointer rounded-[10px] border border-line bg-panel px-3 py-1.5 text-[13.5px] font-[550] hover:bg-subtle"
+								onclick={() => {
+									seriesOpen = true;
+									seenNews = NEW_SERIES.id;
+								}}
+							>
+								Choose series
+							</button>
+						</div>
+					</div>
+					<button
+						class="-mt-1 -mr-1.5 grid size-8 shrink-0 cursor-pointer place-items-center rounded-full text-muted hover:bg-subtle hover:text-fg"
+						aria-label="Dismiss"
+						onclick={() => (seenNews = NEW_SERIES.id)}
+					>
+						<X width="16" height="16" aria-hidden="true" />
+					</button>
+				</section>
+			{/if}
+
 			{#if liveNow.length}
 				<section class={[hero, 'flex-col items-stretch gap-2.5 [--c:var(--color-live)]']} aria-live="polite">
 					<span class={[eyebrow, 'text-live']}><span class="size-2 animate-throb rounded-full bg-live"></span>Live now</span>

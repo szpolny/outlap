@@ -103,6 +103,8 @@ const SERIES_SERVICES: Record<string, SeriesId> = {
 	'MotoGP VideoPass': 'motogp',
 	'WorldSBK VideoPass': 'worldsbk',
 	'IMSA.TV': 'imsa',
+	'MXGP-TV': 'mxgp',
+	'NLS livestream': 'nls',
 	'Rally.TV': 'wrc'
 };
 

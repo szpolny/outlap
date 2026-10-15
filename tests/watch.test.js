@@ -77,7 +77,7 @@ test('providers without logo assets retain the supported monogram fallback', asy
 	const names = new Set(Object.values(WATCH_GUIDES).flatMap((guide) => guide.options.map((entry) => entry.name)));
 	for (const channel of ['FOX', 'FS1', 'TNT', 'USA Network', 'NBC', 'Prime Video']) names.add(channel);
 	assert.deepEqual([...names].filter((name) => !providerLogo(name)).sort(),
-		['REV TV', 'RTBF Auvio', 'Sporty TV', 'TV 2 Play', 'L’Équipe', 'RTL+', 'BandSports', 'SPOTV', 'beIN SPORTS'].sort());
+		['REV TV', 'RTBF Auvio', 'Sporty TV', 'TV 2 Play', 'L’Équipe', 'RTL+', 'BandSports', 'SPOTV', 'beIN SPORTS', 'The CW', 'ITVX'].sort());
 });
 
 test('later seasons keep series-run streams as unconfirmed, without local broadcasters', () => {

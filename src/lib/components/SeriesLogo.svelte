@@ -20,10 +20,29 @@
 	import dtm from '#lib/assets/series/dtm.svg';
 	import supergt from '#lib/assets/series/supergt.svg';
 	import wrc from '#lib/assets/series/wrc.svg';
+	import f1academy from '#lib/assets/series/f1academy.png';
+	import formulae from '#lib/assets/series/formulae.png';
+	import sfl from '#lib/assets/series/sfl.png';
+	import oreilly from '#lib/assets/series/oreilly.png';
+	import truck from '#lib/assets/series/truck.png';
+	import bsb from '#lib/assets/series/bsb.png';
+	import iomtt from '#lib/assets/series/iomtt.png';
+	import mxgp from '#lib/assets/series/mxgp.png';
+	import supercross from '#lib/assets/series/supercross.png';
+	import igtc from '#lib/assets/series/igtc.png';
+	import nls from '#lib/assets/series/nls.png';
+	import gtwce from '#lib/assets/series/gtwce.png';
+	import gtwca from '#lib/assets/series/gtwca.png';
+	import gtwcasia from '#lib/assets/series/gtwcasia.png';
+	import btcc from '#lib/assets/series/btcc.png';
+	import supercars from '#lib/assets/series/supercars.png';
+	import erc from '#lib/assets/series/erc.png';
+	import dakar from '#lib/assets/series/dakar.png';
 
 	// Single-colour marks applied as a CSS mask, so they take the surrounding text colour.
 	// The ratio is width / height of each trimmed asset. Very wide wordmarks take an
-	// optional scale so they don't dwarf the others at the same height.
+	// optional scale so they don't dwarf the others at the same height; compact marks take
+	// one above 1 so they stay legible.
 	const LOGOS: Record<SeriesId, [src: string, ratio: number, scale?: number]> = {
 		f1: [f1, 4],
 		f2: [f2, 3.0185],
@@ -44,7 +63,25 @@
 		imsa: [imsa, 4.5574],
 		dtm: [dtm, 3.6728],
 		supergt: [supergt, 8.0011],
-		wrc: [wrc, 5.0879]
+		wrc: [wrc, 5.0879],
+		f1academy: [f1academy, 261 / 72],
+		formulae: [formulae, 556 / 72],
+		sfl: [sfl, 292 / 72],
+		oreilly: [oreilly, 252 / 72],
+		truck: [truck, 267 / 72],
+		bsb: [bsb, 219 / 72],
+		iomtt: [iomtt, 505 / 72],
+		mxgp: [mxgp, 248 / 72],
+		supercross: [supercross, 909 / 72, 0.6],
+		igtc: [igtc, 578 / 72],
+		nls: [nls, 148 / 72, 1.5],
+		gtwce: [gtwce, 695 / 72],
+		gtwca: [gtwca, 698 / 72],
+		gtwcasia: [gtwcasia, 682 / 72],
+		btcc: [btcc, 209 / 72],
+		supercars: [supercars, 450 / 72],
+		erc: [erc, 231 / 72],
+		dakar: [dakar, 53 / 72, 1.6]
 	};
 </script>
 

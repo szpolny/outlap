@@ -49,11 +49,8 @@ export const imsa: Source = {
 	label: 'Wikipedia (IMSA season article)',
 	series: ['imsa'],
 	async load(years) {
-		const events: MotorEvent[] = [];
-		for (const year of years) {
-			const wikitext = await fetchWikitext(`${year}_IMSA_SportsCar_Championship`);
-			if (wikitext) events.push(...parseSchedule(wikitext, year));
-		}
+		const texts = await Promise.all(years.map((year) => fetchWikitext(`${year}_IMSA_SportsCar_Championship`)));
+		const events = years.flatMap((year, i) => (texts[i] ? parseSchedule(texts[i], year) : []));
 		if (events.length === 0) throw new Error('no races found in schedule table');
 		return events;
 	}

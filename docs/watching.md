@@ -133,3 +133,12 @@ another season, review every affected source and update the season gate.
 Run `pnpm test`, `pnpm check` and `pnpm build`. Watch tests cover IMSA geoblocking,
 INDYCAR race delays versus INDY NXT, NASCAR race dates/channels, unknown countries,
 future seasons and free-account versus subscription access.
+- Series added in October 2026 start with links to their official sites. GT World
+  Challenge (Europe, America, Asia) and IGTC link to each site's TV schedule and the
+  [GT World YouTube channel](https://www.youtube.com/@GTWorld/streams), which local
+  deals can geoblock. F1 Academy lists F1 TV (conditional, like F2/F3). The main
+  broadcaster is listed for the O'Reilly Series (The CW) and Truck Series (FS1), BTCC
+  (ITVX, GB), Supercars (Kayo, AU), Supercross (Peacock, US), with the series' own
+  MXGP-TV and NLS livestream as worldwide leads; all are marked “Check availability”
+  until each guide is verified round by round. Formula E, Super Formula Lights,
+  BSB, Isle of Man TT, ERC and Dakar have no listed providers yet.
