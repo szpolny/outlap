@@ -4,7 +4,7 @@ import { createServer } from 'vite';
 
 let server, getWatchInfo, COUNTRIES, isCountry;
 before(async () => {
-	server = await createServer({ configFile: false, logLevel: 'error', server: { middlewareMode: true, hmr: false, ws: false } });
+	server = await createServer({ configFile: false, logLevel: 'error', optimizeDeps: { noDiscovery: true }, server: { middlewareMode: true, hmr: false, ws: false, watch: null } });
 	({ getWatchInfo } = await server.ssrLoadModule('/src/lib/watch.ts'));
 	({ COUNTRIES, isCountry } = await server.ssrLoadModule('/src/lib/countries.ts'));
 });

@@ -6,7 +6,9 @@ let server, scrapeSchedule, SERIES_IDS, motogp;
 before(async () => {
 	server = await createServer({
 		configFile: false, logLevel: 'error',
-		server: { middlewareMode: true, hmr: false, ws: false },
+		// These SSR tests need neither client dependency optimization nor file watching.
+		optimizeDeps: { noDiscovery: true },
+		server: { middlewareMode: true, hmr: false, ws: false, watch: null },
 		plugins: [{
 			name: 'test-app-env',
 			resolveId(id) { if (id === '$app/env') return '\0test-app-env'; },
@@ -79,16 +81,26 @@ test('a missing series failure preserves the published schedule', async (t) => {
 
 test('dev loads GitHub once for concurrent requests and reuses the snapshot', async (t) => {
 	const previous = snapshot();
+	const response = Response.json(previous);
 	const requested = [];
+	let release;
+	const pending = new Promise((resolve) => { release = resolve; });
+	t.after(() => release());
+	const { getSchedule } = await server.ssrLoadModule('/src/lib/server/schedule.ts');
 	t.mock.method(globalThis, 'fetch', async (url) => {
 		requested.push(url);
 		assert.equal(url, 'https://raw.githubusercontent.com/szpolny/outlap/data/schedule.json');
-		return Response.json(previous);
+		await pending;
+		return response;
 	});
-	const { getSchedule } = await server.ssrLoadModule('/src/lib/server/schedule.ts');
-	const results = await Promise.all([getSchedule(), getSchedule()]);
+	// Keep the response pending so both readers overlap regardless of host timing.
+	const concurrent = Promise.all([getSchedule(), getSchedule()]);
+	await new Promise((resolve) => setImmediate(resolve));
+	assert.equal(requested.length, 1, 'concurrent readers share the pending fetch');
+	release();
+	const results = await concurrent;
 	assert.deepEqual(results[0], previous);
 	assert.equal(results[0], results[1]);
 	assert.equal(await getSchedule(), results[0]);
-	assert.equal(requested.length, 1);
+	assert.equal(requested.length, 1, 'a later reader reuses the cached snapshot');
 });

@@ -4,7 +4,7 @@ import { createServer } from 'vite';
 
 let server, wiki, sro, seasons, bsb, supercars, supercross, mxgp, iomtt, nls;
 before(async () => {
-	server = await createServer({ configFile: false, logLevel: 'error', server: { middlewareMode: true, hmr: false, ws: false } });
+	server = await createServer({ configFile: false, logLevel: 'error', optimizeDeps: { noDiscovery: true }, server: { middlewareMode: true, hmr: false, ws: false, watch: null } });
 	wiki = await server.ssrLoadModule('/src/lib/server/sources/wikipedia.ts');
 	sro = await server.ssrLoadModule('/src/lib/server/sources/sro.ts');
 	seasons = await server.ssrLoadModule('/src/lib/server/sources/seasons.ts');

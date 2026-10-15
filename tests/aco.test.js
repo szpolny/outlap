@@ -4,7 +4,7 @@ import { createServer } from 'vite';
 
 let server, alms, wec, buildIcs, attachVenues;
 before(async () => {
-	server = await createServer({ configFile: false, logLevel: 'error', server: { middlewareMode: true, hmr: false } });
+	server = await createServer({ configFile: false, logLevel: 'error', optimizeDeps: { noDiscovery: true }, server: { middlewareMode: true, hmr: false, ws: false, watch: null } });
 	({ alms, wec } = await server.ssrLoadModule('/src/lib/server/sources/aco.ts'));
 	({ buildIcs } = await server.ssrLoadModule('/src/lib/server/ics.ts'));
 	({ attachVenues } = await server.ssrLoadModule('/src/lib/server/venues.ts'));
