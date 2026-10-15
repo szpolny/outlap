@@ -107,7 +107,7 @@ const VENUES: Venue[] = [
 	{ match: /zandvoort/i, track: 'zandvoort', photo: 'Circuit_Park_Zandvoort_from_air_2016-08-24.jpg' },
 	{ match: /monza/i, track: 'monza', photo: 'Monza_start_line.jpg', focus: '50% 45%' },
 	// Before Madring: the Madrid ePrix runs at Jarama.
-	{ match: /jarama/i, photo: 'Tribuna_recta_Circuito_del_Jarama.jpg' },
+	{ match: /jarama/i, track: 'jarama', photo: 'Tribuna_recta_Circuito_del_Jarama.jpg' },
 	{ match: /madring|madrid/i, track: 'madring' },
 	{ match: /baku/i, track: 'baku', photo: 'Baku_City_Circuit,_April_9,_2018_SkySat.jpg' },
 	// Before Bahrain: the 2026 "Bahrain Grand Prix in Malaysia" runs at Sepang.
@@ -149,7 +149,7 @@ const VENUES: Venue[] = [
 	},
 	{ match: /jeddah/i, track: 'jeddah', photo: 'Jeddah_Corniche_Circuit_viewed_from_above.png' },
 	{ match: /imola/i, track: 'imola', photo: 'Autodromo_aerea_poster.jpg' },
-	{ match: /buriram|chang international|thailand/i, photo: 'Marc_Márquez_wins_the_race_2018_Buriram.jpg' },
+	{ match: /buriram|chang international|thailand/i, track: 'buriram', photo: 'Marc_Márquez_wins_the_race_2018_Buriram.jpg' },
 	{ match: /goi[aâ]nia/i, track: 'goiania', photo: 'Moto_GP_2026-_Goiânia.jpg' },
 	{ match: /g[aá]lvez|buenos aires/i, photo: 'Autodromo_Buenos_Aires.jpg' },
 	{ match: /istanbul/i, track: 'istanbul', photo: 'Istanbul_Park_aerial.jpg' },
@@ -157,7 +157,8 @@ const VENUES: Venue[] = [
 	{ match: /jerez/i, track: 'jerez', photo: 'Jorge_Lorenzo_leads_the_pack_2015_Jerez_2.jpeg', focus: '50% 90%' },
 	// Before Le Mans: Petit Le Mans runs at Road Atlanta.
 	{ match: /road atlanta|petit le mans/i, track: 'roadatlanta', photo: 'Road_atlanta_esses.JPG' },
-	{ series: BIKES, match: /le mans/i, photo: 'Marc_Márquez_leads_the_pack_2015_Le_Mans.jpeg' },
+	// Bikes race the Bugatti circuit; cars race the full Circuit de la Sarthe, which has no outline.
+	{ series: BIKES, match: /le mans/i, track: 'bugatti', photo: 'Marc_Márquez_leads_the_pack_2015_Le_Mans.jpeg' },
 	{ match: /le mans/i, photo: '2023_24_Hours_of_Le_Mans_(53272111149).jpg', focus: '50% 70%' },
 	{ match: /mugello/i, track: 'mugello', photo: "Partenza_del_Gran_Premio_d'Italia_TIM_2011.jpg" },
 	{ match: /balaton/i, track: 'balaton', photo: 'Balaton_Park_Circuit_-_Pitlane.jpg' },
@@ -230,18 +231,23 @@ const VENUES: Venue[] = [
 		focus: '50% 60%'
 	},
 	{ match: /donington/i, track: 'donington', photo: 'Sbk_2013_-_Donington_Park_-_panoramio_(1).jpg' },
-	{ match: /brands hatch/i, photo: 'Brands-hatch.jpg' },
-	{ match: /croft/i, photo: 'Porsche_Carreras_racing_in_the_wet,_Croft_circuit_(geograph_6188957).jpg' },
-	{ match: /knockhill/i, photo: 'Knockhill_Racing_Circuit,_Near_Dunfermline,_Fife_-_geograph.org.uk_-_6202246.jpg' },
-	{ match: /oulton park/i, photo: 'Michael_Caine_Oulton_Park_(Knickerbrook).JPG' },
-	{ match: /snetterton/i, photo: 'Ginetta_Race_2_-_02_(9454210700).jpg' },
-	{ match: /thruxton/i, photo: 'Tony_Ayres_Mini_Miglia_Challenge_Thruxton_2026.jpg' },
+	// Season articles name the layout: BTCC opens on the Indy circuit and ends on the Grand Prix one.
+	{ match: /brands hatch \(indy/i, track: 'brandshatchindy', photo: 'Brands-hatch.jpg' },
+	{ match: /brands hatch/i, track: 'brandshatch', photo: 'Brands-hatch.jpg' },
+	{ match: /croft/i, track: 'croft', photo: 'Porsche_Carreras_racing_in_the_wet,_Croft_circuit_(geograph_6188957).jpg' },
+	{ match: /knockhill/i, track: 'knockhill', photo: 'Knockhill_Racing_Circuit,_Near_Dunfermline,_Fife_-_geograph.org.uk_-_6202246.jpg' },
+	{ match: /oulton park \(island/i, track: 'oultonparkisland', photo: 'Michael_Caine_Oulton_Park_(Knickerbrook).JPG' },
+	{ match: /oulton park/i, track: 'oultonpark', photo: 'Michael_Caine_Oulton_Park_(Knickerbrook).JPG' },
+	{ match: /snetterton/i, track: 'snetterton', photo: 'Ginetta_Race_2_-_02_(9454210700).jpg' },
+	{ match: /thruxton/i, track: 'thruxton', photo: 'Tony_Ayres_Mini_Miglia_Challenge_Thruxton_2026.jpg' },
 
 	// Australia.
+	// MotoGP's Adelaide layout differs from the Supercars one.
+	{ series: ['supercars'], match: /adelaide/i, track: 'adelaide', photo: 'Nissan_(8525283411).jpg' },
 	{ match: /adelaide/i, photo: 'Nissan_(8525283411).jpg' },
-	{ match: /bathurst|mount panorama/i, photo: 'Mount_Panorama_Pit_Straight_and_Pit_Lane_2015.JPG' },
-	{ match: /sandown/i, photo: 'Whincup_leads_Qualifying_Race_2_2015_Sandown_500.JPG' },
-	{ match: /surfers paradise|gold coast/i, photo: 'Surfers_Paradise_Street_Circuit_aerial_view.jpg' },
+	{ match: /bathurst|mount panorama/i, track: 'bathurst', photo: 'Mount_Panorama_Pit_Straight_and_Pit_Lane_2015.JPG' },
+	{ match: /sandown/i, track: 'sandown', photo: 'Whincup_leads_Qualifying_Race_2_2015_Sandown_500.JPG' },
+	{ match: /surfers paradise|gold coast/i, track: 'surfersparadise', photo: 'Surfers_Paradise_Street_Circuit_aerial_view.jpg' },
 	{
 		match: /paul ricard|le castellet/i,
 		track: 'paulricard',
@@ -252,7 +258,7 @@ const VENUES: Venue[] = [
 	{ series: ['nascar'], match: /daytona/i, photo: '2024_Daytona_500.jpg' },
 	{ match: /daytona/i, track: 'daytona', photo: '2024_Daytona_500.jpg' },
 	{ match: /sebring/i, track: 'sebring', photo: '2018_12_Hours_of_Sebring_Sunset_Bend.jpg' },
-	{ match: /long beach/i, photo: 'LBGP05.jpg' },
+	{ match: /long beach/i, track: 'longbeach', photo: 'LBGP05.jpg' },
 	{ match: /detroit/i, photo: 'Will_Power_(7333133580).jpg' },
 	{ match: /laguna seca|monterey/i, track: 'lagunaseca', photo: 'Corkscrew_Turn,_Mazda_Raceway_Laguna_Seca.jpg' },
 	{
@@ -268,6 +274,7 @@ const VENUES: Venue[] = [
 	{ match: /road america/i, track: 'roadamerica', photo: 'Indy_cars_at_Turn_Eight_at_Road_America.JPG' },
 	{
 		match: /virginia international|\bvir\b/i,
+		track: 'vir',
 		photo: 'VirginiaInternationalRacewayPit_Road.jpg'
 	},
 	{ match: /indianapolis 500|brickyard/i, photo: 'Indianapolis-motor-speedway-1848561.jpg' },
@@ -277,7 +284,7 @@ const VENUES: Venue[] = [
 		photo: '2012_Honda_Grand_Prix_of_St._Petersburg_Progress_Energy_Corners.jpg'
 	},
 	// Not "Alabama": Talladega is there too.
-	{ match: /barber/i, photo: 'Barber_Motorsports_Park_Aerial_(34804699780).jpg' },
+	{ match: /barber/i, track: 'barber', photo: 'Barber_Motorsports_Park_Aerial_(34804699780).jpg' },
 	{ match: /world wide technology|wwtr|gateway/i, track: 'gateway', photo: 'Alex_Bowman_Gateway_2024.jpg' },
 	{ match: /mid-ohio/i, photo: 'Gtp_sports_cars.jpg' },
 	{ match: /nashville|music city/i, track: 'nashville', photo: 'Nationwide_2008.jpg' },
@@ -299,7 +306,7 @@ const VENUES: Venue[] = [
 		track: 'martinsville',
 		photo: 'Martinsville_Speedway,_September_2011_overview.JPG'
 	},
-	{ match: /bristol/i, photo: 'Bristol_Motor_Speedway_(9608386615).jpg' },
+	{ match: /bristol/i, track: 'bristol', photo: 'Bristol_Motor_Speedway_(9608386615).jpg' },
 	{ match: /kansas/i, track: 'kansas', photo: 'The_Kansas_Speedway_(cropped).jpg' },
 	{ match: /talladega/i, track: 'talladega', photo: 'TalladegaSuperspeedway2-2.jpg' },
 	{ match: /texas motor speedway/i, track: 'texas', photo: 'TexasMotorSpeedway23.jpg' },
@@ -311,11 +318,13 @@ const VENUES: Venue[] = [
 		track: 'michigan',
 		photo: 'Pure_Michigan_400_Nascar_race_8-16-15_(20731306712).jpg'
 	},
-	{ match: /pocono/i, photo: 'Aerial_view_of_Pocono_Raceway.JPG' },
+	{ match: /pocono/i, track: 'pocono', photo: 'Aerial_view_of_Pocono_Raceway.JPG' },
 	{
 		match: /san diego|coronado/i,
 		photo: 'NASCAR_Cup_Series_Anduril_250_Race_the_Base_at_NASCAR_San_Diego_Weekend_(4)_9764231.jpg'
 	},
+	// NASCAR's short layout; sports cars use the longer course with the Carousel.
+	{ series: ['nascar', 'oreilly', 'truck'], match: /sonoma/i, track: 'sonoma', photo: 'Sonoma_Raceway_Turn_7A.jpg' },
 	{ match: /sonoma/i, photo: 'Sonoma_Raceway_Turn_7A.jpg' },
 	{ match: /chicagoland/i, track: 'chicagoland', photo: 'Chicagolandspeedway.jpg' },
 	{ match: /north wilkesboro/i, track: 'northwilkesboro', photo: 'North_Willesboro_Speedway_2025-20.jpg' },

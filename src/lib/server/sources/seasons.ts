@@ -32,13 +32,21 @@ export const round = (cell: string | undefined) => {
 	return Number.isInteger(n) && n > 0 ? n : undefined;
 };
 
+/** The layout a circuit cell's note names, such as "Indy Circuit" in "<small>(Indy Circuit, Kent)</small>". */
+const layout = (cell: string | undefined) =>
+	stripWiki(cell?.match(/<small>\(?([^,)<]*)/i)?.[1] ?? '').match(/^.*\bCircuit$/i)?.[0];
+
 /** Championships whose table has a row per race, grouped into meetings by round. */
-function circuitRow(short: string) {
+export function circuitRow(short: string) {
 	return (cells: Record<string, string>, year: number): Row | null => {
-		const circuit = text(column(cells, /^circuit/i)).replace(/,.*$/, '');
+		const cell = column(cells, /^circuit/i);
+		const circuit = text(cell).replace(/,.*$/, '');
 		const r = round(column(cells, /^(round|rnd)/i));
 		if (!circuit || !r) return null;
-		return { name: `${short} ${circuit}`, location: circuit, round: r, dates: dateRange(column(cells, /^dates?$/i) ?? '', year) };
+		// Keep the layout, which venues.ts uses to pick the outline: BTCC races both at Brands Hatch.
+		const variant = layout(cell);
+		const location = variant ? `${circuit} (${variant})` : circuit;
+		return { name: `${short} ${circuit}`, location, round: r, dates: dateRange(column(cells, /^dates?$/i) ?? '', year) };
 	};
 }
 

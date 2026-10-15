@@ -82,6 +82,15 @@ test('table grids fill row spans and number repeated headers', () => {
 	assert.equal(rows[1].Date, '11 April');
 });
 
+test('circuit rows keep the layout named in the circuit note', () => {
+	const row = seasons.circuitRow('BTCC');
+	const cells = (circuit) => ({ Round: '2', Circuit: circuit, Date: '25 April' });
+	assert.equal(row(cells('[[Brands Hatch]]<br /><small>(Indy Circuit, [[Kent]])</small>'), 2027).location, 'Brands Hatch (Indy Circuit)');
+	assert.equal(row(cells('[[Brands Hatch]]\n<small>(Grand Prix Circuit, [[Kent]])</small>'), 2027).location, 'Brands Hatch (Grand Prix Circuit)');
+	const thruxton = row(cells('[[Thruxton Circuit]]<br /><small>([[Hampshire]])</small>'), 2027);
+	assert.deepEqual([thruxton.name, thruxton.location], ['BTCC Thruxton Circuit', 'Thruxton Circuit']);
+});
+
 test('concurrent article requests share one Wikipedia query', async (t) => {
 	const fetch = t.mock.method(globalThis, 'fetch', async (url) => {
 		const titles = new URL(url).searchParams.get('titles').split('|');
