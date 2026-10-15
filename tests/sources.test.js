@@ -2,13 +2,18 @@ import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { createServer } from 'vite';
 
-let server, wiki, sro, seasons, bsb;
+let server, wiki, sro, seasons, bsb, supercars, supercross, mxgp, iomtt, nls;
 before(async () => {
 	server = await createServer({ configFile: false, logLevel: 'error', server: { middlewareMode: true, hmr: false, ws: false } });
 	wiki = await server.ssrLoadModule('/src/lib/server/sources/wikipedia.ts');
 	sro = await server.ssrLoadModule('/src/lib/server/sources/sro.ts');
 	seasons = await server.ssrLoadModule('/src/lib/server/sources/seasons.ts');
 	bsb = await server.ssrLoadModule('/src/lib/server/sources/bsb.ts');
+	supercars = await server.ssrLoadModule('/src/lib/server/sources/supercars.ts');
+	supercross = await server.ssrLoadModule('/src/lib/server/sources/supercross.ts');
+	mxgp = await server.ssrLoadModule('/src/lib/server/sources/mxgp.ts');
+	iomtt = await server.ssrLoadModule('/src/lib/server/sources/iomtt.ts');
+	nls = await server.ssrLoadModule('/src/lib/server/sources/nls.ts');
 });
 after(async () => { await server?.close(); });
 
@@ -151,4 +156,78 @@ test('BSB calendars skip tests and timetables place weekdays within the round', 
 		['Race 3', 'race', '2026-09-20T14:00:00.000Z']
 	]);
 	assert.equal(bsb.parseTimetable(row('Mon', 'Race 1', '13:00 BST'), rounds[0]).length, 0);
+});
+
+test('Supercars schedules keep only the championship, without sponsors or test days', () => {
+	const session = (name, type, start, end, series) =>
+		({ name, type, startDate: start, endDate: end, series: { natsoftSeriesId: series } });
+	const payload = JSON.stringify(['$', 'div', null, { schedules: [
+		session('Practice 1', 'Practice', '2026-10-23T11:05:00.000+10:00', '2026-10-23T11:30:00.000+10:00', 'PCC'),
+		session('Pre-enduro Cup Test Day - Session 1', 'Practice', '2026-10-22T08:30:00.000+10:00', null, 'SG3'),
+		session('Boost Mobile Qualifying (Race 31)', 'Qualifying', '2026-10-23T16:05:00.000+10:00', '2026-10-23T16:40:00.000+10:00', 'SG3'),
+		session('Boost Mobile TTSO (Race 32)', 'Qualifying', '2026-10-25T12:05:00.000+10:00', '2026-10-25T12:40:00.000+10:00', 'SG3'),
+		session('Race 31', 'Race', '2026-10-24T15:15:00.000+10:00', null, 'SG3')
+	] }]);
+	// The server component payload is a JS string inside a script tag.
+	const html = `<script>self.__next_f.push([1,${JSON.stringify(`26:${payload}\n`)}])</script>`;
+	assert.deepEqual(supercars.parseSchedule(html).map((s) => [s.name, s.kind, s.start, s.estimatedEnd]), [
+		['Qualifying (Race 31)', 'qualifying', '2026-10-23T06:05:00.000Z', false],
+		['Top Ten Shootout (Race 32)', 'qualifying', '2026-10-25T02:05:00.000Z', false],
+		['Race 31', 'race', '2026-10-24T05:15:00.000Z', true]
+	]);
+	assert.equal(supercars.eventName('2026 Penrite Oil Sandown 500', '2026-sandown'), 'Sandown 500');
+	assert.equal(supercars.eventName('2026 ITM Taupō Super 440', '2026-taupo'), 'Taupō Super 440');
+	assert.equal(supercars.eventName('2026 Melbourne SuperSprint', '2026-melbourne-supersprint'), 'Melbourne SuperSprint');
+	assert.equal(supercars.eventName('2026 AirTouch 500 at The Bend', '2026-the-bend'), 'AirTouch 500 at The Bend');
+});
+
+test('Supercross tickets list Supercross rounds and their schedules in the venue time zone', () => {
+	const ticket = (round, city, date, classes, tz, slug) => `<div class="ticket"><div class="ticket-info__title">
+		<div>Round ${round}</div><div>${city}</div><div>${date}</div></div>
+		<div class="ticket-info__venue"><div>Stadium</div></div>
+		<div class="ticket-info__classes" style="display:flex;">${classes}</div>
+		${slug ? `<a href="https://www.supercrosslive.com/tickets/${slug}/">More</a>` : ''}
+		<a href="https://www.supercrosslive.com/wp-admin/admin-ajax.php?action=felds_download_ics&#038;timezone=${tz}">ICS</a></div>`;
+	const rounds = supercross.parseTickets(ticket(6, 'Glendale, AZ', 'Mar 13, 2027', '450SX / 250SX W', 'America%2FPhoenix', 'glendale-az/mar-13-2027') +
+		ticket(18, 'Pala, CA', 'May 29, 2027', '450MX / 250MX', 'America%2FLos_Angeles'));
+	assert.deepEqual(rounds.map((r) => [r.round, r.city, r.date, r.timeZone]), [[6, 'Glendale', '2027-03-13', 'America/Phoenix']]);
+	const item = (time, title) => `<div class="item"><div class="item-time">${time}</div><div class="item-title">${title}</div></div>`;
+	const sessions = supercross.parseSchedule(item('9 a.m. - 3 p.m. MT', 'FanFest') + item('3:30 p.m. MT', 'Opening Ceremonies') +
+		item('4 p.m. MT', 'Main Event'), rounds[0]);
+	// Arizona stays on standard time after the clocks change elsewhere.
+	assert.deepEqual(sessions.map((s) => [s.name, s.kind, s.start]), [
+		['Opening Ceremonies', 'other', '2027-03-13T22:30:00.000Z'],
+		['Main Event', 'race', '2027-03-13T23:00:00.000Z']
+	]);
+});
+
+test('MXGP calendars read the season from ticket links and stop where the list repeats', () => {
+	const entry = (category, date, place, venue) => `<li class="" data-id="${category}"><div rel=0><div class="flag"></div><div class="date">${date}</div><div class="destination"><a href="/tracks/x">${
+		place ? `<span class="country_prefix">MXGP of </span>${place}` : 'FIM Junior Motocross World Championship'}</a><span class="venue_name">${venue}</span></div></div></li>`;
+	const html = `<a href="https://my.weezevent.com/mxgp-of-france-vip-2027?x=1">VIP</a>` +
+		entry('9', '28 Feb', 'Andalucia', 'Almonte') + entry('9', '04 Apr', 'Sardegna (ITA)', 'Riola Sardo') +
+		entry('9', '18 Jul', '', 'Parnu') + entry('9', '03 Oct', 'Switzerland', 'TBA') + entry('7', '28 Feb', 'Andalucia', 'Almonte') +
+		entry('9', '28 Feb', 'Andalucia', 'Almonte');
+	assert.deepEqual(mxgp.parseCalendar(html).map((e) => [e.id, e.name, e.location, e.start]), [
+		['mxgp-2027-1', 'MXGP of Andalucia', 'Almonte', '2027-02-28'],
+		['mxgp-2027-2', 'MXGP of Sardegna', 'Riola Sardo', '2027-04-04'],
+		['mxgp-2027-3', 'MXGP of Switzerland', undefined, '2027-10-03']
+	]);
+});
+
+test('past TT editions come from the dates in their article infobox', () => {
+	const event = iomtt.parseArticle('{{Infobox Isle of Man TT races\n| year = 2026\n| date     = 25 May – 6 June 2026\n}}', 2026);
+	assert.deepEqual([event.id, event.start, event.end, event.allDay], ['iomtt-2026', '2026-05-25', '2026-06-06', true]);
+	assert.equal(iomtt.parseArticle('{{Infobox Isle of Man TT races\n| date = TBA\n}}', 2027), null);
+});
+
+test('NLS calendars keep race names and join the two-day 24h Qualifiers', () => {
+	const row = (date, race) => `<tr>\n<td>${date}</td>\n<td>${race}</td>\n</tr>`;
+	const html = row('14.03.2026', 'NLS1: 71. ADAC Westfalenfahrt (4h)') + row('18.-19.04.2026', 'ADAC 24h Qualifiers (2x4h)') +
+		row('01.08.2026', 'NLS7: KW 6h ADAC Ruhr-Pokal-Rennen');
+	assert.deepEqual(nls.parseCalendar(html, 2026).map((e) => [e.id, e.name, e.round, e.start, e.end]), [
+		['nls-2026-1', '71. ADAC Westfalenfahrt', 1, '2026-03-14', '2026-03-14'],
+		['nls-2026-adac-24h-qualifiers', 'ADAC 24h Qualifiers', undefined, '2026-04-18', '2026-04-19'],
+		['nls-2026-7', 'KW 6h ADAC Ruhr-Pokal-Rennen', 7, '2026-08-01', '2026-08-01']
+	]);
 });

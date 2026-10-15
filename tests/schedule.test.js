@@ -43,12 +43,15 @@ test('published empty and failed series do not trigger provider requests', async
 test('a shared adapter adds only missing series and preserves published events and statuses', async (t) => {
 	const previous = snapshot(['moto2']);
 	previous.events = [event('motogp')];
-	const load = t.mock.method(motogp, 'load', async () => [event('motogp'), event('moto2'), event('moto3')]);
+	// Both scraped seasons are covered, so no provisional Wikipedia calendar is requested.
+	const next = `${new Date().getUTCFullYear() + 1}-03-07`;
+	const nextMoto2 = { ...event('moto2'), id: 'moto2-next', start: next, end: next };
+	const load = t.mock.method(motogp, 'load', async () => [event('motogp'), event('moto2'), nextMoto2, event('moto3')]);
 	const fetch = t.mock.method(globalThis, 'fetch', () => { throw new Error('unexpected provider request'); });
 	const result = await scrapeSchedule(previous, { onlyMissing: true });
 	assert.equal(load.mock.callCount(), 1);
 	assert.equal(fetch.mock.callCount(), 0);
-	assert.deepEqual(result.events.map((e) => e.series), ['motogp', 'moto2']);
+	assert.deepEqual(result.events.map((e) => e.series), ['motogp', 'moto2', 'moto2']);
 	assert.equal(result.events[0], previous.events[0]);
 	assert.deepEqual(result.sources.slice(0, -1), previous.sources);
 	assert.deepEqual(result.sources.at(-1).series, ['moto2']);

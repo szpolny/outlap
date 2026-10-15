@@ -57,18 +57,19 @@ const PROVISIONAL: Season[] = [
 		heading: CALENDAR,
 		row: columns({ name: /^e-?prix/i, location: [/^circuit/i], date: /^date/i, round: /^round/i })
 	},
-	{
-		series: 'motogp',
-		article: (y) => `${y}_MotoGP_World_Championship`,
+	// Moto2 and Moto3 race at every MotoGP weekend, and each class has its own article.
+	...(['MotoGP', 'Moto2', 'Moto3'] as const).map((name): Season => ({
+		series: name.toLowerCase() as SeriesId,
+		article: (y) => `${y}_${name}_World_Championship`,
 		heading: CALENDAR,
 		row: columns({
 			name: /^grand prix/i,
 			location: [/^circuit/i],
 			date: /^date/i,
 			round: /^round/i,
-			rename: (name) => name.replace(/ motorcycle /i, ' ')
+			rename: (grandPrix) => grandPrix.replace(/ motorcycle /i, ' ')
 		})
-	},
+	})),
 	{
 		series: 'indycar',
 		article: (y) => `${y}_IndyCar_Series`,
@@ -140,6 +141,58 @@ const PROVISIONAL: Season[] = [
 		article: (y) => `${y}_British_Superbike_Championship`,
 		heading: /==\s*Race calendar\s*==/i,
 		row: circuitRow('BSB')
+	},
+	{
+		series: 'supercross',
+		article: (y) => `${y}_AMA_Supercross_Championship`,
+		heading: /==\s*Schedule and results\s*==/i,
+		row: (cells, year) => {
+			const city = text(column(cells, /^location/i));
+			const r = round(column(cells, /^round/i));
+			if (!city || !r) return null;
+			return {
+				name: `Supercross ${city}`,
+				location: [text(column(cells, /^stadium/i)), city].filter(Boolean).join(', '),
+				round: r,
+				dates: dateRange(column(cells, /^date/i) ?? '', year)
+			};
+		}
+	},
+	{
+		series: 'mxgp',
+		article: (y) => `${y}_FIM_Motocross_World_Championship`,
+		heading: /===\s*MXGP\s*===/,
+		row: (cells, year) => {
+			const name = text(column(cells, /^grand prix/i));
+			const r = round(column(cells, /^round/i));
+			if (!name || !r) return null;
+			return { name, location: text(column(cells, /^location/i)), round: r, dates: dateRange(column(cells, /^date/i) ?? '', year) };
+		}
+	},
+	{
+		series: 'supercars',
+		article: (y) => `${y}_Supercars_Championship`,
+		heading: /==\s*Calendar\s*==/i,
+		row: (cells, year) => {
+			const name = text(column(cells, /^event/i));
+			if (!name) return null;
+			return {
+				name,
+				location: [text(column(cells, /^circuit/i)), text(column(cells, /^location/i))].filter(Boolean).join(', '),
+				dates: dateRange(column(cells, /^dates?$/i) ?? '', year)
+			};
+		}
+	},
+	{
+		series: 'nls',
+		article: (y) => `${y}_Nürburgring_Langstrecken-Serie`,
+		heading: /==\s*Calendar\s*==/i,
+		row: (cells, year) => {
+			const name = text(column(cells, /^race/i));
+			const r = round(column(cells, /^(rnd|round)/i));
+			if (!name || !r) return null;
+			return { name, location: 'Nürburgring Nordschleife', round: r, dates: dateRange(column(cells, /^date/i) ?? '', year) };
+		}
 	},
 	{
 		series: 'elms',

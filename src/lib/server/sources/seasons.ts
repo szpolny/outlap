@@ -3,8 +3,8 @@ import { fetchText, slugify, titleCase } from '../util';
 import type { Source } from './types';
 import { MONTHS, column, dateRange, fetchWikitext, stripWiki, tableGrid } from './wikipedia';
 
-// Series whose official sites have no usable timetable feed, read from the calendar table of
-// the Wikipedia season article. The tables give race days without start times, so meetings
+// Series whose official sites turn away automated clients (btcc.net with Vercel's bot checkpoint,
+// sfl.jp with a Cloudflare challenge), read from the calendar table of the Wikipedia season article. The tables give race days without start times, so meetings
 // are all-day events. A season's article usually appears a few months before it starts.
 
 export interface Row {
@@ -62,58 +62,6 @@ const SEASONS: Season[] = [
 		article: (y) => `${y}_Super_Formula_Lights`,
 		heading: /==\s*Race calendar\s*==/i,
 		row: circuitRow('SFL')
-	},
-	{
-		series: 'supercars',
-		article: (y) => `${y}_Supercars_Championship`,
-		heading: /==\s*Calendar\s*==/i,
-		row: (cells, year) => {
-			const name = text(column(cells, /^event/i));
-			if (!name) return null;
-			return {
-				name,
-				location: [text(column(cells, /^circuit/i)), text(column(cells, /^location/i))].filter(Boolean).join(', '),
-				dates: dateRange(column(cells, /^dates?$/i) ?? '', year)
-			};
-		}
-	},
-	{
-		series: 'supercross',
-		article: (y) => `${y}_AMA_Supercross_Championship`,
-		heading: /==\s*Schedule and results\s*==/i,
-		row: (cells, year) => {
-			const city = text(column(cells, /^location/i));
-			const r = round(column(cells, /^round/i));
-			if (!city || !r) return null;
-			return {
-				name: `Supercross ${city}`,
-				location: [text(column(cells, /^stadium/i)), city].filter(Boolean).join(', '),
-				round: r,
-				dates: dateRange(column(cells, /^date/i) ?? '', year)
-			};
-		}
-	},
-	{
-		series: 'mxgp',
-		article: (y) => `${y}_FIM_Motocross_World_Championship`,
-		heading: /===\s*MXGP\s*===/,
-		row: (cells, year) => {
-			const name = text(column(cells, /^grand prix/i));
-			const r = round(column(cells, /^round/i));
-			if (!name || !r) return null;
-			return { name, location: text(column(cells, /^location/i)), round: r, dates: dateRange(column(cells, /^date/i) ?? '', year) };
-		}
-	},
-	{
-		series: 'nls',
-		article: (y) => `${y}_Nürburgring_Langstrecken-Serie`,
-		heading: /==\s*Calendar\s*==/i,
-		row: (cells, year) => {
-			const name = text(column(cells, /^race/i));
-			const r = round(column(cells, /^(rnd|round)/i));
-			if (!name || !r) return null;
-			return { name, location: 'Nürburgring Nordschleife', round: r, dates: dateRange(column(cells, /^date/i) ?? '', year) };
-		}
 	}
 ];
 
@@ -161,7 +109,7 @@ function seasonSource(season: Season): Source {
 	};
 }
 
-export const [btcc, sfl, supercars, supercross, mxgp, nls] = SEASONS.map(seasonSource);
+export const [btcc, sfl] = SEASONS.map(seasonSource);
 
 /** "3 January 2026" */
 const FULL_DATE = /(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/g;
