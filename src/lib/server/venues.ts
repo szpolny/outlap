@@ -45,6 +45,9 @@ const VENUES: Venue[] = [
 	{ series: ['wrc'], match: /paraguay/i, photo: 'JimHug2006.JPG' },
 	{ series: ['wrc'], match: /chile/i, photo: 'Rally_Mobil_Chille_Bio_Bio_-_WRC_Concepcion_Chile.jpg' },
 	{ series: ['wrc'], match: /scotland/i, photo: 'Kris_meeke_drummond_hill_2010_rally_scotland.jpg' },
+	{ series: ['erc'], match: /fafe|north of portugal/i, photo: 'Rali_Serras_de_Fafe_2018_-_29.jpg' },
+	{ series: ['dakar'], match: /dakar/i, photo: 'Dakar_Rally_2021_-_Shakedown_(50779690333).jpg' },
+	{ series: ['iomtt'], match: /isle of man|snaefell/i, photo: '2013_Isle_of_Man_TT_Races_Photo_11_IMG_00305.jpg' },
 
 	// Speedway GP: stadium photos.
 	{ series: ['sgp'], match: /prague/i, photo: 'Na_Markétě_speedway,_Zvoníčkova_street,_Praha.jpg' },
@@ -103,6 +106,8 @@ const VENUES: Venue[] = [
 	{ match: /hungaroring|budapest/i, track: 'hungaroring', photo: 'Hungaroring_Exit.JPG' },
 	{ match: /zandvoort/i, track: 'zandvoort', photo: 'Circuit_Park_Zandvoort_from_air_2016-08-24.jpg' },
 	{ match: /monza/i, track: 'monza', photo: 'Monza_start_line.jpg', focus: '50% 45%' },
+	// Before Madring: the Madrid ePrix runs at Jarama.
+	{ match: /jarama/i, photo: 'Tribuna_recta_Circuito_del_Jarama.jpg' },
 	{ match: /madring|madrid/i, track: 'madring' },
 	{ match: /baku/i, track: 'baku', photo: 'Baku_City_Circuit,_April_9,_2018_SkySat.jpg' },
 	// Before Bahrain: the 2026 "Bahrain Grand Prix in Malaysia" runs at Sepang.
@@ -145,7 +150,10 @@ const VENUES: Venue[] = [
 	{ match: /jeddah/i, track: 'jeddah', photo: 'Jeddah_Corniche_Circuit_viewed_from_above.png' },
 	{ match: /imola/i, track: 'imola', photo: 'Autodromo_aerea_poster.jpg' },
 	{ match: /buriram|chang international|thailand/i, photo: 'Marc_Márquez_wins_the_race_2018_Buriram.jpg' },
-	{ match: /goi[aâ]nia/i, track: 'goiania' },
+	{ match: /goi[aâ]nia/i, track: 'goiania', photo: 'Moto_GP_2026-_Goiânia.jpg' },
+	{ match: /g[aá]lvez|buenos aires/i, photo: 'Autodromo_Buenos_Aires.jpg' },
+	{ match: /istanbul/i, track: 'istanbul', photo: 'Istanbul_Park_aerial.jpg' },
+	{ match: /tokyo/i, photo: '2024_Tokyo_e-Prix_race_start_1.jpg' },
 	{ match: /jerez/i, track: 'jerez', photo: 'Jorge_Lorenzo_leads_the_pack_2015_Jerez_2.jpeg', focus: '50% 90%' },
 	// Before Le Mans: Petit Le Mans runs at Road Atlanta.
 	{ match: /road atlanta|petit le mans/i, track: 'roadatlanta', photo: 'Road_atlanta_esses.JPG' },
@@ -222,6 +230,18 @@ const VENUES: Venue[] = [
 		focus: '50% 60%'
 	},
 	{ match: /donington/i, track: 'donington', photo: 'Sbk_2013_-_Donington_Park_-_panoramio_(1).jpg' },
+	{ match: /brands hatch/i, photo: 'Brands-hatch.jpg' },
+	{ match: /croft/i, photo: 'Porsche_Carreras_racing_in_the_wet,_Croft_circuit_(geograph_6188957).jpg' },
+	{ match: /knockhill/i, photo: 'Knockhill_Racing_Circuit,_Near_Dunfermline,_Fife_-_geograph.org.uk_-_6202246.jpg' },
+	{ match: /oulton park/i, photo: 'Michael_Caine_Oulton_Park_(Knickerbrook).JPG' },
+	{ match: /snetterton/i, photo: 'Ginetta_Race_2_-_02_(9454210700).jpg' },
+	{ match: /thruxton/i, photo: 'Tony_Ayres_Mini_Miglia_Challenge_Thruxton_2026.jpg' },
+
+	// Australia.
+	{ match: /adelaide/i, photo: 'Nissan_(8525283411).jpg' },
+	{ match: /bathurst|mount panorama/i, photo: 'Mount_Panorama_Pit_Straight_and_Pit_Lane_2015.JPG' },
+	{ match: /sandown/i, photo: 'Whincup_leads_Qualifying_Race_2_2015_Sandown_500.JPG' },
+	{ match: /surfers paradise|gold coast/i, photo: 'Surfers_Paradise_Street_Circuit_aerial_view.jpg' },
 	{
 		match: /paul ricard|le castellet/i,
 		track: 'paulricard',
@@ -256,8 +276,9 @@ const VENUES: Venue[] = [
 		match: /st\.? petersburg/i,
 		photo: '2012_Honda_Grand_Prix_of_St._Petersburg_Progress_Energy_Corners.jpg'
 	},
-	{ match: /barber|alabama/i, photo: 'Barber_Motorsports_Park_Aerial_(34804699780).jpg' },
-	{ match: /world wide technology|wwtr|gateway/i, track: 'gateway' },
+	// Not "Alabama": Talladega is there too.
+	{ match: /barber/i, photo: 'Barber_Motorsports_Park_Aerial_(34804699780).jpg' },
+	{ match: /world wide technology|wwtr|gateway/i, track: 'gateway', photo: 'Alex_Bowman_Gateway_2024.jpg' },
 	{ match: /mid-ohio/i, photo: 'Gtp_sports_cars.jpg' },
 	{ match: /nashville|music city/i, track: 'nashville', photo: 'Nationwide_2008.jpg' },
 	{ match: /portland/i, photo: 'Portland_International_Raceway_USGS.jpeg' },
@@ -265,9 +286,14 @@ const VENUES: Venue[] = [
 
 	// NASCAR ovals.
 	{ match: /bowman gray/i, track: 'bowmangray', photo: 'Bowman_Gray_Stadium.jpg' },
-	{ match: /atlanta motor speedway/i, track: 'atlanta' },
+	// Renamed EchoPark Speedway in 2025.
+	{
+		match: /atlanta motor speedway|echopark/i,
+		track: 'atlanta',
+		photo: '2008_Atlanta_Motor_Speedway_Oct_26_Pep_Boys_500_(10)_(2978148192).jpg'
+	},
 	{ match: /phoenix/i, track: 'phoenix', photo: 'PhoenixInternationalRacewayGrandstands.jpg' },
-	{ match: /darlington/i, track: 'darlington' },
+	{ match: /darlington/i, track: 'darlington', photo: 'DarlingtonRacewayDodgeCharger500.JPG' },
 	{
 		match: /martinsville/i,
 		track: 'martinsville',

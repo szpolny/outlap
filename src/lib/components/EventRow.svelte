@@ -23,6 +23,7 @@
 		countdown,
 		eventEndMs,
 		eventRange,
+		isLongEvent,
 		fmtDate,
 		fmtDay,
 		fmtTime,
@@ -167,6 +168,8 @@
 				>
 			{:else if finished}
 				<span class={[pill, 'bg-subtle text-muted']}>Finished</span>
+			{:else if isLongEvent(event)}
+				<span class={[pill, 'bg-subtle text-fg']}>{eventRange(event, timeZone)}</span>
 			{:else if event.allDay}
 				<span class={[pill, 'bg-subtle text-fg']}
 					>{fmtDate(event.start, { weekday: 'short' })}{#if event.end !== event.start}

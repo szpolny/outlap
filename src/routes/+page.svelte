@@ -14,6 +14,7 @@
 		FILTER_LABELS,
 		addDays,
 		anchorDate,
+		isLongEvent,
 		countdown,
 		eventEndMs,
 		fmtDate,
@@ -111,7 +112,8 @@
 	const matching = $derived(
 		data.events.filter(
 			(e) =>
-				weekStart(anchorDate(e, timeZone)) >= thisWeek &&
+				// A long event stays listed until its last day.
+				weekStart(isLongEvent(e) ? e.end : anchorDate(e, timeZone)) >= thisWeek &&
 				selected.includes(e.series) &&
 				(e.allDay || e.sessions.some((s) => kinds.includes(s.kind)))
 		)
@@ -124,7 +126,9 @@
 	const weeks = $derived.by((): WeekItem[] => {
 		const byWeek = new Map<string, MotorEvent[]>();
 		for (const e of matching) {
-			const week = weekStart(anchorDate(e, timeZone));
+			// A long event already under way is shown in the current week.
+			const anchorWeek = weekStart(anchorDate(e, timeZone));
+			const week = anchorWeek < thisWeek ? thisWeek : anchorWeek;
 			byWeek.set(week, [...(byWeek.get(week) ?? []), e]);
 		}
 		const keys = [...byWeek.keys()].sort();

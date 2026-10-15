@@ -2,11 +2,12 @@ import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { createServer } from 'vite';
 
-let server, wiki, sro;
+let server, wiki, sro, seasons;
 before(async () => {
 	server = await createServer({ configFile: false, logLevel: 'error', server: { middlewareMode: true, hmr: false, ws: false } });
 	wiki = await server.ssrLoadModule('/src/lib/server/sources/wikipedia.ts');
 	sro = await server.ssrLoadModule('/src/lib/server/sources/sro.ts');
+	seasons = await server.ssrLoadModule('/src/lib/server/sources/seasons.ts');
 });
 after(async () => { await server?.close(); });
 
@@ -17,6 +18,43 @@ test('date ranges read the formats used in season articles', () => {
 	assert.deepEqual(wiki.dateRange('January 10', 2026), ['2026-01-10', '2026-01-10']);
 	assert.deepEqual(wiki.dateRange('{{nowrap|3–5 July}}', 2026), ['2026-07-03', '2026-07-05']);
 	assert.equal(wiki.dateRange('TBA', 2026), null);
+	assert.deepEqual(wiki.dateRange('8/9 March', 2027), ['2027-03-08', '2027-03-09']);
+	// Seasons spanning two years write the year out.
+	assert.deepEqual(wiki.dateRange('18 December 2026', 2027), ['2026-12-18', '2026-12-18']);
+	assert.deepEqual(wiki.dateRange('December 31, 2026 – January 2, 2027', 2027), ['2026-12-31', '2027-01-02']);
+});
+
+test('heading patterns can skip a table that precedes the calendar', () => {
+	const wikitext = `==Schedule==
+{|
+! Icon
+! Legend
+|-
+| O
+| Oval
+|}
+{|
+!Rd.
+!Date
+|-
+!1
+|March 7
+|}`;
+	const rows = wiki.tableGrid(wikitext, /==\s*Schedule\s*==[\s\S]*?\n\|\}/);
+	assert.deepEqual(rows, [{ 'Rd.': '1', Date: 'March 7' }]);
+});
+
+test('the Dakar site header gives the next edition before Wikipedia does', () => {
+	const html = `<a href="/en/discover-saudi-arabia">x</a><span class="header__date">
+		01/01
+		>
+		01/15/2027
+	</span>`;
+	const event = seasons.parseDakarHome(html);
+	assert.deepEqual([event.id, event.start, event.end, event.location], ['dakar-2027', '2027-01-01', '2027-01-15', 'Saudi Arabia']);
+	const december = seasons.parseDakarHome('<span class="header__date">12/31 &gt; 01/14/2028</span>');
+	assert.deepEqual([december.id, december.start, december.end], ['dakar-2028', '2027-12-31', '2028-01-14']);
+	assert.equal(seasons.parseDakarHome('<span class="header__date"></span>'), null);
 });
 
 test('table grids fill row spans and number repeated headers', () => {

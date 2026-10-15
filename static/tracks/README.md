@@ -35,6 +35,7 @@ in a 100-unit box. `src/lib/server/venues.ts` assigns them to events.
 | `indianapolis` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `interlagos` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `iowa` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
+| `istanbul` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `jeddah` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `jerez` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `kansas` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |

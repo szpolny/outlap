@@ -38,6 +38,8 @@ export interface ResolvedWatchOption extends WatchOption {
 }
 
 const CHECKED = '2026-10-12';
+/** Guides re-audited for the October 2026 series additions. */
+const AUDITED = '2026-10-15';
 /** The season the curated rights below describe. */
 const SEASON = 2026;
 const F1_GUIDE = 'https://www.formula1.com/en/information/f1-broadcast-information.45y3LNsT1D6VoK0ZmX8ciJ';
@@ -226,8 +228,13 @@ export const WATCH_GUIDES: Record<SeriesId, WatchGuide> = {
 	supergt: guide('https://supergt.net/about-super-gt/media', [
 		tv('J SPORTS', 'https://www.jsports.co.jp/motor/supergt/', ['JP'], 'Live qualifying and races in Japan; subscription required.'),
 		stream('RACER+', 'https://racerplus.com/', 'Subscription', 'All 2026 races live and on demand with English commentary; RACER Network airs highlights.', { countries: ['US', 'CA'] })]),
-	f1academy: guide('https://www.f1academy.com/', [f1tv]),
-	formulae: officialOnly('https://www.fiaformulae.com/en/'),
+	f1academy: { ...guide('https://www.f1academy.com/', [f1tv,
+		stream('F1 Academy on YouTube', 'https://www.youtube.com/@F1Academy/streams', 'Free', 'Qualifying and races live with commentary. Check the stream for this round and any local restrictions.', { medium: 'YouTube', check: true, ongoing: true })]), checked: AUDITED },
+	// Season 13 (from December 2026) starts a multi-year global streaming deal; local
+	// partners for it are still unannounced, so the Season 12 broadcasters are not carried over.
+	formulae: { ...guide('https://www.fiaformulae.com/en/ways-to-watch', [
+		stream('Disney+', 'https://www.disneyplus.com/', 'Subscription', 'Global streaming home from the 2026–27 season: every practice, qualifying and race in 100+ territories. Check your country and plan.', { check: true, ongoing: true }),
+		stream('ESPN+', 'https://www.espn.com/espnplus/', 'Subscription', 'US coverage from the 2026–27 season, alongside Disney+.', { countries: ['US'], ongoing: true })]), checked: AUDITED },
 	sfl: officialOnly('https://superformula.net/sf3/en/'),
 	oreilly: guide('https://www.nascar.com/international/how-to-watch', [
 		tv('The CW', 'https://www.cwtv.com/', ['US'], 'US home of the O’Reilly Series; some races air on other networks. Check the race listing.')]),
@@ -239,18 +246,42 @@ export const WATCH_GUIDES: Record<SeriesId, WatchGuide> = {
 	igtc: gtWorld('https://www.intercontinentalgtchallenge.com'),
 	nls: guide('https://www.nuerburgring-langstrecken-serie.de/', [
 		stream('NLS livestream', 'https://www.nuerburgring-langstrecken-serie.de/', 'Free', 'Free live race stream from the series. Check the round page for the link.', { check: true, ongoing: true })]),
-	btcc: guide('https://www.btcc.net/', [
-		stream('ITVX', 'https://www.itv.com/watch/categories/sport', 'Free', 'Live race-day coverage on ITV4 and ITVX.', { countries: ['GB'], check: true })]),
-	supercars: guide('https://www.supercars.com/', [
-		stream('Kayo Sports', 'https://www.kayosports.com.au/', 'Subscription', 'Live sessions and races in Australia.', { countries: ['AU'], check: true })]),
-	bsb: officialOnly('https://www.britishsuperbike.com/'),
-	iomtt: officialOnly('https://www.iomttraces.com/'),
+	btcc: { ...guide('https://www.btcc.net/', [
+		stream('ITVX', 'https://www.itv.com/watch/categories/sport', 'Free', 'Live races on ITV4 and ITVX; qualifying on ITVX.', { countries: ['GB'] }),
+		stream('RACER+', 'https://racerplus.com/', 'Subscription', 'Live races and on demand on RACER+ and RACER Network, including support series.', { countries: ['US', 'CA'] }),
+		stream('BTCC on YouTube', 'https://www.youtube.com/@OfficialBTCC/streams', 'Free', 'Whole race day live, with support series, outside the UK and North America.', { medium: 'YouTube', ongoing: true,
+			rules: [{ countries: ['GB', 'US', 'CA'], availability: 'blocked', note: 'Race-day streams are blocked here because of local rights; qualifying stays open. Use the local broadcaster.' }] })]), checked: AUDITED },
+	supercars: { ...guide('https://www.supercars.com/', [
+		stream('Kayo Sports', 'https://www.kayosports.com.au/', 'Subscription', 'Every session and race live in Australia.', { countries: ['AU'] }),
+		tv('Foxtel', 'https://www.foxtel.com.au/', ['AU'], 'Every session live in Australia.'),
+		stream('Seven / 7plus', 'https://7plus.com.au/', 'Free', 'Live free-to-air coverage of this event in Australia.', { countries: ['AU'],
+			rules: [{ countries: ['AU'], event: (event) => !/sydney|townsville|bathurst|gold coast|surfers|adelaide/i.test(`${event.name} ${event.location}`), availability: 'blocked', note: 'Seven shows five events live (Sydney, Townsville, Bathurst, Gold Coast and Adelaide); check its listings for highlights of this one.' }] }),
+		tv('Sky Sport NZ', 'https://www.sky.co.nz/sports', ['NZ'], 'Live coverage in New Zealand.'),
+		stream('SuperView', 'https://www.supercars.com/superview', 'Subscription', 'Supercars’ own international stream of every session. Check that it is sold in your country.', { check: true, ongoing: true,
+			rules: [{ countries: ['AU', 'NZ'], availability: 'blocked', note: 'Not offered here; use the local broadcaster.' }] })]), checked: AUDITED },
+	// The official 2026 guide also lists a series livestream for other countries, but its
+	// page gives no terms, so it is left out until it does.
+	bsb: { ...guide('https://www.britishsuperbike.com/news/2026/may/1/how-to-watch-the-zyn-british-superbike-championship-in-2026', [
+		tv('TNT Sports', 'https://www.tntsports.co.uk/', ['GB', 'IE'], 'Every round live. In Ireland, through a local TV provider.'),
+		stream('HBO Max', 'https://www.hbomax.com/', 'Subscription', 'Every round live with the TNT Sports plan.', { countries: ['GB'] }),
+		{ ...tv('Quest', 'https://www.quest.co.uk/', ['GB', 'IE'], 'Monday highlights of every round; live races at Donington Park, Snetterton, Cadwell Park and Assen.'), access: 'Free' as const },
+		tv('Fox Sports', 'https://www.foxsports.com.au/', ['AU'], 'Live coverage in Australia.'),
+		tv('Eurosport', 'https://www.eurosport.com/', ['IN'], 'Live coverage in India.'),
+		tv('RACER Network', 'https://racer.com/', ['US', 'CA'], 'Highlights only.'),
+		stream('HBO Max / Eurosport', 'https://www.hbomax.com/', 'Subscription', 'Sub-licensed in several European countries; check this round’s listing.', { countries: ['ES', 'DE', 'FR', 'IT'], check: true })]), checked: AUDITED },
+	iomtt: { ...guide('https://www.iomttraces.com/latest/news/how-to-follow-tt-2026/', [
+		stream('TT+ Live Pass', 'https://ttplus.iomttraces.com/', 'Subscription', 'Every qualifying session and race live, with 12 months of replays. A free TT+ account includes daily round-ups, not live racing.', { ongoing: true })]), checked: AUDITED },
 	mxgp: guide('https://www.mxgp.com/', [
 		stream('MXGP-TV', 'https://www.mxgp-tv.com/', 'Subscription', 'The series’ own live and on-demand service. Check your country before subscribing.', { check: true, ongoing: true })]),
-	supercross: guide('https://www.supercrosslive.com/', [
-		stream('Peacock Premium', 'https://www.peacocktv.com/', 'Subscription', 'Live races in the US.', { countries: ['US'], check: true })]),
-	erc: officialOnly('https://www.fiaerc.com/'),
-	dakar: officialOnly('https://www.dakar.com/en/'),
+	supercross: { ...guide('https://www.supercrosslive.com/', [
+		stream('Peacock Premium', 'https://www.peacocktv.com/', 'Subscription', 'Live races in the US.', { countries: ['US'], check: true }),
+		stream('SMX Video Pass', 'https://www.smxvideopass.com/', 'Subscription', 'Every round live and on demand outside the US, with English, Spanish and French commentary.', { ongoing: true,
+			rules: [{ countries: ['US'], availability: 'blocked', note: 'Not sold in the US; use Peacock.' }] })]), checked: AUDITED },
+	erc: { ...guide('https://www.fiaerc.com/', [
+		stream('Rally.TV', 'https://www.rally.tv/', 'Subscription', 'The official ERC streaming home, linked from each rally’s page. Check which stages are live in your country.', { check: true, ongoing: true })]), checked: AUDITED },
+	// No 2027 broadcaster list yet; coverage is mostly daily highlights because stages run far from networks.
+	dakar: { ...guide('https://www.dakar.com/en/', [
+		stream('Dakar on YouTube', 'https://www.youtube.com/@OfficialDakar', 'Free', 'Official daily stage highlights, not live coverage. Local TV partners are announced before each edition.', { medium: 'YouTube', ongoing: true })]), checked: AUDITED },
 	wrc: guide('https://www.wrc.com/en/misc/broadcast-guide', [
 		stream('Rally.TV', 'https://www.rally.tv/', 'Subscription', 'Every WRC stage live and on demand worldwide.', { ongoing: true }),
 		tv('Motowizja', 'https://motowizja.pl/', ['PL'], 'Local WRC coverage. Check the stage listing for this rally.'),

@@ -77,7 +77,8 @@ test('providers without logo assets retain the supported monogram fallback', asy
 	const names = new Set(Object.values(WATCH_GUIDES).flatMap((guide) => guide.options.map((entry) => entry.name)));
 	for (const channel of ['FOX', 'FS1', 'TNT', 'USA Network', 'NBC', 'Prime Video']) names.add(channel);
 	assert.deepEqual([...names].filter((name) => !providerLogo(name)).sort(),
-		['REV TV', 'RTBF Auvio', 'Sporty TV', 'TV 2 Play', 'L’Équipe', 'RTL+', 'BandSports', 'SPOTV', 'beIN SPORTS', 'The CW', 'ITVX'].sort());
+		['REV TV', 'RTBF Auvio', 'Sporty TV', 'TV 2 Play', 'L’Équipe', 'RTL+', 'BandSports', 'SPOTV', 'beIN SPORTS', 'The CW', 'ITVX',
+			'Disney+', 'ESPN+', 'Foxtel', 'Seven / 7plus', 'Sky Sport NZ', 'Quest'].sort());
 });
 
 test('later seasons keep series-run streams as unconfirmed, without local broadcasters', () => {
@@ -137,4 +138,22 @@ test('WEC local rights stay within their territories, round evidence and season'
 	const spa = event('wec', '2026-05-09T12:00:00Z', '6 Hours of Spa-Francorchamps');
 	assert.equal(option(getWatchInfo(spa, 'JP'), 'J SPORTS').availability, 'available');
 	assert.deepEqual(getWatchInfo(event('wec', '2027-06-12T14:00:00Z'), 'PL').options.map(({ name }) => name), ['FIAWEC+']);
+});
+
+test('newer series list their confirmed services and keep regional limits', () => {
+	// The next Dakar falls outside the curated season, so only its own channel remains.
+	const dakar = getWatchInfo(event('dakar', '2027-01-01', 'Dakar Rally 2027'), 'PL');
+	assert.deepEqual(dakar.options.map((entry) => [entry.name, entry.availability]), [['Dakar on YouTube', 'check']]);
+
+	assert.equal(option(getWatchInfo(event('btcc'), 'DE'), 'BTCC on YouTube').availability, 'available');
+	assert.equal(option(getWatchInfo(event('btcc'), 'GB'), 'BTCC on YouTube').availability, 'blocked');
+
+	const goldCoast = { ...event('supercars', '2026-10-23', 'Gold Coast 500'), location: 'Surfers Paradise Street Circuit' };
+	const sandown = { ...event('supercars', '2026-11-06', 'Sandown 500'), location: 'Sandown Raceway' };
+	assert.equal(option(getWatchInfo(goldCoast, 'AU'), 'Seven / 7plus').availability, 'available');
+	assert.equal(option(getWatchInfo(sandown, 'AU'), 'Seven / 7plus').availability, 'blocked');
+	assert.equal(option(getWatchInfo(sandown, 'AU'), 'SuperView').availability, 'blocked');
+
+	const fe = getWatchInfo(event('formulae', '2026-12-18', 'Jeddah ePrix'), 'US');
+	assert.deepEqual(fe.options.map((entry) => entry.name), ['Disney+', 'ESPN+']);
 });

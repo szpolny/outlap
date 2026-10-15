@@ -6,6 +6,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:1_singapore_f1_night_race_2012_city_skyline.jpg",
 		"credit": "chensiyuan, CC BY-SA 4.0"
 	},
+	"2008_Atlanta_Motor_Speedway_Oct_26_Pep_Boys_500_(10)_(2978148192).jpg": {
+		"src": "/photos/2008-atlanta-motor-speedway-oct-26-pep-boys-500-10-2978148192.jpg",
+		"width": 960,
+		"height": 643,
+		"page": "https://commons.wikimedia.org/wiki/File:2008_Atlanta_Motor_Speedway_Oct_26_Pep_Boys_500_(10)_(2978148192).jpg",
+		"credit": "Hans J E, CC BY-SA 2.0"
+	},
 	"2009_1000km_of_Okayama_(Race_1)_opening_lap.jpg": {
 		"src": "/photos/2009-1000km-of-okayama-race-1-opening-lap.jpg",
 		"width": 960,
@@ -19,6 +26,13 @@
 		"height": 754,
 		"page": "https://commons.wikimedia.org/wiki/File:2012_Honda_Grand_Prix_of_St._Petersburg_Progress_Energy_Corners.jpg",
 		"credit": "John O'Neill, CC BY-SA 3.0"
+	},
+	"2013_Isle_of_Man_TT_Races_Photo_11_IMG_00305.jpg": {
+		"src": "/photos/2013-isle-of-man-tt-races-photo-11-img-00305.jpg",
+		"width": 960,
+		"height": 697,
+		"page": "https://commons.wikimedia.org/wiki/File:2013_Isle_of_Man_TT_Races_Photo_11_IMG_00305.jpg",
+		"credit": "Agljones, CC BY-SA 3.0"
 	},
 	"2013_Norisring_DTM_35282b.jpg": {
 		"src": "/photos/2013-norisring-dtm-35282b.jpg",
@@ -90,6 +104,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:2024_Daytona_500.jpg",
 		"credit": "JazzyJoeyD, CC BY-SA 4.0"
 	},
+	"2024_Tokyo_e-Prix_race_start_1.jpg": {
+		"src": "/photos/2024-tokyo-e-prix-race-start-1.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:2024_Tokyo_e-Prix_race_start_1.jpg",
+		"credit": "Morio, CC BY-SA 4.0"
+	},
 	"4_Hours_of_Sepang_2019.jpg": {
 		"src": "/photos/4-hours-of-sepang-2019.jpg",
 		"width": 960,
@@ -125,6 +146,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Albert_Park_circuit_main_straight,_pictured_from_above_teams%27_garages_in_2022.jpg",
 		"credit": "AllAussieTraveller, CC BY-SA 4.0"
 	},
+	"Alex_Bowman_Gateway_2024.jpg": {
+		"src": "/photos/alex-bowman-gateway-2024.jpg",
+		"width": 960,
+		"height": 536,
+		"page": "https://commons.wikimedia.org/wiki/File:Alex_Bowman_Gateway_2024.jpg",
+		"credit": "Airman 1st Class Tyler A. P. Moody, Public domain"
+	},
 	"Andrea_Dovizioso_2011_Estoril_3.jpg": {
 		"src": "/photos/andrea-dovizioso-2011-estoril-3.jpg",
 		"width": 960,
@@ -138,6 +166,13 @@
 		"height": 638,
 		"page": "https://commons.wikimedia.org/wiki/File:Autodrom_Most_Tschechien_Originalgr%C3%B6%C3%9Fe.jpg",
 		"credit": "AutodromMost, CC BY-SA 4.0"
+	},
+	"Autodromo_Buenos_Aires.jpg": {
+		"src": "/photos/autodromo-buenos-aires.jpg",
+		"width": 960,
+		"height": 703,
+		"page": "https://commons.wikimedia.org/wiki/File:Autodromo_Buenos_Aires.jpg",
+		"credit": "Banfield, CC BY-SA 3.0"
 	},
 	"Autodromo_aerea_poster.jpg": {
 		"src": "/photos/autodromo-aerea-poster.jpg",
@@ -187,6 +222,13 @@
 		"height": 1440,
 		"page": "https://commons.wikimedia.org/wiki/File:Bowman_Gray_Stadium.jpg",
 		"credit": "Mike Kalasnik from Charlotte, USA, CC BY-SA 2.0"
+	},
+	"Brands-hatch.jpg": {
+		"src": "/photos/brands-hatch.jpg",
+		"width": 960,
+		"height": 720,
+		"page": "https://commons.wikimedia.org/wiki/File:Brands-hatch.jpg",
+		"credit": "Whiters, Public domain"
 	},
 	"Bristol_Motor_Speedway_(9608386615).jpg": {
 		"src": "/photos/bristol-motor-speedway-9608386615.jpg",
@@ -251,12 +293,26 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Croatia_Rally_2021_-_Ott_T%C3%A4nak_cropped.jpg",
 		"credit": "Ivan Vranić hvranic, CC0"
 	},
+	"Dakar_Rally_2021_-_Shakedown_(50779690333).jpg": {
+		"src": "/photos/dakar-rally-2021-shakedown-50779690333.jpg",
+		"width": 960,
+		"height": 639,
+		"page": "https://commons.wikimedia.org/wiki/File:Dakar_Rally_2021_-_Shakedown_(50779690333).jpg",
+		"credit": "EKSRX, CC BY 2.0"
+	},
 	"Dani_Pedrosa_leads_the_pack_2014_Sepang.jpeg": {
 		"src": "/photos/dani-pedrosa-leads-the-pack-2014-sepang.jpg",
 		"width": 960,
 		"height": 640,
 		"page": "https://commons.wikimedia.org/wiki/File:Dani_Pedrosa_leads_the_pack_2014_Sepang.jpeg",
 		"credit": "Box Repsol, CC BY 2.0"
+	},
+	"DarlingtonRacewayDodgeCharger500.JPG": {
+		"src": "/photos/darlingtonracewaydodgecharger500.jpg",
+		"width": 960,
+		"height": 720,
+		"page": "https://commons.wikimedia.org/wiki/File:DarlingtonRacewayDodgeCharger500.JPG",
+		"credit": "Berniestew, Public domain"
 	},
 	"Epingle_Monaco.jpg": {
 		"src": "/photos/epingle-monaco.jpg",
@@ -328,6 +384,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Gillman_Speedway.jpg",
 		"credit": "HoldenV8, CC BY-SA 4.0"
 	},
+	"Ginetta_Race_2_-_02_(9454210700).jpg": {
+		"src": "/photos/ginetta-race-2-02-9454210700.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:Ginetta_Race_2_-_02_(9454210700).jpg",
+		"credit": "Peter Laborne, CC BY 2.0"
+	},
 	"Grande_Prêmio_São_Paulo_de_Fórmula_1_(52497080967).jpg": {
 		"src": "/photos/grande-premio-sao-paulo-de-formula-1-52497080967.jpg",
 		"width": 960,
@@ -377,6 +440,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:IowaSpeedwayJune2007.jpg",
 		"credit": "Matt Owen, CC BY 2.0"
 	},
+	"Istanbul_Park_aerial.jpg": {
+		"src": "/photos/istanbul-park-aerial.jpg",
+		"width": 960,
+		"height": 535,
+		"page": "https://commons.wikimedia.org/wiki/File:Istanbul_Park_aerial.jpg",
+		"credit": "Adbar, CC BY-SA 3.0"
+	},
 	"Jari-Matti_Latvala_2015-02-14_001.jpg": {
 		"src": "/photos/jari-matti-latvala-2015-02-14-001.jpg",
 		"width": 960,
@@ -411,6 +481,13 @@
 		"height": 540,
 		"page": "https://commons.wikimedia.org/wiki/File:Kenya_KCB_Rally_Naivasha_3.jpg",
 		"credit": "Jared-G-Maina, CC BY-SA 4.0"
+	},
+	"Knockhill_Racing_Circuit,_Near_Dunfermline,_Fife_-_geograph.org.uk_-_6202246.jpg": {
+		"src": "/photos/knockhill-racing-circuit-near-dunfermline-fife-geograph-org-uk-6202246.jpg",
+		"width": 960,
+		"height": 689,
+		"page": "https://commons.wikimedia.org/wiki/File:Knockhill_Racing_Circuit,_Near_Dunfermline,_Fife_-_geograph.org.uk_-_6202246.jpg",
+		"credit": "Mark S, CC BY-SA 2.0"
 	},
 	"Kris_meeke_drummond_hill_2010_rally_scotland.jpg": {
 		"src": "/photos/kris-meeke-drummond-hill-2010-rally-scotland.jpg",
@@ -531,6 +608,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Miami_Grand_Prix_startfinish.jpg",
 		"credit": "Bassfish22, CC BY-SA 4.0"
 	},
+	"Michael_Caine_Oulton_Park_(Knickerbrook).JPG": {
+		"src": "/photos/michael-caine-oulton-park-knickerbrook.jpg",
+		"width": 960,
+		"height": 720,
+		"page": "https://commons.wikimedia.org/wiki/File:Michael_Caine_Oulton_Park_(Knickerbrook).JPG",
+		"credit": "Skully Collins, CC BY-SA 3.0"
+	},
 	"MilwaukeeMilePanorama.jpg": {
 		"src": "/photos/milwaukeemilepanorama.jpg",
 		"width": 960,
@@ -566,6 +650,20 @@
 		"page": "https://commons.wikimedia.org/wiki/File:MotoGP_di_Sirkuit_Balapan_Pertamina_Mandalika,_NTB,_Indonesia.jpg",
 		"credit": "Andika Wahyu; Portal Informasi Indonesia, Public domain"
 	},
+	"Moto_GP_2026-_Goiânia.jpg": {
+		"src": "/photos/moto-gp-2026-goiania.jpg",
+		"width": 960,
+		"height": 447,
+		"page": "https://commons.wikimedia.org/wiki/File:Moto_GP_2026-_Goi%C3%A2nia.jpg",
+		"credit": "Boaventuravinicius, CC BY 4.0"
+	},
+	"Mount_Panorama_Pit_Straight_and_Pit_Lane_2015.JPG": {
+		"src": "/photos/mount-panorama-pit-straight-and-pit-lane-2015.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:Mount_Panorama_Pit_Straight_and_Pit_Lane_2015.JPG",
+		"credit": "Kytabu, CC BY-SA 4.0"
+	},
 	"NASCAR_Cup_Series_Anduril_250_Race_the_Base_at_NASCAR_San_Diego_Weekend_(4)_9764231.jpg": {
 		"src": "/photos/nascar-cup-series-anduril-250-race-the-base-at-nascar-san-diego-weekend-4-9764231.jpg",
 		"width": 960,
@@ -600,6 +698,13 @@
 		"height": 720,
 		"page": "https://commons.wikimedia.org/wiki/File:New_Hampshire_International_Speedway_(2007).jpg",
 		"credit": "SayCheeeeeese, Public domain"
+	},
+	"Nissan_(8525283411).jpg": {
+		"src": "/photos/nissan-8525283411.jpg",
+		"width": 960,
+		"height": 720,
+		"page": "https://commons.wikimedia.org/wiki/File:Nissan_(8525283411).jpg",
+		"credit": "jason goulding from Muswellbrook, Australia, CC BY 2.0"
 	},
 	"North_Willesboro_Speedway_2025-20.jpg": {
 		"src": "/photos/north-willesboro-speedway-2025-20.jpg",
@@ -643,6 +748,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:PhoenixInternationalRacewayGrandstands.jpg",
 		"credit": "us44mt, CC BY-SA 2.0"
 	},
+	"Porsche_Carreras_racing_in_the_wet,_Croft_circuit_(geograph_6188957).jpg": {
+		"src": "/photos/porsche-carreras-racing-in-the-wet-croft-circuit-geograph-6188957.jpg",
+		"width": 960,
+		"height": 641,
+		"page": "https://commons.wikimedia.org/wiki/File:Porsche_Carreras_racing_in_the_wet,_Croft_circuit_(geograph_6188957).jpg",
+		"credit": "Mark Anderson, CC BY-SA 2.0"
+	},
 	"Portland_International_Raceway_USGS.jpeg": {
 		"src": "/photos/portland-international-raceway-usgs.jpg",
 		"width": 787,
@@ -670,6 +782,13 @@
 		"height": 640,
 		"page": "https://commons.wikimedia.org/wiki/File:Race_start_(38904049411).jpg",
 		"credit": "Zach Catanzareti Photo, CC BY-SA 2.0"
+	},
+	"Rali_Serras_de_Fafe_2018_-_29.jpg": {
+		"src": "/photos/rali-serras-de-fafe-2018-29.jpg",
+		"width": 960,
+		"height": 604,
+		"page": "https://commons.wikimedia.org/wiki/File:Rali_Serras_de_Fafe_2018_-_29.jpg",
+		"credit": "Harpagornis, CC BY-SA 4.0"
 	},
 	"Rally_Acropolis_2011-SS3.jpg": {
 		"src": "/photos/rally-acropolis-2011-ss3.jpg",
@@ -776,6 +895,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Stadion_%C5%BCu%C5%BClowy_w_Rydze.jpg",
 		"credit": "Kubapoczatek12, CC BY-SA 4.0"
 	},
+	"Surfers_Paradise_Street_Circuit_aerial_view.jpg": {
+		"src": "/photos/surfers-paradise-street-circuit-aerial-view.jpg",
+		"width": 960,
+		"height": 720,
+		"page": "https://commons.wikimedia.org/wiki/File:Surfers_Paradise_Street_Circuit_aerial_view.jpg",
+		"credit": "MasterMind5991, CC BY-SA 4.0"
+	},
 	"Suzuka_Circuit_2006.jpg": {
 		"src": "/photos/suzuka-circuit-2006.jpg",
 		"width": 960,
@@ -811,6 +937,20 @@
 		"page": "https://commons.wikimedia.org/wiki/File:The_Kansas_Speedway_(cropped).jpg",
 		"credit": "The_Kansas_Speedway.jpg : Balaji derivative work: Nascar 1996, CC BY-SA 2.0"
 	},
+	"Tony_Ayres_Mini_Miglia_Challenge_Thruxton_2026.jpg": {
+		"src": "/photos/tony-ayres-mini-miglia-challenge-thruxton-2026.jpg",
+		"width": 960,
+		"height": 540,
+		"page": "https://commons.wikimedia.org/wiki/File:Tony_Ayres_Mini_Miglia_Challenge_Thruxton_2026.jpg",
+		"credit": "BWard 1997, CC BY 4.0"
+	},
+	"Tribuna_recta_Circuito_del_Jarama.jpg": {
+		"src": "/photos/tribuna-recta-circuito-del-jarama.jpg",
+		"width": 960,
+		"height": 720,
+		"page": "https://commons.wikimedia.org/wiki/File:Tribuna_recta_Circuito_del_Jarama.jpg",
+		"credit": "Carlos Delgado, CC BY-SA 3.0"
+	},
 	"Turn_8_heading_into_The_Esses_at_Canadian_Tire_Motorsport_Park.jpg": {
 		"src": "/photos/turn-8-heading-into-the-esses-at-canadian-tire-motorsport-park.jpg",
 		"width": 960,
@@ -845,6 +985,13 @@
 		"height": 540,
 		"page": "https://commons.wikimedia.org/wiki/File:WTCC_2016,_Qatar.jpg",
 		"credit": "Dmitry Racer, CC BY-SA 4.0"
+	},
+	"Whincup_leads_Qualifying_Race_2_2015_Sandown_500.JPG": {
+		"src": "/photos/whincup-leads-qualifying-race-2-2015-sandown-500.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:Whincup_leads_Qualifying_Race_2_2015_Sandown_500.JPG",
+		"credit": "Kytabu, CC BY-SA 4.0"
 	},
 	"Will_Power_(7333133580).jpg": {
 		"src": "/photos/will-power-7333133580.jpg",

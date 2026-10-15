@@ -136,9 +136,35 @@ future seasons and free-account versus subscription access.
 - Series added in October 2026 start with links to their official sites. GT World
   Challenge (Europe, America, Asia) and IGTC link to each site's TV schedule and the
   [GT World YouTube channel](https://www.youtube.com/@GTWorld/streams), which local
-  deals can geoblock. F1 Academy lists F1 TV (conditional, like F2/F3). The main
-  broadcaster is listed for the O'Reilly Series (The CW) and Truck Series (FS1), BTCC
-  (ITVX, GB), Supercars (Kayo, AU), Supercross (Peacock, US), with the series' own
-  MXGP-TV and NLS livestream as worldwide leads; all are marked “Check availability”
-  until each guide is verified round by round. Formula E, Super Formula Lights,
-  BSB, Isle of Man TT, ERC and Dakar have no listed providers yet.
+  deals can geoblock. The main broadcaster is listed for the O'Reilly Series (The CW)
+  and Truck Series (FS1), and the series' own MXGP-TV and NLS livestream are worldwide
+  leads; these are marked “Check availability” until each guide is verified round by
+  round. Super Formula Lights has no listed providers: no official source names one.
+
+## New series audit — 15 October 2026
+
+- [Formula E ways to watch](https://www.fiaformulae.com/en/ways-to-watch): Disney+ is the
+  global streaming home from Season 13 (December 2026) in 100+ territories, with ESPN+ in
+  the US. Both are kept for later seasons because the deal is multi-year. Season 12's local
+  partners are not carried over; the page says Season 13 partners are still to come.
+- [BTCC 2026 viewing](https://www.silverstone.co.uk/news/how-watch-btcc-2026-your-free-live-and-demand-guide)
+  and [global YouTube stream](https://btcc.net/btcc-to-broadcast-race-day-live-globally-on-youtube/):
+  ITV4/ITVX in the UK, RACER+ in the US and Canada, and the free
+  [official channel](https://www.youtube.com/@OfficialBTCC) everywhere else.
+- [Supercars 2026 broadcast details](https://www.supercars.com/news/supercars-news-2026-championship-broadcast-details-confirmed-seven-foxtel-kayo-free-to-air-rounds):
+  Kayo and Foxtel carry every round; Seven/7plus show Sydney, Townsville, Bathurst, the
+  Gold Coast and Adelaide live; Sky Sport in New Zealand; SuperView internationally.
+- [BSB 2026 guide](https://www.britishsuperbike.com/news/2026/may/1/how-to-watch-the-zyn-british-superbike-championship-in-2026):
+  TNT Sports/HBO Max (UK), Quest (four live rounds plus highlights), Fox Sports (AU),
+  Eurosport India, RACER (highlights, US/CA) and an HBO Max/Eurosport sub-licence in
+  some European countries (conditional). Its own livestream page gives no terms or
+  territories, so it is not listed.
+- [How to follow TT 2026](https://www.iomttraces.com/latest/news/how-to-follow-tt-2026/):
+  the TT+ Live Pass is the only full live coverage; free TT+ accounts get round-ups only.
+- [SMX Video Pass](https://www.smxvideopass.com/) covers Supercross outside the US.
+- The [FIA ERC site](https://www.fiaerc.com/) links each rally to Rally.TV.
+- F1 Academy streams qualifying and races on its
+  [YouTube channel](https://www.youtube.com/@F1Academy/streams) (conditional).
+- Dakar: no 2027 broadcaster list yet. Only the
+  [official channel](https://www.youtube.com/@OfficialDakar)'s daily highlights are
+  listed, labelled as highlights.

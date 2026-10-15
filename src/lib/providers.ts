@@ -62,6 +62,7 @@ const BRANDS: Record<string, string> = {
 	'Fox Sports': foxau,
 	'FS1': fs1,
 	'HBO Max': hbomax,
+	'HBO Max / Eurosport': hbomax,
 	'HBO Max / TNT Sports': hbomax,
 	'J SPORTS': jsports,
 	'Kayo Sports': kayo,
@@ -105,7 +106,10 @@ const SERIES_SERVICES: Record<string, SeriesId> = {
 	'IMSA.TV': 'imsa',
 	'MXGP-TV': 'mxgp',
 	'NLS livestream': 'nls',
-	'Rally.TV': 'wrc'
+	'Rally.TV': 'wrc',
+	'SMX Video Pass': 'supercross',
+	'SuperView': 'supercars',
+	'TT+ Live Pass': 'iomtt'
 };
 
 export function providerLogo(name: string): ProviderLogo | undefined {

@@ -1,4 +1,4 @@
-import { localDate, fmtRange } from '@szpolny/calendar-kit/dates';
+import { addDays, localDate, fmtRange } from '@szpolny/calendar-kit/dates';
 export { endMs as eventEndMs, localDate, addDays, weekStart, fmtDate, fmtTime, fmtDay, fmtRange, countdown } from '@szpolny/calendar-kit/dates';
 // Client-side date helpers. Everything takes an explicit time zone so the server
 // can render in UTC and the browser can re-render in the viewer's zone.
@@ -28,9 +28,17 @@ export function mainSession(e: MotorEvent): Session | undefined {
 	return e.sessions.findLast((s) => s.kind === 'race') ?? e.sessions.at(-1);
 }
 
-/** The local calendar date that represents the event (its race day). */
+/** An all-day event lasting over a week, such as the Dakar or the TT, rather than a race weekend. */
+export function isLongEvent(e: MotorEvent): boolean {
+	return e.allDay && addDays(e.start, 6) < e.end;
+}
+
+/**
+ * The local calendar date that represents the event: its race day, or the first day of a
+ * long event, which would otherwise sit in its final week.
+ */
 export function anchorDate(e: MotorEvent, timeZone: string): string {
-	if (e.allDay) return e.end;
+	if (e.allDay) return isLongEvent(e) ? e.start : e.end;
 	const main = mainSession(e);
 	return localDate(main?.start ?? e.end, timeZone);
 }

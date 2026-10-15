@@ -132,13 +132,14 @@ function splitCell(raw: string): { content: string; rowspan: number; colspan: nu
 }
 
 /**
- * The first table after `heading`, as rows keyed by column header, with row and column spans
+ * The first table after the text matching `heading`, as rows keyed by column header, with row and column spans
  * filled in. Cells keep their wikitext; use stripWiki for plain text.
  */
 export function tableGrid(wikitext: string, heading: RegExp): Record<string, string>[] {
-	const start = wikitext.search(heading);
-	if (start < 0) return [];
-	const open = wikitext.indexOf('{|', start);
+	// After the whole match, so a heading pattern can also skip a table that precedes the calendar.
+	const match = heading.exec(wikitext);
+	if (!match) return [];
+	const open = wikitext.indexOf('{|', match.index + match[0].length);
 	if (open < 0) return [];
 	const table = wikitext.slice(open, wikitext.indexOf('\n|}', open));
 	const rows = table.split(/\n\|-[^\n]*/).map((row) => {
@@ -208,22 +209,28 @@ function monthNumber(name: string): number {
 
 /**
  * First and last day named in a date cell: "10–11 April", "30 July – 2 August",
- * "January 10", "September 30 – October 1", "3 January 2026". Null for "TBA" and the like.
+ * "January 10", "September 30 – October 1", "18 December 2026". A year written in the cell
+ * overrides `year`, for seasons that span two. Null for "TBA" and the like.
  */
 export function dateRange(cell: string, year: number): [string, string] | null {
-	const text = stripWiki(cell).replace(/&ndash;|—/g, '–');
+	const text = stripWiki(cell)
+		.replace(/&ndash;|—/g, '–')
+		// "8/9 March"
+		.replace(/(\d{1,2})\s*\/\s*(\d{1,2})(?=\s+[A-Za-z])/g, '$1–$2');
 	const days: string[] = [];
-	const add = (day: string, month: string) => {
+	const add = (day: string, month: string, y: string | undefined) => {
 		const m = monthNumber(month);
-		if (m > 0) days.push(`${year}-${String(m).padStart(2, '0')}-${day.padStart(2, '0')}`);
+		if (m > 0) days.push(`${y ?? year}-${String(m).padStart(2, '0')}-${day.padStart(2, '0')}`);
 	};
-	for (const m of text.matchAll(/(\d{1,2})(?:\s*[–-]\s*(\d{1,2}))?\s+([A-Za-z]{3,})|([A-Za-z]{3,})\s+(\d{1,2})(?:\s*[–-]\s*(\d{1,2}))?/g)) {
+	const pattern =
+		/(\d{1,2})(?:\s*[–-]\s*(\d{1,2}))?\s+([A-Za-z]{3,})(?:,?\s+(\d{4}))?|([A-Za-z]{3,})\s+(\d{1,2})(?:\s*[–-]\s*(\d{1,2}))?(?:,?\s+(\d{4}))?/g;
+	for (const m of text.matchAll(pattern)) {
 		if (m[3]) {
-			add(m[1], m[3]);
-			if (m[2]) add(m[2], m[3]);
+			add(m[1], m[3], m[4]);
+			if (m[2]) add(m[2], m[3], m[4]);
 		} else {
-			add(m[5], m[4]);
-			if (m[6]) add(m[6], m[4]);
+			add(m[6], m[5], m[8]);
+			if (m[7]) add(m[7], m[5], m[8]);
 		}
 	}
 	if (days.length === 0) return null;

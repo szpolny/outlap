@@ -8,6 +8,7 @@ import { indycar, indynxt } from './sources/indycar';
 import { iomtt } from './sources/iomtt';
 import { motogp } from './sources/motogp';
 import { nascar } from './sources/nascar';
+import { withProvisional } from './sources/provisional';
 import { btcc, bsb, dakar, mxgp, nls, sfl, supercars, supercross } from './sources/seasons';
 import { sgp } from './sources/sgp';
 import { f1academy, f2, f3, formulae } from './sources/sportstimes';
@@ -43,7 +44,8 @@ export async function scrapeSchedule(previous?: Schedule, { onlyMissing = false 
 	]);
 	const selected = new Set(SERIES_IDS.filter((series) => !onlyMissing || !present.has(series)));
 	if (onlyMissing && selected.size === 0 && previous) return previous;
-	const sourcesToLoad = SOURCES.filter((source) => source.series.some((series) => selected.has(series)));
+	const sourcesToLoad = SOURCES.filter((source) => source.series.some((series) => selected.has(series)))
+		.map((source) => withProvisional(source, selected));
 	const results = await loadSources(sourcesToLoad, {
 		load: (source) => source.load(seasons()),
 		fallback: (source) => previous?.events.filter((ev) => source.series.includes(ev.series)) ?? [],
