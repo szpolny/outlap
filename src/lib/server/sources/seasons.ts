@@ -58,12 +58,6 @@ const SEASONS: Season[] = [
 		row: circuitRow('BTCC')
 	},
 	{
-		series: 'bsb',
-		article: (y) => `${y}_British_Superbike_Championship`,
-		heading: /==\s*Race calendar\s*==/i,
-		row: circuitRow('BSB')
-	},
-	{
 		series: 'sfl',
 		article: (y) => `${y}_Super_Formula_Lights`,
 		heading: /==\s*Race calendar\s*==/i,
@@ -167,7 +161,7 @@ function seasonSource(season: Season): Source {
 	};
 }
 
-export const [btcc, bsb, sfl, supercars, supercross, mxgp, nls] = SEASONS.map(seasonSource);
+export const [btcc, sfl, supercars, supercross, mxgp, nls] = SEASONS.map(seasonSource);
 
 /** "3 January 2026" */
 const FULL_DATE = /(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/g;

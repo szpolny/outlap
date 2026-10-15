@@ -1,6 +1,7 @@
 import { loadSources } from '@szpolny/calendar-kit/snapshot';
 import { SERIES_IDS, type Schedule } from '#lib/series.ts';
 import { alms, elms, lemanscup, wec } from './sources/aco';
+import { bsb } from './sources/bsb';
 import { dtm } from './sources/dtm';
 import { f1 } from './sources/f1';
 import { imsa } from './sources/imsa';
@@ -9,7 +10,7 @@ import { iomtt } from './sources/iomtt';
 import { motogp } from './sources/motogp';
 import { nascar } from './sources/nascar';
 import { withProvisional } from './sources/provisional';
-import { btcc, bsb, dakar, mxgp, nls, sfl, supercars, supercross } from './sources/seasons';
+import { btcc, dakar, mxgp, nls, sfl, supercars, supercross } from './sources/seasons';
 import { sgp } from './sources/sgp';
 import { f1academy, f2, f3, formulae } from './sources/sportstimes';
 import { gtwca, gtwcasia, gtwce, igtc } from './sources/sro';

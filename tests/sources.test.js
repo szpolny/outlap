@@ -2,12 +2,13 @@ import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { createServer } from 'vite';
 
-let server, wiki, sro, seasons;
+let server, wiki, sro, seasons, bsb;
 before(async () => {
 	server = await createServer({ configFile: false, logLevel: 'error', server: { middlewareMode: true, hmr: false, ws: false } });
 	wiki = await server.ssrLoadModule('/src/lib/server/sources/wikipedia.ts');
 	sro = await server.ssrLoadModule('/src/lib/server/sources/sro.ts');
 	seasons = await server.ssrLoadModule('/src/lib/server/sources/seasons.ts');
+	bsb = await server.ssrLoadModule('/src/lib/server/sources/bsb.ts');
 });
 after(async () => { await server?.close(); });
 
@@ -121,4 +122,33 @@ test('SRO calendars skip test days and timetables convert local times to UTC', (
 		['Main Race', 'race', '2026-06-27T14:30:00.000Z']
 	]);
 	assert.equal(sessions[1].end, '2026-06-28T14:30:00.000Z');
+});
+
+test('BSB calendars skip tests and timetables place weekdays within the round', () => {
+	const card = (path, header, dates, circuit, layout) => `<div class="card round-info is-round"><a href="${path}" rel="noopener"><div class="card-divider"><div class="header">${header}</div>
+		<div class="grid-x "><div class="cell small-8 details"><h3>${dates}</h3>
+		<h3>${circuit}</h3>
+		<p>${layout}</p></div></div></div></a>
+		<div class="card-section"><a class="button expanded secondary-col" href="${path}"><span>Event Details</span></a></div></div>`;
+	const rounds = bsb.parseCalendar(card('/calendar/2026/t1-donington-park', 'R&amp;G Official Test', '03 - 04 Apr', 'Donington Park', 'GP') +
+		card('/calendar/2026/r6-oulton-park', 'Round 6', '31 Jul - 02 Aug', 'Oulton Park', 'International') +
+		card('/calendar/2026/r9-assen', 'Round 9', '18 - 20 Sep', 'Assen', 'GP'), 2026);
+	assert.deepEqual(rounds.map((r) => [r.path, r.round, r.circuit, r.start, r.end]), [
+		['/calendar/2026/r6-oulton-park', 6, 'Oulton Park', '2026-07-31', '2026-08-02'],
+		['/calendar/2026/r9-assen', 9, 'Assen', '2026-09-18', '2026-09-20']
+	]);
+
+	const row = (day, name, time) => `<li><div class="grid-x"><div class="cell small-3 medium-2"><strong>${day}</strong></div>
+		<div class="cell auto"><span>${name}</span></div>
+		<div class="cell small-3 medium-3 text-left medium-text-right"><span class="time">${time}</span></div></div></li>`;
+	const html = `<div class="schedule"><ul>${row('Fri', 'Gates Open', '08:30 BST') + row('Fri', 'Free Practice 1', '11:15 CET') +
+		row('Sat', 'ROKiT Oxygen Performance Qualifying 2', '13:42 CET') + row('Sun', 'Race 3', '16:00 CET') + row('Sun', 'Gates Open', 'TBC')}</ul></div>`;
+	const sessions = bsb.parseTimetable(html, rounds[1]);
+	// Assen keeps Dutch summer time whatever the label says.
+	assert.deepEqual(sessions.map((s) => [s.name, s.kind, s.start]), [
+		['Free Practice 1', 'practice', '2026-09-18T09:15:00.000Z'],
+		['Qualifying 2', 'qualifying', '2026-09-19T11:42:00.000Z'],
+		['Race 3', 'race', '2026-09-20T14:00:00.000Z']
+	]);
+	assert.equal(bsb.parseTimetable(row('Mon', 'Race 1', '13:00 BST'), rounds[0]).length, 0);
 });

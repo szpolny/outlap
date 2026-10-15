@@ -1,5 +1,5 @@
 import type { SeriesId } from '#lib/series.ts';
-import { readSeason, round, text, type Row, type Season } from './seasons';
+import { circuitRow, readSeason, round, text, type Row, type Season } from './seasons';
 import type { Source } from './types';
 import { column, dateRange } from './wikipedia';
 
@@ -134,6 +134,12 @@ const PROVISIONAL: Season[] = [
 		article: (y) => `${y}_Intercontinental_GT_Challenge`,
 		heading: CALENDAR,
 		row: columns({ name: /^race/i, location: [/^circuit/i], date: /^date/i, round: /^round/i })
+	},
+	{
+		series: 'bsb',
+		article: (y) => `${y}_British_Superbike_Championship`,
+		heading: /==\s*Race calendar\s*==/i,
+		row: circuitRow('BSB')
 	},
 	{
 		series: 'elms',
