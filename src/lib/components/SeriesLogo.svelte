@@ -40,48 +40,54 @@
 	import dakar from '#lib/assets/series/dakar.png';
 
 	// Single-colour marks applied as a CSS mask, so they take the surrounding text colour.
-	// The ratio is width / height of each trimmed asset. Very wide wordmarks take an
-	// optional scale so they don't dwarf the others at the same height; compact marks take
-	// one above 1 so they stay legible.
-	const LOGOS: Record<SeriesId, [src: string, ratio: number, scale?: number]> = {
-		f1: [f1, 4],
-		f2: [f2, 3.0185],
-		f3: [f3, 3.0185],
-		indycar: [indycar, 6.531],
-		indynxt: [indynxt, 473 / 72],
-		superformula: [superformula, 3.3828],
-		nascar: [nascar, 5.9935],
-		motogp: [motogp, 6.255],
+	// The ratio is width / height of each trimmed asset. The optional scale evens out their
+	// optical size: it brings each mark's main letters (not its box, which tails, stars and
+	// small taglines enlarge) to about 90% of the line height. Wide marks are limited by area
+	// instead (5.5 square line heights, at most 7.2 line heights wide), so they give up some
+	// letter height for their width.
+	// Formula E is sized by its E, which its FORMULA sits beside.
+	// Bleed is how far the artwork reaches above and left of the box, as fractions of its height
+	// and width: ERC's star overlaps its letters, which alone set the box so they line up with
+	// the other marks.
+	const LOGOS: Record<SeriesId, [src: string, ratio: number, scale?: number, bleed?: [top: number, left: number]]> = {
+		f1: [f1, 4, 0.99],
+		f2: [f2, 3.0185, 0.9],
+		f3: [f3, 3.0185, 0.9],
+		indycar: [indycar, 6.531, 0.9],
+		indynxt: [indynxt, 473 / 72, 0.91],
+		superformula: [superformula, 3.3828, 1.18],
+		nascar: [nascar, 5.9935, 0.9],
+		motogp: [motogp, 6.255, 0.94],
 		moto2: [moto2, 5.4786],
 		moto3: [moto3, 5.5028],
-		worldsbk: [worldsbk, 4.5585],
-		sgp: [sgp, 215 / 55],
-		wec: [wec, 4.1914],
-		elms: [elms, 375 / 72],
-		alms: [alms, 13.8546, 0.6],
-		lemanscup: [lemanscup, 746 / 72, 0.7],
-		imsa: [imsa, 4.5574],
-		dtm: [dtm, 3.6728],
-		supergt: [supergt, 8.0011],
-		wrc: [wrc, 5.0879],
-		f1academy: [f1academy, 261 / 72],
-		formulae: [formulae, 556 / 72],
-		sfl: [sfl, 292 / 72],
-		oreilly: [oreilly, 252 / 72],
-		truck: [truck, 267 / 72],
-		bsb: [bsb, 219 / 72],
-		iomtt: [iomtt, 505 / 72],
-		mxgp: [mxgp, 248 / 72],
-		supercross: [supercross, 909 / 72, 0.6],
-		igtc: [igtc, 578 / 72],
-		nls: [nls, 148 / 72, 1.5],
-		gtwce: [gtwce, 695 / 72],
-		gtwca: [gtwca, 698 / 72],
-		gtwcasia: [gtwcasia, 682 / 72],
-		btcc: [btcc, 209 / 72],
-		supercars: [supercars, 450 / 72],
-		erc: [erc, 231 / 72],
-		dakar: [dakar, 53 / 72, 1.6]
+		worldsbk: [worldsbk, 4.5585, 0.9],
+		sgp: [sgp, 215 / 55, 0.93],
+		wec: [wec, 4.1914, 1.08],
+		elms: [elms, 375 / 72, 0.91],
+		alms: [alms, 13.8546, 0.52],
+		lemanscup: [lemanscup, 746 / 72, 0.69],
+		imsa: [imsa, 4.5574, 0.9],
+		dtm: [dtm, 3.6728, 0.91],
+		supergt: [supergt, 12.6024, 0.57],
+		wrc: [wrc, 5.0879, 0.9],
+		f1academy: [f1academy, 261 / 72, 0.91],
+		formulae: [formulae, 648 / 72, 0.72],
+		sfl: [sfl, 292 / 72, 1.13],
+		oreilly: [oreilly, 252 / 72, 1.11],
+		truck: [truck, 372 / 72, 0.97],
+		bsb: [bsb, 284 / 72, 0.92],
+		iomtt: [iomtt, 505 / 72, 0.89],
+		mxgp: [mxgp, 248 / 72, 1.22],
+		supercross: [supercross, 909 / 72, 0.57],
+		igtc: [igtc, 635 / 72, 0.79],
+		nls: [nls, 297 / 72, 1.1],
+		gtwce: [gtwce, 592 / 72, 0.8],
+		gtwca: [gtwca, 623 / 72, 0.8],
+		gtwcasia: [gtwcasia, 479 / 72, 0.8],
+		btcc: [btcc, 209 / 72, 0.95],
+		supercars: [supercars, 450 / 72, 0.94],
+		erc: [erc, 4.9662, 0.9, [0.7729, 0.107]],
+		dakar: [dakar, 243 / 72, 1.2]
 	};
 </script>
 
@@ -100,11 +106,28 @@
 	const logo = $derived(LOGOS[series]);
 </script>
 
-<span
-	role="img"
-	aria-label={SERIES[series].name}
-	class={['inline-block shrink-0 bg-current', className]}
-	style:aspect-ratio={logo[1]}
-	style:zoom={logo[2]}
-	style:mask="url(&quot;{logo[0]}&quot;) center / contain no-repeat"
-></span>
+{#if logo[3]}
+	<span
+		role="img"
+		aria-label={SERIES[series].name}
+		class={['relative inline-block shrink-0', className]}
+		style:aspect-ratio={logo[1]}
+		style:zoom={logo[2]}
+	>
+		<span
+			class="absolute right-0 bottom-0 bg-current"
+			style:top="{-logo[3][0] * 100}%"
+			style:left="{-logo[3][1] * 100}%"
+			style:mask="url(&quot;{logo[0]}&quot;) center / contain no-repeat"
+		></span>
+	</span>
+{:else}
+	<span
+		role="img"
+		aria-label={SERIES[series].name}
+		class={['inline-block shrink-0 bg-current', className]}
+		style:aspect-ratio={logo[1]}
+		style:zoom={logo[2]}
+		style:mask="url(&quot;{logo[0]}&quot;) center / contain no-repeat"
+	></span>
+{/if}
