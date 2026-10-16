@@ -72,7 +72,8 @@
 	// Bleed is how far the artwork reaches above and left of the box, as fractions of its height
 	// and width: ERC's star overlaps its letters, which alone set the box so they line up with
 	// the other marks.
-	// Series without artwork (ADAC GT Masters publishes no standalone mark) show their short name.
+	// Series without artwork show their short name as a black italic capital wordmark, the way
+	// ADAC GT Masters (which publishes no standalone mark) sets its own name.
 	const LOGOS: Partial<Record<SeriesId, [src: string, ratio: number, scale?: number, bleed?: [top: number, left: number]]>> = {
 		f1: [f1, 4, 0.99],
 		f2: [f2, 3.0185, 0.9],
@@ -97,7 +98,7 @@
 		f1academy: [f1academy, 261 / 72, 0.91],
 		formulae: [formulae, 648 / 72, 0.72],
 		sfl: [sfl, 292 / 72, 1.13],
-		oreilly: [oreilly, 252 / 72, 1.11],
+		oreilly: [oreilly, 252 / 72, 1.2],
 		truck: [truck, 372 / 72, 0.97],
 		bsb: [bsb, 284 / 72, 0.92],
 		iomtt: [iomtt, 505 / 72, 0.89],
@@ -113,26 +114,26 @@
 		erc: [erc, 4.9662, 0.9, [0.7729, 0.107]],
 		dakar: [dakar, 243 / 72, 1.2],
 		freca: [freca, 249 / 72, 1.25],
-		euroformula: [euroformula, 165 / 72, 1.15],
+		euroformula: [euroformula, 165 / 72, 1.5],
 		gb3: [gb3, 158 / 72, 1.2],
-		macau: [macau, 122 / 72, 1.1],
-		arca: [arca, 186 / 72, 1.0],
+		macau: [macau, 122 / 72, 1.6],
+		arca: [arca, 186 / 72, 1.45],
 		worldssp: [worldssp, 213 / 72, 1.3],
 		nw200: [nw200, 479 / 72, 0.9],
 		promx: [promx, 376 / 72, 1.03],
-		smx: [smx, 266 / 72, 1.0],
-		trialgp: [trialgp, 126 / 72, 1.3],
-		endurogp: [endurogp, 125 / 72, 1.3],
-		n24: [n24, 97 / 72, 1.15],
-		h24: [h24, 137 / 72, 0.95],
-		supertaikyu: [supertaikyu, 176 / 72, 1.2],
-		gtwcaus: [gtwcaus, 177 / 72, 1.3],
-		britishgt: [britishgt, 225 / 72, 0.9],
-		supercup: [supercup, 260 / 72, 1.2],
-		tcr: [tcr, 116 / 72, 1.25],
-		w2rc: [w2rc, 180 / 72, 1.2],
-		rallycross: [rallycross, 130 / 72, 0.9],
-		nhra: [nhra, 151 / 72, 1.0],
+		smx: [smx, 266 / 72, 1.2],
+		trialgp: [trialgp, 126 / 72, 1.75],
+		endurogp: [endurogp, 125 / 72, 1.75],
+		n24: [n24, 97 / 72, 1.6],
+		h24: [h24, 137 / 72, 1.5],
+		supertaikyu: [supertaikyu, 176 / 72, 1.5],
+		gtwcaus: [gtwcaus, 177 / 72, 1.45],
+		britishgt: [britishgt, 225 / 72, 1.3],
+		supercup: [supercup, 260 / 72, 1.23],
+		tcr: [tcr, 116 / 72, 1.6],
+		w2rc: [w2rc, 180 / 72, 1.4],
+		rallycross: [rallycross, 130 / 72, 1.25],
+		nhra: [nhra, 151 / 72, 1.4],
 		formuladrift: [formuladrift, 406 / 72, 0.9],
 		pikespeak: [pikespeak, 387 / 72, 1.0]
 	};
@@ -151,7 +152,7 @@
 	let { series, class: className }: Props = $props();
 
 	const logo = $derived(LOGOS[series]);
-	const textWidth = $derived(SERIES[series].short.length * 7.2);
+	const textWidth = $derived(SERIES[series].short.length * 7.7);
 </script>
 
 {#if !logo}
@@ -160,10 +161,11 @@
 		role="img"
 		aria-label={SERIES[series].name}
 		class={['inline-block shrink-0', className]}
-		viewBox="0 0 {textWidth} 10"
-		style:aspect-ratio={textWidth / 10}
+		viewBox="0 0 {textWidth + 2} 10"
+		style:aspect-ratio={(textWidth + 2) / 10}
 	>
-		<text x="0" y="9" font-size="12.5" font-weight="700" fill="currentColor" textLength={textWidth} lengthAdjust="spacingAndGlyphs">{SERIES[series].short}</text>
+		<!-- Skewed rather than font-style italic, which not every system font has in black. -->
+		<text x="2" y="9.1" font-size="11.5" font-weight="800" transform="skewX(-12)" fill="currentColor" textLength={textWidth} lengthAdjust="spacingAndGlyphs">{SERIES[series].short.toUpperCase()}</text>
 	</svg>
 {:else if logo[3]}
 	<span

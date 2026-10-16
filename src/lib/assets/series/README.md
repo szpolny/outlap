@@ -20,4 +20,5 @@ Sources of the marks added in October 2026 (second batch):
 | EnduroGP | endurogp.com header logo |
 | Pikes Peak | ppihc.org horizontal logo (wordmark) |
 
-ADAC GT Masters publishes no standalone mark, so it shows its short name.
+ADAC GT Masters publishes no standalone mark (its site sets the name in black italic capitals), so
+it shows its short name in that style.
