@@ -1,12 +1,14 @@
-import type { MotorEvent, SeriesId, Session } from '#lib/series.ts';
+import { SERIES, type MotorEvent, type SeriesId, type Session } from '#lib/series.ts';
 import { MONTHS } from './wikipedia';
-import { decodeEntities, fetchText, finalizeEvent, guessKind, mapLimit, slugify } from '../util';
+import { decodeEntities, fetchPdfLines, fetchText, finalizeEvent, guessKind, mapLimit, slugify, zonedToUtc } from '../util';
+import { timeZoneFor } from '../zones';
 import type { Source } from './types';
 
 // SRO runs each championship on its own site with the same layout. The calendar page lists the
 // current season's meetings, and each meeting page has a timetable per day giving local and GMT
 // times. Only the series' own sessions are listed. Test days are skipped; meetings without a
-// timetable on the page (GTWC America only publishes PDFs) become all-day events.
+// timetable on the page become all-day events, unless the page links an event schedule PDF
+// (GT World Challenge America publishes only those), which is read instead.
 
 type SroSeries = Extract<SeriesId, 'gtwce' | 'gtwca' | 'gtwcasia' | 'gtwcaus' | 'britishgt' | 'igtc'>;
 
@@ -148,6 +150,46 @@ export function parseTimetable(html: string, meeting: Meeting): Session[] {
 	return sessions;
 }
 
+/**
+ * Sessions from an event schedule PDF, as lines of cells: a day heading ("Sunday, September 27,
+ * 2026"), then rows of start and end times in local time, a duration, the category (the series'
+ * name, sometimes with "powered by AWS") and the session. Sessions shared with another category
+ * and tests are left out.
+ */
+export function parseSchedulePdf(lines: string[][], series: string, timeZone: string, meeting: Meeting): Session[] {
+	const sessions: Session[] = [];
+	// Rounds shared with the Intercontinental GT Challenge list the race under the IGTC event
+	// ("IGTC Indianapolis 8 Hour").
+	const category = new RegExp(`^(?:${series.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?: powered by \\w+)?|IGTC .+)$`, 'i');
+	let day: [number, number, number] | null = null;
+	for (const cells of lines) {
+		const heading = cells[0]?.match(/^(?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day,\s+([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})$/);
+		if (heading) {
+			const month = MONTHS.indexOf(heading[1].toLowerCase()) + 1;
+			day = month ? [Number(heading[3]), month, Number(heading[2])] : null;
+			continue;
+		}
+		const at = cells.findIndex((c) => category.test(c));
+		const name = cells[at + 1]?.replace(/^Qualify\b/i, 'Qualifying').replace(/^Free Practice/i, 'Practice');
+		if (!day || at < 0 || !name || !/^(practice|qualifying|race)\b/i.test(name)) continue;
+		const times = cells.slice(0, at).filter((c) => /^\d{1,2}:\d{2} ?[AP]M$/i.test(c)).map((c) => {
+			const [, h, m, ap] = c.match(/^(\d{1,2}):(\d{2}) ?([AP])M$/i)!;
+			return zonedToUtc(day![0], day![1], day![2], (Number(h) % 12) + (ap.toUpperCase() === 'P' ? 12 : 0), Number(m), timeZone);
+		});
+		if (times.length === 0) continue;
+		const kind = guessKind(name);
+		const minutes = MINUTES.find(([match]) => match.test(kind === 'race' ? `${meeting.name} ${name}` : name))?.[1] ?? 60;
+		sessions.push({
+			name,
+			kind,
+			start: times[0],
+			end: times[1] ?? new Date(Date.parse(times[0]) + minutes * 60_000).toISOString(),
+			estimatedEnd: !times[1]
+		});
+	}
+	return sessions;
+}
+
 function sroSource(series: SroSeries): Source {
 	const site = SITES[series];
 	return {
@@ -160,7 +202,14 @@ function sroSource(series: SroSeries): Source {
 			if (meetings.length === 0) throw new Error('no meetings in calendar');
 			const events = await mapLimit(meetings, 3, async (m): Promise<MotorEvent | null> => {
 				const url = `${site}${encodeURI(decodeURI(m.path))}`;
-				const sessions = parseTimetable(await fetchText(url), m);
+				const html = await fetchText(url);
+				let sessions = parseTimetable(html, m);
+				const pdf = html.match(/href="([^"]*schedule[^"]*\.pdf)"/i)?.[1];
+				const timeZone = timeZoneFor(`${m.name} ${m.path}`);
+				if (sessions.length === 0 && pdf && timeZone) {
+					sessions = await fetchPdfLines(encodeURI(decodeEntities(pdf)))
+						.then((lines) => parseSchedulePdf(lines, SERIES[series].name, timeZone, m), () => []);
+				}
 				const round = Number(m.round?.match(/\d+/)?.[0]);
 				const event = {
 					id: `${series}-${m.from.slice(0, 4)}-${slugify(m.name)}`,

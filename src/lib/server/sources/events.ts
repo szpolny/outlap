@@ -1,5 +1,5 @@
-import type { MotorEvent, SeriesId } from '#lib/series.ts';
-import { decodeEntities, fetchText } from '../util';
+import type { MotorEvent, SeriesId, Session } from '#lib/series.ts';
+import { decodeEntities, fetchText, finalizeEvent, guessKind, makeSession, zonedToUtc } from '../util';
 import type { Source } from './types';
 import { MONTHS, dateRange, fetchWikitext, stripWiki } from './wikipedia';
 
@@ -17,6 +17,8 @@ interface Annual {
 	page?: string;
 	/** the next edition's year and inclusive dates from the home page */
 	parsePage?: (html: string) => { year: number; dates: [string, string] } | null;
+	/** the edition's timed sessions, once the organiser publishes them */
+	sessions?: (year: number) => Promise<Session[]>;
 }
 
 const iso = (year: number | string, month: string, day: string) => {
@@ -63,6 +65,73 @@ export function parsePikesPeak(html: string) {
 	return day ? { year: Number(m[3]), dates: [day, day] as [string, string] } : null;
 }
 
+interface MacauDay {
+	/** local midnight, as a unix timestamp */
+	date_timestamp: number;
+	events: { time: string; title: string }[] | null;
+}
+
+/**
+ * The Grand Prix's own sessions from the organiser's programme: each day's rows have a time
+ * ("09:25 ~ 10:05", Macau time) and a title ("Macau Grand Prix - FIA FR World Cup - Free
+ * Practice 1"); the race itself is "Macau Grand Prix - FIA FR World Cup (15 laps)".
+ */
+export function parseMacauProgramme(days: MacauDay[]): Session[] {
+	const sessions: Session[] = [];
+	for (const day of days) {
+		const date = new Date((day.date_timestamp + 12 * 3600) * 1000);
+		for (const row of day.events ?? []) {
+			const m = row.title.match(/^Macau Grand Prix\s*-\s*FIA FR World Cup\s*(?:-\s*(.+?))?\s*(?:\((\d+) laps\))?$/i);
+			const t = row.time.match(/^(\d{1,2}):(\d{2})(?:\s*~\s*(\d{1,2}):(\d{2}))?/);
+			if (!m || !t) continue;
+			const name = (m[1] ?? 'Grand Prix').replace(/\s+/g, ' ').trim();
+			const at = (h: string, min: string) =>
+				zonedToUtc(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate(), Number(h), Number(min), 'Asia/Macau');
+			const kind = /qualifying race/i.test(name) ? 'sprint' : name === 'Grand Prix' ? 'race' : guessKind(name);
+			const session = makeSession(name, at(t[1], t[2]), 40, kind);
+			if (t[3]) {
+				session.end = at(t[3], t[4]);
+				session.estimatedEnd = false;
+			}
+			sessions.push(session);
+		}
+	}
+	return sessions;
+}
+
+const NW200_CLASSES = /(SUPERBIKE|SUPERSPORT|SUPERSTOCK|SUPERTWIN|NEWCOMERS ONLY)/;
+
+/**
+ * Practice sessions and races from the NW200 schedule page: blocks such as "Thursday 7th May –
+ * Race Schedule" with "Race 1 MILWAUKEE SUPERBIKE RACE (4 LAPS) 17.30 hrs" rows, and "Wednesday
+ * 6th May – Practice Schedule" with "2nd Session SUPERBIKE 10.30" rows, in UK time. Races
+ * listed without a time are left out.
+ */
+export function parseNw200Schedule(html: string, year: number): Session[] {
+	const text = plain(html);
+	const sessions: Session[] = [];
+	const blocks = text.split(/(?=(?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day \d{1,2}(?:st|nd|rd|th)? [A-Za-z]+ – (?:Race|Practice) Schedule)/);
+	const title = (s: string) => s.charAt(0) + s.slice(1).toLowerCase();
+	for (const block of blocks) {
+		const head = block.match(/^(?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day (\d{1,2})(?:st|nd|rd|th)? ([A-Za-z]+) – (Race|Practice) Schedule/);
+		const month = head ? MONTHS.indexOf(head[2].toLowerCase()) + 1 : 0;
+		if (!head || !month) continue;
+		const at = (h: string, m: string) => zonedToUtc(year, month, Number(head[1]), Number(h), Number(m), 'Europe/London');
+		if (head[3] === 'Race') {
+			for (const r of block.matchAll(/Race (\d) ([A-Z][A-Z0-9 &'.-]*?) RACE \((\d+) LAPS\)\s*(\d{1,2})[.:](\d{2}) hrs/g)) {
+				const cls = r[2].match(NW200_CLASSES)?.[1];
+				if (cls) sessions.push(makeSession(`${title(cls)} Race`, at(r[4], r[5]), Number(r[3]) * 5, 'race'));
+			}
+		} else {
+			for (const r of block.matchAll(/\d(?:st|nd|rd|th) Session ([A-Z ]+?) (\d{1,2})[.:](\d{2})\b/g)) {
+				const cls = r[1].match(NW200_CLASSES)?.[1];
+				if (cls) sessions.push(makeSession(`Practice: ${cls === 'NEWCOMERS ONLY' ? 'Newcomers' : title(cls)}`, at(r[2], r[3]), 40, 'practice'));
+			}
+		}
+	}
+	return sessions;
+}
+
 const EVENTS: Annual[] = [
 	{
 		series: 'n24',
@@ -75,7 +144,12 @@ const EVENTS: Annual[] = [
 		series: 'macau',
 		name: (y) => `Macau Grand Prix ${y}`,
 		location: 'Guia Circuit, Macau',
-		article: (y) => `${y}_Macau_Grand_Prix`
+		article: (y) => `${y}_Macau_Grand_Prix`,
+		page: 'https://www.macau.grandprix.gov.mo/en/info/schedule',
+		sessions: async (year) => {
+			const body = await fetchText(`https://www.macau.grandprix.gov.mo/api/game/event_day?_locale=en&year=${year}`);
+			return parseMacauProgramme(JSON.parse(body).data ?? []);
+		}
 	},
 	{
 		series: 'nw200',
@@ -83,7 +157,12 @@ const EVENTS: Annual[] = [
 		location: 'The Triangle, Portstewart, Northern Ireland',
 		article: (y) => `${y}_North_West_200_Races`,
 		page: 'https://www.northwest200.org/',
-		parsePage: parseNw200
+		parsePage: parseNw200,
+		// Published months ahead, and taken down between editions.
+		sessions: async (year) => {
+			const html = await fetchText('https://northwest200.co.uk/practice-race-schedule/');
+			return html.includes(`${year} Race Week`) ? parseNw200Schedule(html, year) : [];
+		}
 	},
 	{
 		series: 'pikespeak',
@@ -127,6 +206,12 @@ function annualSource(e: Annual): Source {
 			});
 			// The organiser's dates win over the article's.
 			if (next && years.includes(next.year)) events.set(next.year, event(next.year, next.dates, e.page!));
+			// And its timetable over both.
+			for (const year of years) {
+				const sessions = e.sessions ? await e.sessions(year).catch(() => []) : [];
+				const timed = sessions.length > 0 && finalizeEvent({ ...event(year, ['', ''], e.page ?? ''), sessions });
+				if (timed) events.set(year, timed);
+			}
 			return [...events.values()];
 		}
 	};

@@ -35,7 +35,9 @@ providers.
 See [source adapters](src/lib/server/sources) for data providers. Session end
 times are estimated when unpublished. Local times are converted with the venue's
 time zone ([zones.ts](src/lib/server/zones.ts)); timetables published only as PDFs
-(TCR World Tour, Euroformula) are read with `unpdf`, which only the scraper loads. Until a source publishes a season, its
+(TCR World Tour, Euroformula, GT World Challenge America, MXGP) are read with `unpdf`,
+which only the scraper loads. Events without a published timetable stay all-day;
+previous years' times are never used as estimates. Until a source publishes a season, its
 announced calendar is read from the Wikipedia season article as all-day race
 days, and replaced by the official timetable once it appears.
 

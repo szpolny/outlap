@@ -407,3 +407,75 @@ test('Euroformula schedules read the meeting dates and the series rows', () => {
 		['Race 1', '2026-10-24T12:10:00.000Z', true]
 	]);
 });
+
+test('SRO event schedule PDFs give the series sessions in local time', () => {
+	const meeting = { path: '/event/116/barber-motorsports-park', name: 'Barber Motorsports Park', country: 'USA', from: '2026-09-25', to: '2026-09-27' };
+	const lines = [
+		['Friday, September 25, 2026'],
+		['8:45 AM', '10:15 AM', '90', 'GT World Challenge America powered by AWS / GT America powered by AWS', 'Test Session', '15'],
+		['4:45 PM', '5:45 PM', '60', 'GT World Challenge America powered by AWS', 'Practice 1', '15'],
+		['Sunday, September 27, 2026'],
+		['Live', '8:30AM', '8:45AM', '15', 'GT World Challenge America powered by AWS', 'Qualify 1', '5'],
+		['Live', '12:30 PM', '3:30 PM', '180', 'GT World Challenge America powered by AWS', 'Race', '15']
+	];
+	assert.deepEqual(sro.parseSchedulePdf(lines, 'GT World Challenge America', 'America/Chicago', meeting).map((s) => [s.name, s.start, s.end]), [
+		['Practice 1', '2026-09-25T21:45:00.000Z', '2026-09-25T22:45:00.000Z'],
+		['Qualifying 1', '2026-09-27T13:30:00.000Z', '2026-09-27T13:45:00.000Z'],
+		['Race', '2026-09-27T17:30:00.000Z', '2026-09-27T20:30:00.000Z']
+	]);
+});
+
+test('MXGP timetables carry the class from the row before to rows without one', async () => {
+	const mxgpTimetable = (await server.ssrLoadModule('/src/lib/server/sources/mxgp.ts')).parseTimetable;
+	const lines = [['Saturday 22.08.2026'], ['11:00', 'MXGP', 'Free practice', '25 mins'], ['13:40', 'MX2', 'Time practice', '25 mins'],
+		['14:15', 'MXGP', 'Time practice', '25 mins'], ['Sunday 23.08.2026'], ['13:05', 'MX2', 'Motorcycles in waiting zone - sighting lap'],
+		['13:15', 'Race 1', '30 mins + 2 laps'], ['14:05', 'MXGP', 'Motorcycles in waiting zone - sighting lap'], ['14:15', 'Race 1', '30 mins + 2 laps']];
+	assert.deepEqual(mxgpTimetable(lines, 'Europe/Amsterdam').map((s) => [s.name, s.kind, s.start]), [
+		['Free Practice', 'practice', '2026-08-22T09:00:00.000Z'],
+		['Time Practice', 'qualifying', '2026-08-22T12:15:00.000Z'],
+		['Race 1', 'race', '2026-08-23T12:15:00.000Z']
+	]);
+});
+
+test('NLS previews give qualifying and race times, for both days of a double-header only when stated', () => {
+	const single = { name: '2. NLS Sportwarte-Trophy', start: '2026-10-10', end: '2026-10-10' };
+	const text = 'Das Zeittraining läuft am Samstagmorgen von 08:30 bis 10:00 Uhr. Um 12:00 Uhr fällt dann der Startschuss zum vierstündigen Finalrennen.';
+	assert.deepEqual(nls.previewSessions(text, single).map((s) => [s.name, s.start, s.end]), [
+		['Qualifying', '2026-10-10T06:30:00.000Z', '2026-10-10T08:00:00.000Z'],
+		['Race', '2026-10-10T10:00:00.000Z', '2026-10-10T14:00:00.000Z']
+	]);
+	const double = { name: '24h Qualifiers', start: '2026-04-18', end: '2026-04-19' };
+	assert.equal(nls.previewSessions('Das Zeittraining findet wie gewohnt zwischen 08:30 und 10 Uhr statt.', double).length, 0);
+	assert.equal(nls.previewSessions('Das Zeittraining findet jeweils von 08:30 bis 10:00 Uhr statt. Die Rennen werden jeweils um 12:00 Uhr gestartet.', double).length, 4);
+});
+
+test('the Macau programme gives the Grand Prix sessions in Macau time', () => {
+	const sessions = events.parseMacauProgramme([
+		{ date_timestamp: 1795017600, events: [{ time: '09:25 ~ 10:05', title: 'Macau Grand Prix - FIA FR World Cup - Free Practice 1' }, { time: '10:20 ~ 11:00', title: 'Macau Formula 4 Race - FIA F4 World Cup- Free Practice 1' }] },
+		{ date_timestamp: 1795276800, events: [{ time: '15:30 ~ 16:35', title: 'Macau Grand Prix - FIA FR World Cup (15 laps)' }] }
+	]);
+	assert.deepEqual(sessions.map((s) => [s.name, s.kind, s.start, s.end]), [
+		['Free Practice 1', 'practice', '2026-11-19T01:25:00.000Z', '2026-11-19T02:05:00.000Z'],
+		['Grand Prix', 'race', '2026-11-22T07:30:00.000Z', '2026-11-22T08:35:00.000Z']
+	]);
+});
+
+test('the TT schedule gives qualifying sessions and races without sponsors', () => {
+	const html = `<table><tr><td><p><strong>Qualifying 2</strong></p><p>Tuesday 28 May </p></td><td><p>18:00 - Roads Close</p><p>18:30 - Superbike/Superstock</p></td></tr>
+		<tr><td><p><strong>Race Day 2</strong></p><p>Sunday 2 June</p></td><td><p>13:30 - Solo Warm Up (1 lap)</p><p>14:40 - RST Superbike TT Race (6 laps)</p></td></tr></table>`;
+	assert.deepEqual(iomtt.parseSessions(html, 2024).map((s) => [s.name, s.kind, s.start, s.end]), [
+		['Qualifying 2: Superbike/Superstock', 'qualifying', '2024-05-28T17:30:00.000Z', '2024-05-28T18:15:00.000Z'],
+		['Superbike TT Race', 'race', '2024-06-02T13:40:00.000Z', '2024-06-02T15:40:00.000Z']
+	]);
+});
+
+test('the NW200 schedule gives practice sessions and timed races', () => {
+	const html = `<p>Thursday 7th May – Race Schedule (4.45pm to 9pm)</p><p>Race 1 MILWAUKEE SUPERBIKE RACE (4 LAPS) 17.30 hrs</p>
+		<p>Saturday 9th May – Race Schedule (9:00am to 7pm)</p><p>Race 2 BRIGGS EQUIPMENT SUPERBIKE RACE (6 LAPS)</p>
+		<p>Wednesday 6th May – Practice Schedule (9.00am to 3.00pm)</p><p>1st Session NEWCOMERS ONLY 09.45</p><p>2nd Session SUPERBIKE 10.30</p>`;
+	assert.deepEqual(events.parseNw200Schedule(html, 2026).map((s) => [s.name, s.start]), [
+		['Superbike Race', '2026-05-07T16:30:00.000Z'],
+		['Practice: Newcomers', '2026-05-06T08:45:00.000Z'],
+		['Practice: Superbike', '2026-05-06T09:30:00.000Z']
+	]);
+});

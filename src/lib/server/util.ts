@@ -60,3 +60,30 @@ export async function fetchPdfText(url: string): Promise<string[]> {
 	const pdf = await getDocumentProxy(new Uint8Array(await res.arrayBuffer()), { verbosity: 0 });
 	return (await extractText(pdf, { mergePages: false })).text;
 }
+
+/**
+ * Lines of each page of a PDF, top to bottom, as their text cells left to right. Table-like
+ * timetables keep their columns apart, and headings stay where they are on the page, which
+ * plain text extraction can move.
+ */
+export async function fetchPdfLines(url: string): Promise<string[][]> {
+	const res = await fetch(url, { headers: { 'user-agent': 'Mozilla/5.0 (compatible)' }, signal: AbortSignal.timeout(30_000) });
+	if (!res.ok) throw new HttpError(url, res.status);
+	const { getDocumentProxy } = await import('unpdf');
+	const pdf = await getDocumentProxy(new Uint8Array(await res.arrayBuffer()), { verbosity: 0 });
+	const lines: string[][] = [];
+	for (let n = 1; n <= pdf.numPages; n++) {
+		const { items } = await (await pdf.getPage(n)).getTextContent();
+		const rows: { y: number; cells: { x: number; text: string }[] }[] = [];
+		for (const item of items) {
+			if (!('str' in item) || !item.str.trim()) continue;
+			const [x, y] = [item.transform[4], item.transform[5]];
+			let row = rows.find((r) => Math.abs(r.y - y) < 3);
+			if (!row) rows.push((row = { y, cells: [] }));
+			row.cells.push({ x, text: item.str.trim() });
+		}
+		rows.sort((a, b) => b.y - a.y);
+		lines.push(...rows.map((r) => r.cells.sort((a, b) => a.x - b.x).map((c) => c.text)));
+	}
+	return lines;
+}
