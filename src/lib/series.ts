@@ -100,11 +100,29 @@ export const NEW_SERIES: { id: string; ids: SeriesId[] } = {
 	]
 };
 
+/**
+ * Feeder, regional and niche series. The picker folds them behind "+N more" in each group
+ * (unless selected) so the headline championships stay easy to scan.
+ */
+export const SECONDARY_SERIES_IDS: SeriesId[] = [
+	'indynxt', 'sfl', 'freca', 'euroformula', 'gb3', 'macau',
+	'arca',
+	'worldssp', 'bsb', 'nw200', 'promx', 'smx', 'trialgp', 'endurogp',
+	'alms', 'lemanscup', 'igtc', 'nls', 'h24', 'supertaikyu',
+	'gtwca', 'gtwcasia', 'gtwcaus', 'britishgt', 'gtmasters', 'supercup',
+	'tcr',
+	'erc', 'w2rc', 'rallycross'
+];
+
 /** Categories in metadata order, shared by the quick filters and series picker. */
-export const SERIES_GROUPS = [...new Set(SERIES_IDS.map((id) => SERIES[id].group))].map((group) => ({
-	name: group === 'Single-seater' ? 'Single seaters' : group,
-	ids: SERIES_IDS.filter((id) => SERIES[id].group === group)
-}));
+export const SERIES_GROUPS = [...new Set(SERIES_IDS.map((id) => SERIES[id].group))].map((group) => {
+	const ids = SERIES_IDS.filter((id) => SERIES[id].group === group);
+	return {
+		name: group === 'Single-seater' ? 'Single seaters' : group,
+		ids,
+		more: ids.filter((id) => SECONDARY_SERIES_IDS.includes(id))
+	};
+});
 
 export function isSeriesId(value: string): value is SeriesId {
 	return value in SERIES;

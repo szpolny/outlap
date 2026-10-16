@@ -289,7 +289,7 @@
 					{allSelected ? 'Clear' : 'Select all'}
 				</button>
 			</div>
-			<SelectionList bind:selected groups={SERIES_GROUPS} items={SERIES} logo={seriesMark} layout="list" />
+			<SelectionList bind:selected groups={SERIES_GROUPS} items={SERIES} logo={seriesMark} layout="list" searchNoun="series" />
 		</aside>
 
 		<div class="min-w-0">
@@ -547,5 +547,5 @@
 	<SeriesLogo series={id} class="h-3.5 max-w-full" />
 {/snippet}
 
-<SelectionSheet bind:open={seriesOpen} bind:selected title="Series" groups={SERIES_GROUPS} items={SERIES} logo={seriesMark} />
+<SelectionSheet bind:open={seriesOpen} bind:selected title="Series" groups={SERIES_GROUPS} items={SERIES} logo={seriesMark} searchNoun="series" />
 <SubscribeDialog bind:open={subscribeOpen} {selected} bind:filter bind:alarm origin={page.url.origin} />
