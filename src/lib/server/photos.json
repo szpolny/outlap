@@ -6,6 +6,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:1_singapore_f1_night_race_2012_city_skyline.jpg",
 		"credit": "chensiyuan, CC BY-SA 4.0"
 	},
+	"2005_V8_Supercars_Eastern_Creek_race_start.jpg": {
+		"src": "/photos/2005-v8-supercars-eastern-creek-race-start.jpg",
+		"width": 960,
+		"height": 718,
+		"page": "https://commons.wikimedia.org/wiki/File:2005_V8_Supercars_Eastern_Creek_race_start.jpg",
+		"credit": "Kytabu, CC BY-SA 4.0"
+	},
 	"2008_Atlanta_Motor_Speedway_Oct_26_Pep_Boys_500_(10)_(2978148192).jpg": {
 		"src": "/photos/2008-atlanta-motor-speedway-oct-26-pep-boys-500-10-2978148192.jpg",
 		"width": 960,
@@ -76,6 +83,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:2022_4_Hours_of_Barcelona_-_Start_of_the_race.jpg",
 		"credit": "United Autosports, CC BY-SA 2.0"
 	},
+	"2023-04-23_Motorsport,_ABB_FIA_Formula_E_World_Championship,_Berlin_E-Prix_2023_1DX_1445_by_Stepro.jpg": {
+		"src": "/photos/2023-04-23-motorsport-abb-fia-formula-e-world-championship-berlin-e-prix-2023-1dx-1445-by-stepro.jpg",
+		"width": 960,
+		"height": 436,
+		"page": "https://commons.wikimedia.org/wiki/File:2023-04-23_Motorsport,_ABB_FIA_Formula_E_World_Championship,_Berlin_E-Prix_2023_1DX_1445_by_Stepro.jpg",
+		"credit": "Steffen Prößdorf, CC BY-SA 4.0"
+	},
 	"2023_24_Hours_of_Le_Mans_(53272111149).jpg": {
 		"src": "/photos/2023-24-hours-of-le-mans-53272111149.jpg",
 		"width": 960,
@@ -131,6 +145,13 @@
 		"height": 584,
 		"page": "https://commons.wikimedia.org/wiki/File:Aerial_image_of_Sachsenring_(view_from_the_southwest).jpg",
 		"credit": "Carsten Steger, CC BY-SA 4.0"
+	},
+	"Aerial_view_of_Hidden_Valley.jpg": {
+		"src": "/photos/aerial-view-of-hidden-valley.jpg",
+		"width": 960,
+		"height": 720,
+		"page": "https://commons.wikimedia.org/wiki/File:Aerial_view_of_Hidden_Valley.jpg",
+		"credit": "Giselleai, CC BY 2.0"
 	},
 	"Aerial_view_of_Pocono_Raceway.JPG": {
 		"src": "/photos/aerial-view-of-pocono-raceway.jpg",
@@ -237,6 +258,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Bristol_Motor_Speedway_(9608386615).jpg",
 		"credit": "Raniel Diaz from Corona del Mar, United States, CC BY 2.0"
 	},
+	"Cadwell_Mountain_BSB_2.JPG": {
+		"src": "/photos/cadwell-mountain-bsb-2.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:Cadwell_Mountain_BSB_2.JPG",
+		"credit": "Arnot Images, CC BY-SA 2.0"
+	},
 	"Cars_drive_through_the_Esses_during_the_2014_Sahlen's_Six_Hours_of_The_Glen.jpg": {
 		"src": "/photos/cars-drive-through-the-esses-during-the-2014-sahlen-s-six-hours-of-the-glen.jpg",
 		"width": 960,
@@ -279,6 +307,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Circuit_Paul_Ricard,_April_22,_2018_SkySat_(cropped).jpg",
 		"credit": "Planet Labs, Inc., CC BY-SA 4.0"
 	},
+	"Circuito_MADRING_Sur.jpg": {
+		"src": "/photos/circuito-madring-sur.jpg",
+		"width": 960,
+		"height": 1210,
+		"page": "https://commons.wikimedia.org/wiki/File:Circuito_MADRING_Sur.jpg",
+		"credit": "Fábio Alecrim, CC BY 4.0"
+	},
 	"Corkscrew_Turn,_Mazda_Raceway_Laguna_Seca.jpg": {
 		"src": "/photos/corkscrew-turn-mazda-raceway-laguna-seca.jpg",
 		"width": 429,
@@ -313,6 +348,13 @@
 		"height": 720,
 		"page": "https://commons.wikimedia.org/wiki/File:DarlingtonRacewayDodgeCharger500.JPG",
 		"credit": "Berniestew, Public domain"
+	},
+	"Enge_a1gp_2007.jpeg": {
+		"src": "/photos/enge-a1gp-2007.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:Enge_a1gp_2007.jpeg",
+		"credit": "motorsport.com, CC BY 3.0"
 	},
 	"Epingle_Monaco.jpg": {
 		"src": "/photos/epingle-monaco.jpg",
@@ -363,12 +405,26 @@
 		"page": "https://fimspeedway.com/albums/2026-round-9-vojens-sgp",
 		"credit": "FIMSpeedway.com"
 	},
+	"Finish_line_Dubai_Autodrome.jpg": {
+		"src": "/photos/finish-line-dubai-autodrome.jpg",
+		"width": 960,
+		"height": 720,
+		"page": "https://commons.wikimedia.org/wiki/File:Finish_line_Dubai_Autodrome.jpg",
+		"credit": "Curtis Palmer from Vestavia Hills (Birmingham), Alabama, USA, CC BY 2.0"
+	},
 	"Foxhall_stadium.jpg": {
 		"src": "/photos/foxhall-stadium.jpg",
 		"width": 640,
 		"height": 480,
 		"page": "https://commons.wikimedia.org/wiki/File:Foxhall_stadium.jpg",
 		"credit": "steve, CC BY-SA 2.0"
+	},
+	"Freedom_250_Grand_Prix_(freedom-250-grand-prix-3).jpg": {
+		"src": "/photos/freedom-250-grand-prix-freedom-250-grand-prix-3.jpg",
+		"width": 960,
+		"height": 460,
+		"page": "https://commons.wikimedia.org/wiki/File:Freedom_250_Grand_Prix_(freedom-250-grand-prix-3).jpg",
+		"credit": "NASA/Joel Kowsky, Public domain"
 	},
 	"Fuji_Speedway_with_Mount_Fuji.jpg": {
 		"src": "/photos/fuji-speedway-with-mount-fuji.jpg",
@@ -404,6 +460,20 @@
 		"height": 1061,
 		"page": "https://commons.wikimedia.org/wiki/File:Gtp_sports_cars.jpg",
 		"credit": "Rick Dikeman, CC BY-SA 3.0"
+	},
+	"Hail_Rally_(2023).jpg": {
+		"src": "/photos/hail-rally-2023.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:Hail_Rally_(2023).jpg",
+		"credit": "Saudi Press Agency (SPA), CC BY-SA 4.0"
+	},
+	"HeliGraphix_Salzburgring.jpg": {
+		"src": "/photos/heligraphix-salzburgring.jpg",
+		"width": 960,
+		"height": 636,
+		"page": "https://commons.wikimedia.org/wiki/File:HeliGraphix_Salzburgring.jpg",
+		"credit": "HeliGraphix, CC BY-SA 3.0 de"
 	},
 	"Hockenheimring_start-ziel-gerade_2010.jpg": {
 		"src": "/photos/hockenheimring-start-ziel-gerade-2010.jpg",
@@ -524,6 +594,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Lausitzring_Turn_3.jpg",
 		"credit": "Mr T, CC BY-SA 4.0"
 	},
+	"Lime_Rock_Park_Uphill.jpg": {
+		"src": "/photos/lime-rock-park-uphill.jpg",
+		"width": 960,
+		"height": 720,
+		"page": "https://commons.wikimedia.org/wiki/File:Lime_Rock_Park_Uphill.jpg",
+		"credit": "Rob from USA, CC BY-SA 2.0"
+	},
 	"Lodz_Moto_Arena.jpg": {
 		"src": "/photos/lodz-moto-arena.jpg",
 		"width": 960,
@@ -537,6 +614,13 @@
 		"height": 640,
 		"page": "https://commons.wikimedia.org/wiki/File:Luftaufnahme_(c)Red_Bull_Ring.jpg",
 		"credit": "Vanessa Machelett, CC BY-SA 4.0"
+	},
+	"Macau_Grand_Prix_2018_1.jpg": {
+		"src": "/photos/macau-grand-prix-2018-1.jpg",
+		"width": 960,
+		"height": 576,
+		"page": "https://commons.wikimedia.org/wiki/File:Macau_Grand_Prix_2018_1.jpg",
+		"credit": "Pauloleong2002, CC BY-SA 4.0"
 	},
 	"Magny-Cours_(morning_before_the_race).JPG": {
 		"src": "/photos/magny-cours-morning-before-the-race.jpg",
@@ -664,6 +748,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Mount_Panorama_Pit_Straight_and_Pit_Lane_2015.JPG",
 		"credit": "Kytabu, CC BY-SA 4.0"
 	},
+	"NASCAR_Camping_World_Truck_Series_at_Rockingham_Speedway_2012.jpg": {
+		"src": "/photos/nascar-camping-world-truck-series-at-rockingham-speedway-2012.jpg",
+		"width": 960,
+		"height": 503,
+		"page": "https://commons.wikimedia.org/wiki/File:NASCAR_Camping_World_Truck_Series_at_Rockingham_Speedway_2012.jpg",
+		"credit": "Samuel.krystosek, CC BY-SA 3.0"
+	},
 	"NASCAR_Cup_Series_Anduril_250_Race_the_Base_at_NASCAR_San_Diego_Weekend_(4)_9764231.jpg": {
 		"src": "/photos/nascar-cup-series-anduril-250-race-the-base-at-nascar-san-diego-weekend-4-9764231.jpg",
 		"width": 960,
@@ -733,6 +824,13 @@
 		"height": 640,
 		"page": "https://commons.wikimedia.org/wiki/File:Partenza_del_Gran_Premio_d%27Italia_TIM_2011.jpg",
 		"credit": "Press office, CC BY-SA 3.0"
+	},
+	"Paul_Dumbrell_at_Queensland_Raceway_2008.JPG": {
+		"src": "/photos/paul-dumbrell-at-queensland-raceway-2008.jpg",
+		"width": 960,
+		"height": 720,
+		"page": "https://commons.wikimedia.org/wiki/File:Paul_Dumbrell_at_Queensland_Raceway_2008.JPG",
+		"credit": "Cool2010stuff, Public domain"
 	},
 	"Phillip_Island_Aerial_View.jpg": {
 		"src": "/photos/phillip-island-aerial-view.jpg",
@@ -909,6 +1007,13 @@
 		"page": "https://commons.wikimedia.org/wiki/File:Suzuka_Circuit_2006.jpg",
 		"credit": "shiraga from Osaka, JAPAN, CC BY 2.0"
 	},
+	"Symmons_Plains,_Tasmania.jpg": {
+		"src": "/photos/symmons-plains-tasmania.jpg",
+		"width": 960,
+		"height": 456,
+		"page": "https://commons.wikimedia.org/wiki/File:Symmons_Plains,_Tasmania.jpg",
+		"credit": "Steven Penton, CC BY 2.0"
+	},
 	"Sébastien_Loeb_-_2008_Rally_Japan_2.jpg": {
 		"src": "/photos/sebastien-loeb-2008-rally-japan-2.jpg",
 		"width": 960,
@@ -943,6 +1048,13 @@
 		"height": 540,
 		"page": "https://commons.wikimedia.org/wiki/File:Tony_Ayres_Mini_Miglia_Challenge_Thruxton_2026.jpg",
 		"credit": "BWard 1997, CC BY 4.0"
+	},
+	"Townsville_Street_Circuit_Nov_2018_-_Main_Straight.jpg": {
+		"src": "/photos/townsville-street-circuit-nov-2018-main-straight.jpg",
+		"width": 960,
+		"height": 540,
+		"page": "https://commons.wikimedia.org/wiki/File:Townsville_Street_Circuit_Nov_2018_-_Main_Straight.jpg",
+		"credit": "SchueyFan, CC BY-SA 4.0"
 	},
 	"Tribuna_recta_Circuito_del_Jarama.jpg": {
 		"src": "/photos/tribuna-recta-circuito-del-jarama.jpg",
@@ -986,6 +1098,27 @@
 		"page": "https://commons.wikimedia.org/wiki/File:WTCC_2016,_Qatar.jpg",
 		"credit": "Dmitry Racer, CC BY-SA 4.0"
 	},
+	"WTCR_2018.jpg": {
+		"src": "/photos/wtcr-2018.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:WTCR_2018.jpg",
+		"credit": "Mathieu Passoni, CC BY-SA 4.0"
+	},
+	"Wanneroo_Mar_1985_009.jpg": {
+		"src": "/photos/wanneroo-mar-1985-009.jpg",
+		"width": 960,
+		"height": 589,
+		"page": "https://commons.wikimedia.org/wiki/File:Wanneroo_Mar_1985_009.jpg",
+		"credit": "Gnangarra, CC BY-SA 4.0"
+	},
+	"Whincup_2018_The_Bend_SuperSprint.jpg": {
+		"src": "/photos/whincup-2018-the-bend-supersprint.jpg",
+		"width": 960,
+		"height": 720,
+		"page": "https://commons.wikimedia.org/wiki/File:Whincup_2018_The_Bend_SuperSprint.jpg",
+		"credit": "SchueyFan, CC BY-SA 4.0"
+	},
 	"Whincup_leads_Qualifying_Race_2_2015_Sandown_500.JPG": {
 		"src": "/photos/whincup-leads-qualifying-race-2-2015-sandown-500.jpg",
 		"width": 960,
@@ -1013,5 +1146,12 @@
 		"height": 640,
 		"page": "https://commons.wikimedia.org/wiki/File:%C3%81lex_M%C3%A1rquez_in_the_pack_2020_Europe.jpg",
 		"credit": "Box Repsol, CC BY 2.0"
+	},
+	"인제스피디움_전경(야경).jpg": {
+		"src": "/photos/inje-speedium-night.jpg",
+		"width": 960,
+		"height": 640,
+		"page": "https://commons.wikimedia.org/wiki/File:%EC%9D%B8%EC%A0%9C%EC%8A%A4%ED%94%BC%EB%94%94%EC%9B%80_%EC%A0%84%EA%B2%BD(%EC%95%BC%EA%B2%BD).jpg",
+		"credit": "Godrnehd, CC BY-SA 4.0"
 	}
 }
