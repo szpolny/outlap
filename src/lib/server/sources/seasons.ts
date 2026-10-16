@@ -1,5 +1,5 @@
 import type { MotorEvent, SeriesId } from '#lib/series.ts';
-import { fetchText, slugify, titleCase } from '../util';
+import { fetchText, finalizeEvent, makeSession, slugify, titleCase, zonedToUtc } from '../util';
 import type { Source } from './types';
 import { MONTHS, column, dateRange, fetchWikitext, stripWiki, tableGrid } from './wikipedia';
 
@@ -16,6 +16,8 @@ export interface Row {
 	/** groups rows into one meeting; defaults to the round, else the name */
 	key?: string;
 	dates: [string, string] | null;
+	/** the race's start (ISO, UTC) where the table gives its time */
+	race?: { start: string; minutes: number };
 }
 
 export interface Season {
@@ -53,11 +55,20 @@ export function circuitRow(short: string) {
 }
 
 /** Joined plain text of the cells under these headers, skipping empty ones. */
-const joined = (cells: Record<string, string>, headers: RegExp[]) =>
+export const joined = (cells: Record<string, string>, headers: RegExp[]) =>
 	headers.map((header) => text(column(cells, header))).filter(Boolean).join(', ');
 
+/** A race day and a start time in US Eastern time ("Noon", "6 PM", "12:30 PM") as ISO UTC. */
+export function easternTime(day: string, time: string): string | null {
+	const m = time.match(/^(?:(noon)|(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\.?)$/i);
+	if (!m) return null;
+	const hour = m[1] ? 12 : (Number(m[2]) % 12) + (m[4].toLowerCase() === 'p' ? 12 : 0);
+	const [y, mo, d] = day.split('-').map(Number);
+	return zonedToUtc(y, mo, d, hour, Number(m[3] ?? 0), 'America/New_York');
+}
+
 /** "Michelin 12 Hours of Mugello" -> "12 Hours of Mugello" */
-const unsponsored = (name: string) => name.replace(/^Michelin\s+/i, '');
+export const unsponsored = (name: string) => name.replace(/^Michelin\s+/i, '');
 
 const SEASONS: Season[] = [
 	{
@@ -79,12 +90,6 @@ const SEASONS: Season[] = [
 		row: circuitRow('FRECA')
 	},
 	{
-		series: 'euroformula',
-		article: (y) => `${y}_Euroformula_Open_Championship`,
-		heading: /==\s*Race calendar\s*==/i,
-		row: circuitRow('Euroformula')
-	},
-	{
 		series: 'gb3',
 		article: (y) => `${y}_GB3_Championship`,
 		// The 2027 article also has a winter series; its main calendar comes first.
@@ -98,60 +103,21 @@ const SEASONS: Season[] = [
 		row: circuitRow('Supercup')
 	},
 	{
-		series: 'tcr',
-		article: (y) => `${y}_TCR_World_Tour`,
-		heading: /==\s*Calendar\s*==/i,
-		row: circuitRow('TCR')
-	},
-	{
 		series: 'arca',
 		article: (y) => `${y}_ARCA_Menards_Series`,
 		heading: /==\s*Schedule\s*==/,
 		row: (cells, year) => {
 			const name = text(column(cells, /^race/i));
 			if (!name) return null;
+			const dates = dateRange(column(cells, /^date/i) ?? '', year);
+			const start = dates && easternTime(dates[0], text(column(cells, /^time/i)));
 			return {
 				name,
 				location: joined(cells, [/^track/i, /^location/i]),
 				round: round(column(cells, /^no/i)),
-				dates: dateRange(column(cells, /^date/i) ?? '', year)
+				dates,
+				race: start ? { start, minutes: 120 } : undefined
 			};
-		}
-	},
-	{
-		// Race days per race, in two date columns.
-		series: 'gtmasters',
-		article: (y) => `${y}_ADAC_GT_Masters`,
-		heading: /==\s*Race calendar\s*==/i,
-		row: (cells, year) => {
-			const circuit = text(column(cells, /^circuit/i));
-			const r = round(column(cells, /^round/i));
-			if (!circuit || !r) return null;
-			const days = [column(cells, /^race 1/i), column(cells, /^race 2/i), column(cells, /^dates?$/i)].join(' ');
-			return { name: `GT Masters ${circuit}`, location: circuit, round: r, dates: dateRange(days, year) };
-		}
-	},
-	{
-		series: 'h24',
-		article: (y) => `${y}_24H_Series`,
-		heading: /==\s*Calendar\s*==/i,
-		row: (cells, year) => {
-			const name = unsponsored(text(column(cells, /^event/i)));
-			const r = round(column(cells, /^round/i));
-			if (!name || !r) return null;
-			return { name, location: text(column(cells, /^circuit/i)), round: r, dates: dateRange(column(cells, /^date/i) ?? '', year) };
-		}
-	},
-	{
-		// Rounds over two days list one race per day.
-		series: 'supertaikyu',
-		article: (y) => `${y}_Super_Taikyu_Series`,
-		heading: /==\s*Calendar\s*==/i,
-		row: (cells, year) => {
-			const name = text(column(cells, /^event/i));
-			const r = round(column(cells, /^round/i));
-			if (!name || !r) return null;
-			return { name, location: text(column(cells, /^circuit/i)), round: r, dates: dateRange(column(cells, /^date/i) ?? '', year) };
 		}
 	},
 	{
@@ -178,35 +144,6 @@ const SEASONS: Season[] = [
 				location: joined(cells, [/^location/i, /^event/i]),
 				round: r,
 				dates: dateRange(column(cells, /^dates?$/i) ?? '', year)
-			};
-		}
-	},
-	{
-		// The table has no round numbers; its rows are in date order.
-		series: 'nhra',
-		article: (y) => `${y}_NHRA_Mission_Foods_Drag_Racing_Series`,
-		heading: /==\s*Schedule\s*==/i,
-		row: (cells, year) => {
-			const name = text((column(cells, /^race/i) ?? '').replace(/<sup>[\s\S]*?<\/sup>/gi, ''));
-			if (!name) return null;
-			// "[[Rockingham Dragway]], <br> Rockingham, North Carolina"
-			const location = text(column(cells, /^site/i)).replace(/,$/, '');
-			return { name, location, dates: dateRange(column(cells, /^date/i) ?? '', year) };
-		}
-	},
-	{
-		series: 'formuladrift',
-		article: (y) => `${y}_Formula_Drift_season`,
-		heading: /==\s*Schedule\s*==/i,
-		row: (cells, year) => {
-			const name = text(column(cells, /^title/i));
-			const r = round(column(cells, /^round/i));
-			if (!name || !r) return null;
-			return {
-				name: `Formula Drift ${name}`,
-				location: joined(cells, [/^circuit/i, /^location/i]),
-				round: r,
-				dates: dateRange(column(cells, /^date/i) ?? '', year)
 			};
 		}
 	},
@@ -259,18 +196,16 @@ export async function readSeason(season: Season, years: number[]): Promise<Motor
 				if (row.dates[1] > existing.end) existing.end = row.dates[1];
 				continue;
 			}
-			events.set(id, {
+			const event = {
 				id,
 				series: season.series,
 				name: row.name,
 				round: row.round,
 				location: row.location || undefined,
-				start: row.dates[0],
-				end: row.dates[1],
-				allDay: true,
-				sessions: [],
 				url: `https://en.wikipedia.org/wiki/${season.article(year)}`
-			});
+			};
+			const timed = row.race && finalizeEvent({ ...event, sessions: [makeSession('Race', row.race.start, row.race.minutes, 'race')] });
+			events.set(id, timed || { ...event, start: row.dates[0], end: row.dates[1], allDay: true, sessions: [] });
 		}
 	});
 	if (events.size === 0 && articles.some(Boolean)) throw new Error('no meetings in calendar table');

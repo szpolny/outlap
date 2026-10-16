@@ -33,7 +33,9 @@ if GitHub is unavailable, it keeps the in-memory schedule rather than scraping a
 providers.
 
 See [source adapters](src/lib/server/sources) for data providers. Session end
-times are estimated when unpublished. Until a source publishes a season, its
+times are estimated when unpublished. Local times are converted with the venue's
+time zone ([zones.ts](src/lib/server/zones.ts)); timetables published only as PDFs
+(TCR World Tour, Euroformula) are read with `unpdf`, which only the scraper loads. Until a source publishes a season, its
 announced calendar is read from the Wikipedia season article as all-day race
 days, and replaced by the official timetable once it appears.
 

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { createServer } from 'vite';
 
-let server, wiki, sro, seasons, bsb, supercars, supercross, mxgp, iomtt, nls, events;
+let server, wiki, sro, seasons, bsb, supercars, supercross, mxgp, iomtt, nls, events, zones, nhra, drift, h24, gtmasters, taikyu, tcr, euroformula;
 before(async () => {
 	server = await createServer({ configFile: false, logLevel: 'error', optimizeDeps: { noDiscovery: true }, server: { middlewareMode: true, hmr: false, ws: false, watch: null } });
 	wiki = await server.ssrLoadModule('/src/lib/server/sources/wikipedia.ts');
@@ -15,6 +15,14 @@ before(async () => {
 	iomtt = await server.ssrLoadModule('/src/lib/server/sources/iomtt.ts');
 	nls = await server.ssrLoadModule('/src/lib/server/sources/nls.ts');
 	events = await server.ssrLoadModule('/src/lib/server/sources/events.ts');
+	zones = await server.ssrLoadModule('/src/lib/server/zones.ts');
+	nhra = await server.ssrLoadModule('/src/lib/server/sources/nhra.ts');
+	drift = await server.ssrLoadModule('/src/lib/server/sources/drift.ts');
+	h24 = await server.ssrLoadModule('/src/lib/server/sources/h24.ts');
+	gtmasters = await server.ssrLoadModule('/src/lib/server/sources/gtmasters.ts');
+	taikyu = await server.ssrLoadModule('/src/lib/server/sources/supertaikyu.ts');
+	tcr = await server.ssrLoadModule('/src/lib/server/sources/tcr.ts');
+	euroformula = await server.ssrLoadModule('/src/lib/server/sources/euroformula.ts');
 });
 after(async () => { await server?.close(); });
 
@@ -286,5 +294,116 @@ test('rallycross calendars name Euro RX events without sponsors and include the 
 	assert.deepEqual(events.parseRallycross(html).map((e) => [e.name, e.location, e.start, e.end]), [
 		['Euro RX of Hungary', 'Nyirád, Hungary', '2026-05-30', '2026-05-31'],
 		['FIA Rallycross World Cup Indonesia', 'Jakarta, Indonesia', '2026-12-05', '2026-12-06']
+	]);
+});
+
+test('venue time zones come from US state codes, circuits and countries', () => {
+	assert.equal(zones.timeZoneFor('Texas Motorplex, Ennis, TX'), 'America/Chicago');
+	assert.equal(zones.timeZoneFor('Firebird Motorsports Park, Chandler, AZ'), 'America/Phoenix');
+	assert.equal(zones.timeZoneFor('Circuit de Barcelona-Catalunya'), 'Europe/Madrid');
+	assert.equal(zones.timeZoneFor('Inje Speedium, Korea'), 'Asia/Seoul');
+	assert.equal(zones.timeZoneFor('Somewhere'), undefined);
+});
+
+test('ARCA race times in Eastern time become UTC', () => {
+	assert.equal(seasons.easternTime('2026-02-14', 'Noon'), '2026-02-14T17:00:00.000Z');
+	assert.equal(seasons.easternTime('2026-06-20', '7 PM'), '2026-06-20T23:00:00.000Z');
+	assert.equal(seasons.easternTime('2026-04-18', '12:30 PM'), '2026-04-18T16:30:00.000Z');
+	assert.equal(seasons.easternTime('2026-04-18', 'TBA'), null);
+});
+
+test('NHRA event guides keep the professional sessions in local time', () => {
+	const row = `<div class="views-row"><div property="startDate" content="2026-10-14T06:00:00-0700"></div>
+		<div property="endDate" content="2026-10-18T22:00:00-0700"></div>
+		<h3 class="schedule__heading" property="name"><a href="/schedule/2026/nhra-mission-foods-drag-racing-series/texas-nhra-fallnationals" hreflang="en">Texas NHRA FallNationals</a></h3>
+		<h4 class="schedule__location schedule__location--name" property="name">Texas Motorplex</h4>
+		<span property="addressLocality">Ennis</span>, <span property="addressRegion">TX</span>
+		<a href="https://app.nhra.com/2026FallNatsEventGuide" target="_blank" class="button">Event Guide</a></div>`;
+	const [meeting] = nhra.parseSchedule(row);
+	assert.deepEqual([meeting.name, meeting.start, meeting.end, meeting.address, meeting.guide],
+		['Texas NHRA FallNationals', '2026-10-14', '2026-10-18', 'Ennis, TX', 'https://app.nhra.com/2026FallNatsEventGuide']);
+	const guide = `<div><strong>Friday, Oct. 16</strong></div><ul><li><span>4:00 p.m. – Pro Stock Motorcycle &amp; Pro Stock Qualifying</span></li>
+		<li><span>5:00 p.m. – Nitro Qualifying Session (Funny Car, Top Fuel)</span></li><li><span>2:25 p.m. – Top Alcohol Qualifying Session</span></li></ul>
+		<div><strong>Sunday, Oct. 18</strong></div><ul><li><span>12:00 p.m. – Mission Foods Series Eliminations Begin with Top Fuel</span></li></ul>`;
+	assert.deepEqual(nhra.parseGuide(guide, meeting, 'America/Chicago').map((s) => [s.name, s.kind, s.start]), [
+		['Pro Stock Motorcycle & Pro Stock Qualifying 1', 'qualifying', '2026-10-16T21:00:00.000Z'],
+		['Nitro Qualifying 1', 'qualifying', '2026-10-16T22:00:00.000Z'],
+		['Eliminations', 'race', '2026-10-18T17:00:00.000Z']
+	]);
+});
+
+test('Formula Drift event pages give practice, qualifying and competition windows', () => {
+	const row = (time, activity) => `<div><dt><time>${time}</time></dt><dd class="flex-1">${activity}</dd></div>`;
+	const html = `<h1><span class="mr-7 inline-block">SHORELINE SHOWDOWN</span><div role="list"><span role="listitem" class="x">pro</span></div></h1>
+		<h3 class="x">Track</h3><img alt="Long Beach Convention &amp; Entertainment Center" src="x.png"/> 300 East Ocean Blvd. Long Beach, CA, 90802
+		<article role="listitem" aria-label="Friday, October 23, 2026"><h4>Friday, October 23, 2026</h4>${row('11:00AM - 12:30PM', 'PRACTICE')}
+		${row('1:00PM - 8:00PM', 'BOX OFFICE: HOURS')}${row('6:15PM - 9:15PM', 'LIVESTREAM: https://www.formulad.com/live (QUALIFYING)')}</article>
+		<article role="listitem" aria-label="Saturday, October 24, 2026"><h4>Saturday</h4>${row('6:00PM - 9:00PM', 'LIVESTREAM: https://www.formulad.com/live (OPENING CEREMONY + MAIN EVENT: TOP 16)')}</article>`;
+	const event = drift.parseEvent(html);
+	assert.deepEqual([event.title, event.pro, event.venue], ['Shoreline Showdown', true, 'Long Beach Convention & Entertainment Center']);
+	assert.deepEqual(event.sessions.map((s) => [s.name, s.kind, s.start, s.end]), [
+		['Practice', 'practice', '2026-10-23T18:00:00.000Z', '2026-10-23T19:30:00.000Z'],
+		['Qualifying', 'qualifying', '2026-10-24T01:15:00.000Z', '2026-10-24T04:15:00.000Z'],
+		['Top 16', 'race', '2026-10-25T01:00:00.000Z', '2026-10-25T04:00:00.000Z']
+	]);
+});
+
+test('24H Series race pages date sessions by weekday and split the race length between parts', () => {
+	const row = (time, name) => `<div class="result"><div class="col">${time}</div><div class="col">${name}</div></div>`;
+	const html = `<div class="date">20-21-22 March 2026</div><div class="raceResultsContainer" data-series="radical-cup">${row('Fri-09:00', 'Free Practice')}</div>
+		<div class="raceResultsContainer" data-race="1" data-series="michelin-24h-series">${row('Fri-12:00', 'Free Practice')}
+		${row('Sat-12:10', 'RACE PART 1 - MICHELIN 12H MUGELLO 2026')}${row('Sat-12:10', 'Race - Half way mark')}${row('Sun-12:00', 'RACE PART 2 - MICHELIN 12H MUGELLO 2026')}</div>`;
+	const page = h24.parseRacePage(html, 'Europe/Rome', 12);
+	assert.deepEqual(page.dates, ['2026-03-20', '2026-03-22']);
+	assert.deepEqual(page.sessions.map((s) => [s.name, s.start, s.end]), [
+		['Free Practice', '2026-03-20T11:00:00.000Z', '2026-03-20T12:30:00.000Z'],
+		['Race Part 1', '2026-03-21T11:10:00.000Z', '2026-03-21T17:10:00.000Z'],
+		['Race Part 2', '2026-03-22T11:00:00.000Z', '2026-03-22T17:00:00.000Z']
+	]);
+});
+
+test('GT Masters session names are translated', () => {
+	assert.deepEqual(gtmasters.sessionName('1. Freies Training'), ['Free Practice 1', 'practice', 60]);
+	assert.deepEqual(gtmasters.sessionName('2. Qualifying'), ['Qualifying 2', 'qualifying', 20]);
+	assert.deepEqual(gtmasters.sessionName('Rennen 1'), ['Race 1', 'race', 60]);
+	assert.equal(gtmasters.sessionName('Startaufstellung'), null);
+});
+
+test('Super Taikyu timetables skip commented rows and support classes', () => {
+	const row = (time, label) => `<div class="RaceSchedule_Inn"><div class="RaceSchedule_Time"> ${time}</div><div class="RaceSchedule_TXT"> ${label}</div></div>`;
+	const html = `<div class="RaceSchedule_Date"> 2026.6.5 </div>${row('12:10 - 12:55', '公式予選（Aドライバー）')}<!-- ${row('13:45 -', '旧 決勝')} -->
+		${row('11:00 - 11:15', 'S耐チャレンジ 予選A')}${row('9:05 - 9:25', 'Gr-2 公式予選（CDドライバー）')}
+		<div class="RaceSchedule_Date"> 2026.6.6-7 </div>${row('15:00 - 翌15:00', '富士 24時間耐久レース')}${row('13:45 -', 'スーパー耐久 4時間耐久レースRace1 決勝<br>（ST-X）')}`;
+	assert.deepEqual(taikyu.parseRound(html).map((s) => [s.name, s.start, s.end, s.estimatedEnd]), [
+		['Qualifying (Driver A)', '2026-06-05T03:10:00.000Z', '2026-06-05T03:55:00.000Z', false],
+		['Gr.2 Qualifying (Driver C/D)', '2026-06-05T00:05:00.000Z', '2026-06-05T00:25:00.000Z', false],
+		['Race (24h)', '2026-06-06T06:00:00.000Z', '2026-06-07T06:00:00.000Z', false],
+		['Race 1 (4h)', '2026-06-06T04:45:00.000Z', '2026-06-06T08:45:00.000Z', true]
+	]);
+});
+
+test('TCR timetables pick the latest version and the series rows', () => {
+	const page = '<a href="/images/2026/05_Inje/2026_Timetable_05_TCR_World_Tour_Korea_V5.pdf"></a><a href="/images/2026/05_Inje/2026_Timetable_05_TCR_World_Tour_Korea_V6.pdf"></a>';
+	assert.deepEqual(tcr.timetables(page, 2026).map((t) => [t.round, t.country, t.url.split('/').pop()]), [[5, 'Korea', '2026_Timetable_05_TCR_World_Tour_Korea_V6.pdf']]);
+	const text = ['Saturday, 3rd October ↑ 06:17 ↓ 18:11', '10:10 10:30 00:20 Qualifying - Q1 KUMHO FIA TCR World Tour Track',
+		'15:15 15:20 00:05 10 MIN BOARD KUMHO FIA TCR World Tour Track', '15:30 16:05 00:35 Race 1 (30 min + 1 lap) KUMHO FIA TCR World Tour Track',
+		'09:00 09:25 00:25 Free Practice 1 Lotus Cup'].join('\n');
+	assert.deepEqual(tcr.parseTimetable(text, 2026, 'Asia/Seoul').map((s) => [s.name, s.start, s.end]), [
+		['Qualifying 1', '2026-10-03T01:10:00.000Z', '2026-10-03T01:30:00.000Z'],
+		['Race 1', '2026-10-03T06:30:00.000Z', '2026-10-03T07:05:00.000Z']
+	]);
+});
+
+test('Euroformula schedules read the meeting dates and the series rows', () => {
+	const text = ['Circuit Barcelona Catalunya', '23 - 25 October 2026', 'Friday/Viernes, 23 October / Octubre 2026',
+		'09.00/09.40 40´ Euroformula Open Free practice 1', '09.48/10.38 50´ GT Cup Europe Free practice 1',
+		'Saturday/Sabado, 24 October / Octubre 2026', '10.05/10.25 20´ (TV Live) Euroformula Open Qualifying',
+		'14.10 Race – 1 Euroformula Open Standing start - 17 laps – max. 30´ / TV Live'].join('\n');
+	const schedule = euroformula.parseSchedule(text);
+	assert.deepEqual(schedule.dates, ['2026-10-23', '2026-10-25']);
+	assert.deepEqual(schedule.sessions('Europe/Madrid').map((s) => [s.name, s.start, s.estimatedEnd]), [
+		['Free Practice 1', '2026-10-23T07:00:00.000Z', false],
+		['Qualifying', '2026-10-24T08:05:00.000Z', false],
+		['Race 1', '2026-10-24T12:10:00.000Z', true]
 	]);
 });

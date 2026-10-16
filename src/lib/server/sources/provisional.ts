@@ -1,5 +1,6 @@
 import type { SeriesId } from '#lib/series.ts';
-import { circuitRow, readSeason, round, text, type Row, type Season } from './seasons';
+import { circuitRow, joined, readSeason, round, text, type Row, type Season } from './seasons';
+import { driftSeason } from './drift';
 import type { Source } from './types';
 import { column, dateRange } from './wikipedia';
 
@@ -205,6 +206,33 @@ const PROVISIONAL: Season[] = [
 			const r = round(column(cells, /^(rnd|round)/i));
 			if (!name || !r) return null;
 			return { name, location: 'Nürburgring Nordschleife', round: r, dates: dateRange(column(cells, /^date/i) ?? '', year) };
+		}
+	},
+	{
+		// The table has no round numbers; its rows are in date order.
+		series: 'nhra',
+		article: (y) => `${y}_NHRA_Mission_Foods_Drag_Racing_Series`,
+		heading: /==\s*Schedule\s*==/i,
+		row: (cells, year) => {
+			const name = text((column(cells, /^race/i) ?? '').replace(/<sup>[\s\S]*?<\/sup>/gi, ''));
+			if (!name) return null;
+			// "[[Rockingham Dragway]], <br> Rockingham, North Carolina"
+			const location = text(column(cells, /^site/i)).replace(/,$/, '');
+			return { name, location, dates: dateRange(column(cells, /^date/i) ?? '', year) };
+		}
+	},
+	driftSeason,
+	{
+		// Race days per race, in two date columns.
+		series: 'gtmasters',
+		article: (y) => `${y}_ADAC_GT_Masters`,
+		heading: /==\s*Race calendar\s*==/i,
+		row: (cells, year) => {
+			const circuit = text(column(cells, /^circuit/i));
+			const r = round(column(cells, /^round/i));
+			if (!circuit || !r) return null;
+			const days = [column(cells, /^race 1/i), column(cells, /^race 2/i), column(cells, /^dates?$/i)].join(' ');
+			return { name: `GT Masters ${circuit}`, location: circuit, round: r, dates: dateRange(days, year) };
 		}
 	},
 	{

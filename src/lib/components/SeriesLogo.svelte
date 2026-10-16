@@ -38,6 +38,29 @@
 	import supercars from '#lib/assets/series/supercars.png';
 	import erc from '#lib/assets/series/erc.png';
 	import dakar from '#lib/assets/series/dakar.png';
+	import freca from '#lib/assets/series/freca.png';
+	import euroformula from '#lib/assets/series/euroformula.png';
+	import gb3 from '#lib/assets/series/gb3.png';
+	import macau from '#lib/assets/series/macau.png';
+	import arca from '#lib/assets/series/arca.png';
+	import worldssp from '#lib/assets/series/worldssp.png';
+	import nw200 from '#lib/assets/series/nw200.png';
+	import promx from '#lib/assets/series/promx.png';
+	import smx from '#lib/assets/series/smx.png';
+	import trialgp from '#lib/assets/series/trialgp.png';
+	import endurogp from '#lib/assets/series/endurogp.png';
+	import n24 from '#lib/assets/series/n24.png';
+	import h24 from '#lib/assets/series/h24.png';
+	import supertaikyu from '#lib/assets/series/supertaikyu.png';
+	import gtwcaus from '#lib/assets/series/gtwcaus.png';
+	import britishgt from '#lib/assets/series/britishgt.png';
+	import supercup from '#lib/assets/series/supercup.png';
+	import tcr from '#lib/assets/series/tcr.png';
+	import w2rc from '#lib/assets/series/w2rc.png';
+	import rallycross from '#lib/assets/series/rallycross.png';
+	import nhra from '#lib/assets/series/nhra.png';
+	import formuladrift from '#lib/assets/series/formuladrift.png';
+	import pikespeak from '#lib/assets/series/pikespeak.png';
 
 	// Single-colour marks applied as a CSS mask, so they take the surrounding text colour.
 	// The ratio is width / height of each trimmed asset. The optional scale evens out their
@@ -49,7 +72,7 @@
 	// Bleed is how far the artwork reaches above and left of the box, as fractions of its height
 	// and width: ERC's star overlaps its letters, which alone set the box so they line up with
 	// the other marks.
-	// Series without artwork yet show their short name instead.
+	// Series without artwork (ADAC GT Masters publishes no standalone mark) show their short name.
 	const LOGOS: Partial<Record<SeriesId, [src: string, ratio: number, scale?: number, bleed?: [top: number, left: number]]>> = {
 		f1: [f1, 4, 0.99],
 		f2: [f2, 3.0185, 0.9],
@@ -88,7 +111,30 @@
 		btcc: [btcc, 209 / 72, 0.95],
 		supercars: [supercars, 450 / 72, 0.94],
 		erc: [erc, 4.9662, 0.9, [0.7729, 0.107]],
-		dakar: [dakar, 243 / 72, 1.2]
+		dakar: [dakar, 243 / 72, 1.2],
+		freca: [freca, 249 / 72, 1.25],
+		euroformula: [euroformula, 165 / 72, 1.15],
+		gb3: [gb3, 158 / 72, 1.2],
+		macau: [macau, 122 / 72, 1.1],
+		arca: [arca, 186 / 72, 1.0],
+		worldssp: [worldssp, 213 / 72, 1.3],
+		nw200: [nw200, 479 / 72, 0.9],
+		promx: [promx, 376 / 72, 1.03],
+		smx: [smx, 266 / 72, 1.0],
+		trialgp: [trialgp, 126 / 72, 1.3],
+		endurogp: [endurogp, 125 / 72, 1.3],
+		n24: [n24, 97 / 72, 1.15],
+		h24: [h24, 137 / 72, 0.95],
+		supertaikyu: [supertaikyu, 176 / 72, 1.2],
+		gtwcaus: [gtwcaus, 177 / 72, 1.3],
+		britishgt: [britishgt, 225 / 72, 0.9],
+		supercup: [supercup, 260 / 72, 1.2],
+		tcr: [tcr, 116 / 72, 1.25],
+		w2rc: [w2rc, 180 / 72, 1.2],
+		rallycross: [rallycross, 130 / 72, 0.9],
+		nhra: [nhra, 151 / 72, 1.0],
+		formuladrift: [formuladrift, 406 / 72, 0.9],
+		pikespeak: [pikespeak, 387 / 72, 1.0]
 	};
 </script>
 

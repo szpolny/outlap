@@ -2,15 +2,20 @@ import { loadSources } from '@szpolny/calendar-kit/snapshot';
 import { SERIES_IDS, type Schedule } from '#lib/series.ts';
 import { alms, elms, lemanscup, wec } from './sources/aco';
 import { bsb } from './sources/bsb';
+import { formuladrift } from './sources/drift';
 import { dtm } from './sources/dtm';
 import { annualSources, rallycross, trialgp } from './sources/events';
+import { euroformula } from './sources/euroformula';
 import { f1 } from './sources/f1';
+import { gtmasters } from './sources/gtmasters';
+import { h24 } from './sources/h24';
 import { imsa } from './sources/imsa';
 import { indycar, indynxt } from './sources/indycar';
 import { iomtt } from './sources/iomtt';
 import { motogp } from './sources/motogp';
 import { mxgp } from './sources/mxgp';
 import { nascar } from './sources/nascar';
+import { nhra } from './sources/nhra';
 import { nls } from './sources/nls';
 import { withProvisional } from './sources/provisional';
 import { dakar, seasonSources } from './sources/seasons';
@@ -18,6 +23,8 @@ import { sgp } from './sources/sgp';
 import { f1academy, f2, f3, formulae } from './sources/sportstimes';
 import { britishgt, gtwca, gtwcasia, gtwcaus, gtwce, igtc } from './sources/sro';
 import { supercars } from './sources/supercars';
+import { supertaikyu } from './sources/supertaikyu';
+import { tcr } from './sources/tcr';
 import { supercross } from './sources/supercross';
 import { superformula } from './sources/superformula';
 import { supergt } from './sources/supergt';
@@ -29,7 +36,7 @@ import { attachVenues } from './venues';
 const SOURCES: Source[] = [
 	f1, f2, f3, f1academy, formulae, motogp, worldsbk, sgp, wec, elms, alms, lemanscup, imsa, dtm, supergt,
 	indycar, indynxt, superformula, nascar, wrc, erc, gtwce, gtwca, gtwcasia, gtwcaus, britishgt, igtc, supercars,
-	bsb, iomtt, mxgp, supercross, nls, dakar, trialgp, rallycross, ...seasonSources, ...annualSources
+	bsb, iomtt, mxgp, supercross, nls, dakar, trialgp, rallycross, nhra, formuladrift, h24, gtmasters, supertaikyu, tcr, euroformula, ...seasonSources, ...annualSources
 ];
 
 function seasons(): number[] {

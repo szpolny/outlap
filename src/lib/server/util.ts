@@ -1,5 +1,6 @@
 export { fetchText, HttpError, mapLimit, fetchOptional } from '@szpolny/calendar-kit/fetch';
 import { addMinutes } from '@szpolny/calendar-kit/dates';
+import { HttpError } from '@szpolny/calendar-kit/fetch';
 export { zonedToUtc, addMinutes } from '@szpolny/calendar-kit/dates';
 export { slugify, decodeEntities } from '@szpolny/calendar-kit/text';
 import type { MotorEvent, Session, SessionKind } from '#lib/series.ts';
@@ -48,4 +49,14 @@ export function titleCase(s: string): string {
 		.join('')
 		.replace(/\bMotogp\b/g, 'MotoGP')
 		.trim();
+}
+
+/** Text of each page of a PDF; unpdf is loaded only by sources that read PDFs. */
+export async function fetchPdfText(url: string): Promise<string[]> {
+	const res = await fetch(url, { headers: { 'user-agent': 'Mozilla/5.0 (compatible)' }, signal: AbortSignal.timeout(30_000) });
+	if (!res.ok) throw new HttpError(url, res.status);
+	const { extractText, getDocumentProxy } = await import('unpdf');
+	// Verbosity 0 silences pdf.js warnings about fonts it doesn't need for text.
+	const pdf = await getDocumentProxy(new Uint8Array(await res.arrayBuffer()), { verbosity: 0 });
+	return (await extractText(pdf, { mergePages: false })).text;
 }
