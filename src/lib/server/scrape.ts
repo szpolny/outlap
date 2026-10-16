@@ -3,6 +3,7 @@ import { SERIES_IDS, type Schedule } from '#lib/series.ts';
 import { alms, elms, lemanscup, wec } from './sources/aco';
 import { bsb } from './sources/bsb';
 import { dtm } from './sources/dtm';
+import { annualSources, rallycross, trialgp } from './sources/events';
 import { f1 } from './sources/f1';
 import { imsa } from './sources/imsa';
 import { indycar, indynxt } from './sources/indycar';
@@ -12,10 +13,10 @@ import { mxgp } from './sources/mxgp';
 import { nascar } from './sources/nascar';
 import { nls } from './sources/nls';
 import { withProvisional } from './sources/provisional';
-import { btcc, dakar, sfl } from './sources/seasons';
+import { dakar, seasonSources } from './sources/seasons';
 import { sgp } from './sources/sgp';
 import { f1academy, f2, f3, formulae } from './sources/sportstimes';
-import { gtwca, gtwcasia, gtwce, igtc } from './sources/sro';
+import { britishgt, gtwca, gtwcasia, gtwcaus, gtwce, igtc } from './sources/sro';
 import { supercars } from './sources/supercars';
 import { supercross } from './sources/supercross';
 import { superformula } from './sources/superformula';
@@ -27,8 +28,8 @@ import { attachVenues } from './venues';
 
 const SOURCES: Source[] = [
 	f1, f2, f3, f1academy, formulae, motogp, worldsbk, sgp, wec, elms, alms, lemanscup, imsa, dtm, supergt,
-	indycar, indynxt, superformula, sfl, nascar, wrc, erc, gtwce, gtwca, gtwcasia, igtc, btcc, supercars,
-	bsb, iomtt, mxgp, supercross, nls, dakar
+	indycar, indynxt, superformula, nascar, wrc, erc, gtwce, gtwca, gtwcasia, gtwcaus, britishgt, igtc, supercars,
+	bsb, iomtt, mxgp, supercross, nls, dakar, trialgp, rallycross, ...seasonSources, ...annualSources
 ];
 
 function seasons(): number[] {

@@ -168,3 +168,14 @@ future seasons and free-account versus subscription access.
 - Dakar: no 2027 broadcaster list yet. Only the
   [official channel](https://www.youtube.com/@OfficialDakar)'s daily highlights are
   listed, labelled as highlights.
+
+## Second series batch — 15 October 2026
+
+The 24 series added in the second October batch link to their official sites
+until each guide is checked round by round. Only two long-standing services are
+listed: the [WorldSBK VideoPass](https://www.worldsbk.com/en/videopass), which
+carries WorldSSP alongside WorldSBK, and the GT World YouTube channel for British
+GT, which links [its TV schedule](https://www.britishgt.com/live/tv-schedule) and
+is marked “Check availability” like the other SRO series. GT World Challenge
+Australia links its own TV schedule page without a provider, because its local
+coverage has not been verified.

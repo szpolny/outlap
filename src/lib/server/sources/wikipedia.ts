@@ -158,7 +158,8 @@ export function tableGrid(wikitext: string, heading: RegExp): Record<string, str
 		return cells;
 	}).filter((cells) => cells.length > 0);
 
-	const headerRow = rows.findIndex((cells) => cells.every((c) => c.header));
+	// A caption written as a single header cell spanning the table is not the header row.
+	const headerRow = rows.findIndex((cells) => cells.every((c) => c.header) && (cells.length > 1 || splitCell(cells[0].raw).colspan === 1));
 	if (headerRow < 0) return [];
 	const headers = rows[headerRow].flatMap((c) => {
 		const { content, colspan } = splitCell(c.raw);

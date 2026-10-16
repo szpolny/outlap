@@ -141,6 +141,8 @@ const wecLocal = [
 
 // SRO streams every GT World Challenge and IGTC race on its GT World channel; local TV deals
 // can geoblock it, so it stays a lead to check.
+const sbkPass = stream('WorldSBK VideoPass', 'https://www.worldsbk.com/en/videopass', 'Subscription', 'Live races and replays. Check the round timetable for other televised sessions and country availability.', { check: true, ongoing: true });
+
 const gtWorld = (site: string) => guide(`${site}/live/tv-schedule`, [
 	stream('GT World on YouTube', 'https://www.youtube.com/@GTWorld/streams', 'Free', 'Official live race streams. Local broadcast deals can block them; check the round’s TV schedule.', { medium: 'YouTube', check: true, ongoing: true })]);
 // The newer series below link to the official site; only long-standing services are listed.
@@ -181,7 +183,7 @@ export const WATCH_GUIDES: Record<SeriesId, WatchGuide> = {
 	moto2: guide('https://www.motogp.com/en/broadcasters', motoOptions),
 	moto3: guide('https://www.motogp.com/en/broadcasters', motoOptions),
 	worldsbk: guide('https://prod.worldsbk.com/en/news/2026/02/19/donde-ver-worldsbk-durante-toda-la-temporada-2026x/989565', [
-		stream('WorldSBK VideoPass', 'https://www.worldsbk.com/en/videopass', 'Subscription', 'Live races and replays. Check the round timetable for other televised sessions and country availability.', { check: true, ongoing: true }),
+		sbkPass,
 		tv('Eurosport', 'https://www.eurosport.com/', ['PL', 'FR']),
 		tv('TNT Sports', 'https://www.tntsports.co.uk/', ['GB', 'IE']),
 		stream('ServusTV', 'https://www.servustv.com/', 'TV package', 'Live coverage on ServusTV and servusmotogp.com. In Germany it needs a MagentaTV package.', { countries: ['DE', 'AT', 'CH'], check: true }),
@@ -282,6 +284,32 @@ export const WATCH_GUIDES: Record<SeriesId, WatchGuide> = {
 	// No 2027 broadcaster list yet; coverage is mostly daily highlights because stages run far from networks.
 	dakar: { ...guide('https://www.dakar.com/en/', [
 		stream('Dakar on YouTube', 'https://www.youtube.com/@OfficialDakar', 'Free', 'Official daily stage highlights, not live coverage. Local TV partners are announced before each edition.', { medium: 'YouTube', ongoing: true })]), checked: AUDITED },
+	// Series added in the second October 2026 batch link to their official sites; only WorldSSP
+	// (covered by the WorldSBK VideoPass) and the SRO series' GT World channel are listed.
+	worldssp: { ...guide('https://www.worldsbk.com/en/videopass', [sbkPass]), checked: AUDITED },
+	britishgt: { ...gtWorld('https://www.britishgt.com'), checked: AUDITED },
+	gtwcaus: { ...officialOnly('https://www.gt-world-challenge-australia.com/live/tv-schedule'), checked: AUDITED },
+	supercup: { ...officialOnly('https://racing.porsche.com/mobil-1-supercup/about'), checked: AUDITED },
+	arca: { ...officialOnly('https://www.arcaracing.com/'), checked: AUDITED },
+	n24: { ...officialOnly('https://www.24h-rennen.de/en/'), checked: AUDITED },
+	promx: { ...officialOnly('https://promotocross.com/'), checked: AUDITED },
+	smx: { ...officialOnly('https://www.supermotocross.com/'), checked: AUDITED },
+	w2rc: { ...officialOnly('https://www.worldrallyraidchampionship.com/en'), checked: AUDITED },
+	rallycross: { ...officialOnly('https://www.fia-rallycross.com/'), checked: AUDITED },
+	nhra: { ...officialOnly('https://www.nhra.com/'), checked: AUDITED },
+	formuladrift: { ...officialOnly('https://www.formulad.com/'), checked: AUDITED },
+	tcr: { ...officialOnly('https://www.fiatcrworldtour.com/'), checked: AUDITED },
+	freca: { ...officialOnly('https://formularegionaleubyalpine.com/'), checked: AUDITED },
+	euroformula: { ...officialOnly('https://euroformula.gtsport.es/'), checked: AUDITED },
+	gb3: { ...officialOnly('https://www.gb3championship.com/'), checked: AUDITED },
+	h24: { ...officialOnly('https://www.24hseries.com/'), checked: AUDITED },
+	supertaikyu: { ...officialOnly('https://supertaikyu.com/'), checked: AUDITED },
+	gtmasters: { ...officialOnly('https://www.adac-motorsport.de/adac-gt-masters/'), checked: AUDITED },
+	macau: { ...officialOnly('https://www.macau.grandprix.gov.mo/en/'), checked: AUDITED },
+	nw200: { ...officialOnly('https://northwest200.co.uk/'), checked: AUDITED },
+	pikespeak: { ...officialOnly('https://ppihc.org/'), checked: AUDITED },
+	trialgp: { ...officialOnly('https://www.trialgp.com/'), checked: AUDITED },
+	endurogp: { ...officialOnly('https://www.endurogp.com/'), checked: AUDITED },
 	wrc: guide('https://www.wrc.com/en/misc/broadcast-guide', [
 		stream('Rally.TV', 'https://www.rally.tv/', 'Subscription', 'Every WRC stage live and on demand worldwide.', { ongoing: true }),
 		tv('Motowizja', 'https://motowizja.pl/', ['PL'], 'Local WRC coverage. Check the stage listing for this rally.'),

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
 import { createServer } from 'vite';
 
-let server, wiki, sro, seasons, bsb, supercars, supercross, mxgp, iomtt, nls;
+let server, wiki, sro, seasons, bsb, supercars, supercross, mxgp, iomtt, nls, events;
 before(async () => {
 	server = await createServer({ configFile: false, logLevel: 'error', optimizeDeps: { noDiscovery: true }, server: { middlewareMode: true, hmr: false, ws: false, watch: null } });
 	wiki = await server.ssrLoadModule('/src/lib/server/sources/wikipedia.ts');
@@ -14,6 +14,7 @@ before(async () => {
 	mxgp = await server.ssrLoadModule('/src/lib/server/sources/mxgp.ts');
 	iomtt = await server.ssrLoadModule('/src/lib/server/sources/iomtt.ts');
 	nls = await server.ssrLoadModule('/src/lib/server/sources/nls.ts');
+	events = await server.ssrLoadModule('/src/lib/server/sources/events.ts');
 });
 after(async () => { await server?.close(); });
 
@@ -229,5 +230,61 @@ test('NLS calendars keep race names and join the two-day 24h Qualifiers', () => 
 		['nls-2026-1', '71. ADAC Westfalenfahrt', 1, '2026-03-14', '2026-03-14'],
 		['nls-2026-adac-24h-qualifiers', 'ADAC 24h Qualifiers', undefined, '2026-04-18', '2026-04-19'],
 		['nls-2026-7', 'KW 6h ADAC Ruhr-Pokal-Rennen', 7, '2026-08-01', '2026-08-01']
+	]);
+});
+
+test('a caption spanning the table is not taken for its header row', () => {
+	const wikitext = `==Schedule==
+{|class="wikitable"
+|-
+!colspan="3"|2026 Schedule
+|-
+!Date
+!Race
+!Site
+|-
+|March 5–8
+|Gatornationals
+|Gainesville Raceway
+|}`;
+	assert.deepEqual(wiki.tableGrid(wikitext, /==\s*Schedule\s*==/), [{ Date: 'March 5–8', Race: 'Gatornationals', Site: 'Gainesville Raceway' }]);
+});
+
+test('one-off events read their dates from the article or the organiser', () => {
+	assert.deepEqual(events.articleDates('{{Infobox\n| year = 2026\n| date = 14–17 May\n}}', 2026), ['2026-05-14', '2026-05-17']);
+	assert.deepEqual(events.articleDates('| Fulldate = {{Start date|2026|11|22|df=y}}', 2026), ['2026-11-22', '2026-11-22']);
+	// A stale infobox copied from the previous edition is passed over for the edition's own year.
+	assert.deepEqual(events.articleDates("|''Date''\n|6-9 May 2025\n|}\nIt took place between 6–9 May 2026.", 2026), ['2026-05-06', '2026-05-09']);
+	assert.deepEqual(events.parseNw200('<span>2027 Race Week: 10th – 15th May</span>'), { year: 2027, dates: ['2027-05-10', '2027-05-15'] });
+	assert.deepEqual(events.parsePikesPeak('<h2>Gear Up for the 105TH Running</h2> <p>June 27, 2027</p>'), { year: 2027, dates: ['2027-06-27', '2027-06-27'] });
+	assert.equal(events.parsePikesPeak('<p>Tickets on sale</p>'), null);
+});
+
+test('TrialGP calendars keep numbered rounds and read nested country cells', () => {
+	const row = (round, date, country, nested) => `<div class="calendar-line"><div id="calvenue">${round}</div>
+<div id="calflag"><img src="x.png" /></div>
+<div id="caldate">${date}</div>
+${nested ? `<div id="calbled">\n<div id="calbled">${country}</div>\n<div id="calfmn">X</div>\n</div>` : `<div id="calbled">${country}</div>\n<div id="calfmn">X</div>`}
+</div><div class="fusion-text calendar-list"><p>FIM Trial World Championships</p></div>`;
+	const html = row('#1', '16-18 April 2027', 'Spain') + row('#3', '21-23 May 2027', 'U.S.A', true) +
+		row('#6', '25-27 June 2027', 'Itlay') + row('', '25-26 September 2027*', 'France', true);
+	assert.deepEqual(events.parseTrialCalendar(html).map((e) => [e.id, e.name, e.start, e.end]), [
+		['trialgp-2027-1', 'TrialGP of Spain', '2027-04-16', '2027-04-18'],
+		['trialgp-2027-3', 'TrialGP of USA', '2027-05-21', '2027-05-23'],
+		['trialgp-2027-6', 'TrialGP of Italy', '2027-06-25', '2027-06-27']
+	]);
+});
+
+test('rallycross calendars name Euro RX events without sponsors and include the World Cup', () => {
+	const item = (title, venue, dates) => `<li class="more-items-item"><div class="wrapper"><h2><a href="#" class="more-items-title">
+		<span class="flag-icon"></span><span class="event-name">${title}</span></span></a></h2>
+		<p class="more-items-text">${venue}</p>
+		<div class="more-items-long-text">${dates}</div></div></li>`;
+	const section = (title, items) => `<section id="home-calendar" class="widget"><h2 class="widget-title">\n ${title} </h2><ul>${items}</ul></section>`;
+	const html = section('2026 CALENDAR', item('Kárai Trans Euro RX Of<br><span class="city"> HUNGARY', 'Nyirád', '30 - 31 May')) +
+		section('2026 FIA Rallycross World Cup', item('FIA World Cup<br><span class="city">INDONESIA', 'Jakarta', '05 - 06 Dec'));
+	assert.deepEqual(events.parseRallycross(html).map((e) => [e.name, e.location, e.start, e.end]), [
+		['Euro RX of Hungary', 'Nyirád, Hungary', '2026-05-30', '2026-05-31'],
+		['FIA Rallycross World Cup Indonesia', 'Jakarta, Indonesia', '2026-12-05', '2026-12-06']
 	]);
 });

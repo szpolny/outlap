@@ -49,7 +49,8 @@
 	// Bleed is how far the artwork reaches above and left of the box, as fractions of its height
 	// and width: ERC's star overlaps its letters, which alone set the box so they line up with
 	// the other marks.
-	const LOGOS: Record<SeriesId, [src: string, ratio: number, scale?: number, bleed?: [top: number, left: number]]> = {
+	// Series without artwork yet show their short name instead.
+	const LOGOS: Partial<Record<SeriesId, [src: string, ratio: number, scale?: number, bleed?: [top: number, left: number]]>> = {
 		f1: [f1, 4, 0.99],
 		f2: [f2, 3.0185, 0.9],
 		f3: [f3, 3.0185, 0.9],
@@ -104,9 +105,21 @@
 	let { series, class: className }: Props = $props();
 
 	const logo = $derived(LOGOS[series]);
+	const textWidth = $derived(SERIES[series].short.length * 7.2);
 </script>
 
-{#if logo[3]}
+{#if !logo}
+	<!-- Scales with the height class like the image marks; textLength keeps the estimated width. -->
+	<svg
+		role="img"
+		aria-label={SERIES[series].name}
+		class={['inline-block shrink-0', className]}
+		viewBox="0 0 {textWidth} 10"
+		style:aspect-ratio={textWidth / 10}
+	>
+		<text x="0" y="9" font-size="12.5" font-weight="700" fill="currentColor" textLength={textWidth} lengthAdjust="spacingAndGlyphs">{SERIES[series].short}</text>
+	</svg>
+{:else if logo[3]}
 	<span
 		role="img"
 		aria-label={SERIES[series].name}

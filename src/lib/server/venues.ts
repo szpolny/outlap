@@ -20,11 +20,17 @@ interface Venue {
 	focus?: string;
 }
 
-/** Rallies, off-road, road racing and speedway only match venues that name their series. */
-const OFF_CIRCUIT = new Set<SeriesId>(['wrc', 'erc', 'dakar', 'sgp', 'mxgp', 'supercross', 'iomtt']);
+/**
+ * Rallies, off-road, road racing, speedway, drag racing, drifting and hill climbs only match venues
+ * that name their series: a circuit's outline and photo don't show a dragstrip or drift course.
+ */
+const OFF_CIRCUIT = new Set<SeriesId>([
+	'wrc', 'erc', 'dakar', 'w2rc', 'rallycross', 'sgp', 'mxgp', 'supercross', 'promx', 'smx', 'trialgp', 'endurogp',
+	'iomtt', 'nw200', 'nhra', 'formuladrift', 'pikespeak'
+]);
 
 /** Bike series get their own photo where a venue's general one shows cars, and vice versa. */
-const BIKES: SeriesId[] = ['motogp', 'moto2', 'moto3', 'worldsbk', 'bsb'];
+const BIKES: SeriesId[] = ['motogp', 'moto2', 'moto3', 'worldsbk', 'worldssp', 'bsb'];
 
 // First match wins, so series-specific entries come before the venue's general entry.
 const VENUES: Venue[] = [

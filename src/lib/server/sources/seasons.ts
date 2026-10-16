@@ -3,9 +3,11 @@ import { fetchText, slugify, titleCase } from '../util';
 import type { Source } from './types';
 import { MONTHS, column, dateRange, fetchWikitext, stripWiki, tableGrid } from './wikipedia';
 
-// Series whose official sites turn away automated clients (btcc.net with Vercel's bot checkpoint,
-// sfl.jp with a Cloudflare challenge), read from the calendar table of the Wikipedia season article. The tables give race days without start times, so meetings
-// are all-day events. A season's article usually appears a few months before it starts.
+// Series read from the calendar table of the Wikipedia season article: those whose official sites
+// turn away automated clients (btcc.net with Vercel's bot checkpoint, sfl.jp with a Cloudflare
+// challenge) or render their calendar in the browser, and smaller series without an official
+// feed. The tables give race days without start times, so meetings are all-day events. A season's
+// article usually appears a few months before it starts.
 
 export interface Row {
 	name: string;
@@ -50,6 +52,13 @@ export function circuitRow(short: string) {
 	};
 }
 
+/** Joined plain text of the cells under these headers, skipping empty ones. */
+const joined = (cells: Record<string, string>, headers: RegExp[]) =>
+	headers.map((header) => text(column(cells, header))).filter(Boolean).join(', ');
+
+/** "Michelin 12 Hours of Mugello" -> "12 Hours of Mugello" */
+const unsponsored = (name: string) => name.replace(/^Michelin\s+/i, '');
+
 const SEASONS: Season[] = [
 	{
 		series: 'btcc',
@@ -62,6 +71,173 @@ const SEASONS: Season[] = [
 		article: (y) => `${y}_Super_Formula_Lights`,
 		heading: /==\s*Race calendar\s*==/i,
 		row: circuitRow('SFL')
+	},
+	{
+		series: 'freca',
+		article: (y) => `${y}_Formula_Regional_European_Championship`,
+		heading: /==\s*Race calendar\s*==/i,
+		row: circuitRow('FRECA')
+	},
+	{
+		series: 'euroformula',
+		article: (y) => `${y}_Euroformula_Open_Championship`,
+		heading: /==\s*Race calendar\s*==/i,
+		row: circuitRow('Euroformula')
+	},
+	{
+		series: 'gb3',
+		article: (y) => `${y}_GB3_Championship`,
+		// The 2027 article also has a winter series; its main calendar comes first.
+		heading: /==\s*(Race )?calendar\s*==/i,
+		row: circuitRow('GB3')
+	},
+	{
+		series: 'supercup',
+		article: (y) => `${y}_Porsche_Supercup`,
+		heading: /==\s*Race calendar( and results)?\s*==/i,
+		row: circuitRow('Supercup')
+	},
+	{
+		series: 'tcr',
+		article: (y) => `${y}_TCR_World_Tour`,
+		heading: /==\s*Calendar\s*==/i,
+		row: circuitRow('TCR')
+	},
+	{
+		series: 'arca',
+		article: (y) => `${y}_ARCA_Menards_Series`,
+		heading: /==\s*Schedule\s*==/,
+		row: (cells, year) => {
+			const name = text(column(cells, /^race/i));
+			if (!name) return null;
+			return {
+				name,
+				location: joined(cells, [/^track/i, /^location/i]),
+				round: round(column(cells, /^no/i)),
+				dates: dateRange(column(cells, /^date/i) ?? '', year)
+			};
+		}
+	},
+	{
+		// Race days per race, in two date columns.
+		series: 'gtmasters',
+		article: (y) => `${y}_ADAC_GT_Masters`,
+		heading: /==\s*Race calendar\s*==/i,
+		row: (cells, year) => {
+			const circuit = text(column(cells, /^circuit/i));
+			const r = round(column(cells, /^round/i));
+			if (!circuit || !r) return null;
+			const days = [column(cells, /^race 1/i), column(cells, /^race 2/i), column(cells, /^dates?$/i)].join(' ');
+			return { name: `GT Masters ${circuit}`, location: circuit, round: r, dates: dateRange(days, year) };
+		}
+	},
+	{
+		series: 'h24',
+		article: (y) => `${y}_24H_Series`,
+		heading: /==\s*Calendar\s*==/i,
+		row: (cells, year) => {
+			const name = unsponsored(text(column(cells, /^event/i)));
+			const r = round(column(cells, /^round/i));
+			if (!name || !r) return null;
+			return { name, location: text(column(cells, /^circuit/i)), round: r, dates: dateRange(column(cells, /^date/i) ?? '', year) };
+		}
+	},
+	{
+		// Rounds over two days list one race per day.
+		series: 'supertaikyu',
+		article: (y) => `${y}_Super_Taikyu_Series`,
+		heading: /==\s*Calendar\s*==/i,
+		row: (cells, year) => {
+			const name = text(column(cells, /^event/i));
+			const r = round(column(cells, /^round/i));
+			if (!name || !r) return null;
+			return { name, location: text(column(cells, /^circuit/i)), round: r, dates: dateRange(column(cells, /^date/i) ?? '', year) };
+		}
+	},
+	{
+		series: 'w2rc',
+		article: (y) => `${y}_World_Rally-Raid_Championship`,
+		heading: /==\s*Calendar\s*==/i,
+		row: (cells, year) => {
+			const name = text(column(cells, /^rally/i));
+			const r = round(column(cells, /^round/i));
+			if (!name || !r) return null;
+			return { name, round: r, dates: dateRange(column(cells, /^dates?$/i) ?? '', year) };
+		}
+	},
+	{
+		series: 'endurogp',
+		article: (y) => `${y}_FIM_Enduro_World_Championship`,
+		heading: /==\s*Calendar\s*==/i,
+		row: (cells, year) => {
+			const country = text(column(cells, /^event/i));
+			const r = round(column(cells, /^round/i));
+			if (!country || !r) return null;
+			return {
+				name: `EnduroGP of ${country}`,
+				location: joined(cells, [/^location/i, /^event/i]),
+				round: r,
+				dates: dateRange(column(cells, /^dates?$/i) ?? '', year)
+			};
+		}
+	},
+	{
+		// The table has no round numbers; its rows are in date order.
+		series: 'nhra',
+		article: (y) => `${y}_NHRA_Mission_Foods_Drag_Racing_Series`,
+		heading: /==\s*Schedule\s*==/i,
+		row: (cells, year) => {
+			const name = text((column(cells, /^race/i) ?? '').replace(/<sup>[\s\S]*?<\/sup>/gi, ''));
+			if (!name) return null;
+			// "[[Rockingham Dragway]], <br> Rockingham, North Carolina"
+			const location = text(column(cells, /^site/i)).replace(/,$/, '');
+			return { name, location, dates: dateRange(column(cells, /^date/i) ?? '', year) };
+		}
+	},
+	{
+		series: 'formuladrift',
+		article: (y) => `${y}_Formula_Drift_season`,
+		heading: /==\s*Schedule\s*==/i,
+		row: (cells, year) => {
+			const name = text(column(cells, /^title/i));
+			const r = round(column(cells, /^round/i));
+			if (!name || !r) return null;
+			return {
+				name: `Formula Drift ${name}`,
+				location: joined(cells, [/^circuit/i, /^location/i]),
+				round: r,
+				dates: dateRange(column(cells, /^date/i) ?? '', year)
+			};
+		}
+	},
+	// Pro Motocross and the SuperMotocross playoffs share the SuperMotocross season article with
+	// Supercross, each under its own heading.
+	{
+		series: 'promx',
+		article: (y) => `${y}_SuperMotocross_World_Championship`,
+		heading: /==+\s*\d{4} AMA Motocross Championship\s*==+/i,
+		row: (cells, year) => {
+			const name = text(column(cells, /^event/i));
+			const r = round(column(cells, /^round/i));
+			if (!name || !r) return null;
+			return { name, location: text(column(cells, /^racetrack/i)), round: r, dates: dateRange(column(cells, /^date/i) ?? '', year) };
+		}
+	},
+	{
+		series: 'smx',
+		article: (y) => `${y}_SuperMotocross_World_Championship`,
+		heading: /==+\s*\d{4} SuperMotocross World Championship\s*==+/i,
+		row: (cells, year) => {
+			const city = text(column(cells, /^location/i));
+			const r = round(column(cells, /^round/i));
+			if (!city || !r) return null;
+			return {
+				name: `SuperMotocross ${city.replace(/,.*$/, '')}`,
+				location: joined(cells, [/^stadium/i, /^location/i]),
+				round: r,
+				dates: dateRange(column(cells, /^date/i) ?? '', year)
+			};
+		}
 	}
 ];
 
@@ -109,7 +285,7 @@ function seasonSource(season: Season): Source {
 	};
 }
 
-export const [btcc, sfl] = SEASONS.map(seasonSource);
+export const seasonSources = SEASONS.map(seasonSource);
 
 /** "3 January 2026" */
 const FULL_DATE = /(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/g;

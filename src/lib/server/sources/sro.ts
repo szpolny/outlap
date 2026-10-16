@@ -8,12 +8,14 @@ import type { Source } from './types';
 // times. Only the series' own sessions are listed. Test days are skipped; meetings without a
 // timetable on the page (GTWC America only publishes PDFs) become all-day events.
 
-type SroSeries = Extract<SeriesId, 'gtwce' | 'gtwca' | 'gtwcasia' | 'igtc'>;
+type SroSeries = Extract<SeriesId, 'gtwce' | 'gtwca' | 'gtwcasia' | 'gtwcaus' | 'britishgt' | 'igtc'>;
 
 const SITES: Record<SroSeries, string> = {
 	gtwce: 'https://www.gt-world-challenge-europe.com',
 	gtwca: 'https://www.gt-world-challenge-america.com',
 	gtwcasia: 'https://www.gt-world-challenge-asia.com',
+	gtwcaus: 'https://www.gt-world-challenge-australia.com',
+	britishgt: 'https://www.britishgt.com',
 	igtc: 'https://www.intercontinentalgtchallenge.com'
 };
 
@@ -180,4 +182,6 @@ function sroSource(series: SroSeries): Source {
 export const gtwce = sroSource('gtwce');
 export const gtwca = sroSource('gtwca');
 export const gtwcasia = sroSource('gtwcasia');
+export const gtwcaus = sroSource('gtwcaus');
+export const britishgt = sroSource('britishgt');
 export const igtc = sroSource('igtc');

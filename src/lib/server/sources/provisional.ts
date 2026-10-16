@@ -131,6 +131,19 @@ const PROVISIONAL: Season[] = [
 		row: columns({ name: /^circuit/i, location: [/^circuit/i], date: /^date/i, round: /^round/i, rename: venue })
 	},
 	{
+		series: 'gtwcaus',
+		article: (y) => `${y}_GT_World_Challenge_Australia`,
+		heading: CALENDAR,
+		row: columns({ name: /^circuit/i, location: [/^circuit/i], date: /^date/i, round: /^round/i, rename: venue })
+	},
+	{
+		// Double-header rounds are separate rows over the same days.
+		series: 'britishgt',
+		article: (y) => `${y}_British_GT_Championship`,
+		heading: CALENDAR,
+		row: columns({ name: /^circuit/i, location: [/^circuit/i], date: /^date/i, rename: venue, key: (row) => row.dates![0] })
+	},
+	{
 		series: 'igtc',
 		article: (y) => `${y}_Intercontinental_GT_Challenge`,
 		heading: CALENDAR,
