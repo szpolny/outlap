@@ -16,6 +16,7 @@ in a 100-unit box. `src/lib/server/venues.ts` assigns them to events.
 | `balaton` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `barber` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `bathurst` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
+| `berlinraceway` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `bowmangray` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `brandshatch` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `brandshatchindy` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
@@ -37,6 +38,8 @@ in a 100-unit box. `src/lib/server/venues.ts` assigns them to events.
 | `donington` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `dover` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `dubai` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL (Grand Prix layout) |
+| `duquoin` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
+| `elko` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `estoril` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `fuji` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `gateway` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
@@ -64,6 +67,7 @@ in a 100-unit box. `src/lib/server/venues.ts` assigns them to events.
 | `longbeach` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `lusail` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `lvms` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL (oval) |
+| `madison` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `madring` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `magnycours` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `mandalika` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
@@ -88,6 +92,7 @@ in a 100-unit box. `src/lib/server/venues.ts` assigns them to events.
 | `norisring` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `northwilkesboro` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `nurburgring` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License (Sprint layout, cut from the GP circuit) |
+| `nurburgringgp` | [f1-circuits](https://github.com/bacinger/f1-circuits) by Tomislav Bacinger, MIT License |
 | `okayama` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `oschersleben` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `oultonpark` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
@@ -106,6 +111,7 @@ in a 100-unit box. `src/lib/server/venues.ts` assigns them to events.
 | `rockingham` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL (oval) |
 | `ruapuna` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `sachsenring` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
+| `salem` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `salzburgring` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `sandown` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |
 | `sebring` | © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, ODbL |

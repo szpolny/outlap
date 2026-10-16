@@ -222,6 +222,13 @@ const VENUES: Venue[] = [
 		photo: 'Mattias_Ekström,_Red_Bull_Audi_RS_5_DTM,_DTM_Nürburgring_2017_(36976865252).jpg',
 		focus: '50% 90%'
 	},
+	{
+		series: ['gtwce', 'gtmasters'],
+		match: /n[uü]rburgring/i,
+		track: 'nurburgringgp',
+		photo: 'Mattias_Ekström,_Red_Bull_Audi_RS_5_DTM,_DTM_Nürburgring_2017_(36976865252).jpg',
+		focus: '50% 90%'
+	},
 	// Endurance races run the Nordschleife together with the Grand Prix circuit.
 	{
 		series: ['nls', 'n24', 'igtc'],
@@ -284,7 +291,7 @@ const VENUES: Venue[] = [
 	{ match: /queensland raceway|ipswich/i, track: 'queensland', photo: 'Paul_Dumbrell_at_Queensland_Raceway_2008.JPG' },
 	{ match: /the bend|tailem bend/i, track: 'thebend', photo: 'Whincup_2018_The_Bend_SuperSprint.jpg' },
 	{ match: /taup[oō]/i, photo: 'Enge_a1gp_2007.jpeg' },
-	{ match: /christchurch|ruapuna|euromarque/i, track: 'ruapuna' },
+	{ match: /christchurch|ruapuna|euromarque/i, track: 'ruapuna', photo: 'Ruapuna_safety_car.jpg' },
 	{ match: /surfers paradise|gold coast/i, track: 'surfersparadise', photo: 'Surfers_Paradise_Street_Circuit_aerial_view.jpg' },
 	{
 		match: /paul ricard|le castellet/i,
@@ -332,6 +339,17 @@ const VENUES: Venue[] = [
 	{ match: /milwaukee/i, track: 'milwaukee', photo: 'MilwaukeeMilePanorama.jpg' },
 
 	// NASCAR ovals.
+	{ match: /toledo speedway/i, photo: 'ToledoSpdwy-2003-chd1.jpg' },
+	{ match: /elko speedway/i, track: 'elko', photo: 'ElkoSpeedway2019ARCAMenards250.jpg' },
+	{ match: /salem speedway/i, track: 'salem', photo: 'Alex_Garcia_ARCA_72_at_Salem.jpg' },
+	{
+		match: /madison international/i,
+		track: 'madison',
+		photo: 'MadisonInternationalSpeedwayStartFinishLine2019ShoreLunch200.jpg'
+	},
+	{ match: /berlin raceway/i, track: 'berlinraceway', photo: 'Hocevar_-_Berlin,_April_22,_207.jpg' },
+	{ match: /illinois state fairgrounds|springfield mile/i, photo: 'Butler_Springfield_Mile_88.jpg' },
+	{ match: /du ?quoin/i, track: 'duquoin', photo: 'Duquoinsat.JPG' },
 	{
 		match: /rockingham/i,
 		track: 'rockingham',
@@ -385,6 +403,30 @@ const VENUES: Venue[] = [
 	{ match: /netherlands/i, track: 'zandvoort', photo: 'Circuit_Park_Zandvoort_from_air_2016-08-24.jpg' }
 ];
 
+/** Photos for events whose venue has none: off-circuit series, and circuits with no free photo. */
+const SERIES_PHOTOS: Partial<Record<SeriesId, string>> = {
+	mxgp: 'Kompetisi_Motocross_MXGP_di_Pangkal_Pinang_Indonesia.jpg',
+	promx: 'Lucas_Oil_Pro_Motocross_at_High_Point_Raceway.jpg',
+	supercross: 'SF_Supercross_2004.jpg',
+	smx: 'SF_Supercross_2004.jpg',
+	nhra: 'NHRA_Top_Fuel_Dragster_Finals_Sonoma_2023.jpg',
+	formuladrift: 'Formula_DRIFT_on_Track_2012.jpg',
+	rallycross: 'WRX_Sweden_2015_001_(cropped).jpg',
+	endurogp: 'David_Knight_-_2010_WEC_GP_of_Turkey.jpg',
+	trialgp: 'FIM_TRIAL_WORLD_CHAMPIONSHIP_Cal_Rosal_2016_(6).jpg',
+	erc: 'ERC_Tour_de_Corse_2014.jpg',
+	wrc: 'Sebastien_Ogier_Baiao_Rally_de_portugal_2016.jpg',
+	w2rc: 'Dakar_Rally_2021_-_Shakedown_(50779690333).jpg',
+	nw200: 'North_West_200_York_Corner_2009.jpg',
+	pikespeak: 'Pikes_Peak_Hill_Climb_2011_(5878397866).jpg',
+	// New street circuits without a photo of their own.
+	indycar: 'Indy_cars_at_Turn_Eight_at_Road_America.JPG',
+	indynxt: 'Indy_cars_at_Turn_Eight_at_Road_America.JPG',
+	formulae: '2024_Tokyo_e-Prix_race_start_1.jpg',
+	tcr: 'WTCR_2018.jpg',
+	gtwcasia: '2022_4_Hours_of_Barcelona_-_Start_of_the_race.jpg'
+};
+
 export function findVenue(event: MotorEvent): Venue | undefined {
 	const text = [event.location, event.name, event.url].filter(Boolean).join(' | ');
 	return VENUES.find(
@@ -394,12 +436,13 @@ export function findVenue(event: MotorEvent): Venue | undefined {
 
 const PHOTOS_BY_FILE: Record<string, EventImage | undefined> = PHOTOS;
 
-/** Add the track outline and photo to every event whose venue is known. */
+/** Add the track outline and photo to every event whose venue is known, or its series' photo. */
 export function attachVenues(events: MotorEvent[]): void {
 	for (const event of events) {
 		const venue = findVenue(event);
 		if (venue?.track) event.track = venue.track;
-		const photo = venue?.photo && PHOTOS_BY_FILE[venue.photo];
-		if (photo) event.photo = venue.focus ? { ...photo, focus: venue.focus } : photo;
+		const file = venue?.photo ?? SERIES_PHOTOS[event.series];
+		const photo = file && PHOTOS_BY_FILE[file];
+		if (photo) event.photo = venue?.photo && venue.focus ? { ...photo, focus: venue.focus } : photo;
 	}
 }
