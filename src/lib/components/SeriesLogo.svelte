@@ -114,7 +114,7 @@
 		erc: [erc, 4.9662, 0.9, [0.7729, 0.107]],
 		dakar: [dakar, 243 / 72, 1.2],
 		freca: [freca, 249 / 72, 1.25],
-		euroformula: [euroformula, 165 / 72, 1.5],
+		euroformula: [euroformula, 370 / 72, 1.03],
 		gb3: [gb3, 158 / 72, 1.2],
 		macau: [macau, 122 / 72, 1.6],
 		arca: [arca, 186 / 72, 1.45],
@@ -130,10 +130,10 @@
 		gtwcaus: [gtwcaus, 177 / 72, 1.45],
 		britishgt: [britishgt, 225 / 72, 1.3],
 		supercup: [supercup, 260 / 72, 1.23],
-		tcr: [tcr, 116 / 72, 1.6],
+		tcr: [tcr, 214 / 72, 1.3],
 		w2rc: [w2rc, 180 / 72, 1.4],
 		rallycross: [rallycross, 130 / 72, 1.25],
-		nhra: [nhra, 151 / 72, 1.4],
+		nhra: [nhra, 174 / 72, 1.2],
 		formuladrift: [formuladrift, 406 / 72, 0.9],
 		pikespeak: [pikespeak, 387 / 72, 1.0]
 	};

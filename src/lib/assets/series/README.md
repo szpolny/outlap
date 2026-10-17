@@ -8,13 +8,14 @@ Sources of the marks added in October 2026 (second batch):
 
 | Series | Source |
 | --- | --- |
-| ARCA, FRECA, Euroformula, GB3, GTWC Australia, Nürburgring 24 Hours, 24H Series, Super Taikyu, Porsche Supercup, World Rally-Raid, FIA Rallycross (RX mark) | Logo in the series' English Wikipedia infobox |
+| ARCA, FRECA, GB3, GTWC Australia, Nürburgring 24 Hours, 24H Series, Super Taikyu, Porsche Supercup, World Rally-Raid, FIA Rallycross (RX mark) | Logo in the series' English Wikipedia infobox |
 | Macau Grand Prix, WorldSSP | Wikimedia Commons: `Macau_Grand_Prix_Logo.png`, `SBK_SUPERSPORT_FIM_WORLD_CHAMPIONSHIP_LOGO.png` |
 | British GT | britishgt.com header logo |
 | Pro Motocross, SuperMotocross | supermotocross.com header logos (2026) |
-| NHRA | nhra.com header logo (NHRA oval) |
+| NHRA | Wikimedia Commons: `National_Hot_Rod_Association_Logo.svg` (blue NHRA oval) |
 | Formula Drift | formulad.com header logo |
-| TCR World Tour | fiatcrworldtour.com header logo (TCR letters) |
+| TCR World Tour | fiatcrworldtour.com logotype pack (TCR World Tour mark, without FIA badge and tyre sponsor) |
+| Euroformula Open | euroformulaopen.net 2026 logo (flag and EFO letters) |
 | North West 200 | northwest200.co.uk header logo (NW200 wordmark) |
 | TrialGP | trialgp.com monochrome logo |
 | EnduroGP | endurogp.com header logo |
