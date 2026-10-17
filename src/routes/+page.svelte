@@ -5,11 +5,11 @@
 	import Sparkles from '~icons/lucide/sparkles';
 	import X from '~icons/lucide/x';
 	import GitHub from '~icons/simple-icons/github';
-	import { onMount } from 'svelte';
+	import { onMount, untrack } from 'svelte';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { page } from '$app/state';
 	import outlapMark from '#lib/assets/favicon.svg';
-	import { SERIES, SERIES_IDS, SERIES_GROUPS, DEFAULT_SERIES_IDS, NEW_SERIES, type MotorEvent, type SeriesId, type Session } from '#lib/series.ts';
+	import { SERIES, SERIES_IDS, SERIES_GROUPS, NEW_SERIES, type MotorEvent, type SeriesId, type Session } from '#lib/series.ts';
 	import {
 		FILTER_KINDS,
 		FILTER_LABELS,
@@ -23,7 +23,6 @@
 		fmtRange,
 		fmtTime,
 		groupWeekends,
-		isSessionFilter,
 		localDate,
 		sessionState,
 		weekStart,
@@ -39,8 +38,8 @@
 	import ThemeToggle from '@szpolny/calendar-kit/ThemeToggle.svelte';
 	import TimeZonePicker from '@szpolny/calendar-kit/TimeZonePicker.svelte';
 	import { isCountry } from '#lib/countries.ts';
-	import { isTimeZone } from '@szpolny/calendar-kit/dates';
 	import { readPrefs, writePrefs } from '@szpolny/calendar-kit/prefs';
+	import { DEFAULT_PREFS, PREFS_STORAGE_KEY, parsePrefs, writePrefsCookie } from '#lib/prefs.ts';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -59,12 +58,13 @@
 	});
 
 	const FILTERS = Object.keys(FILTER_LABELS) as SessionFilter[];
-	const STORAGE_KEY = 'outlap:prefs';
 	const WEEKS_PER_PAGE = 2;
 
-	let selected = $state<SeriesId[]>([...DEFAULT_SERIES_IDS]);
-	let filter = $state<SessionFilter>('all');
-	let alarm = $state(0);
+	// The server reads saved preferences from a cookie, so returning visitors get their own calendar on first paint.
+	const initial = untrack(() => data.prefs) ?? DEFAULT_PREFS;
+	let selected = $state<SeriesId[]>([...initial.selected]);
+	let filter = $state<SessionFilter>(initial.filter);
+	let alarm = $state(initial.alarm);
 	let subscribeOpen = $state(false);
 	let seriesOpen = $state(false);
 	/** Narrows the calendar to one series, followed or not, without changing what is followed. */
@@ -76,15 +76,15 @@
 	let pages = $state([WEEKS_PER_PAGE]);
 	const weeksShown = $derived(pages.at(-1)!);
 	/** id of the last NEW_SERIES batch this visitor has seen or dismissed */
-	let seenNews = $state('');
+	let seenNews = $state(initial.news);
 	const expanded = new SvelteSet<string>();
 
-	// Server renders in UTC; the browser switches to the viewer's zone after hydration.
-	let detectedZone = $state('UTC');
+	// Server renders in the zone saved at the last visit, or UTC; the browser switches to the device's zone after hydration.
+	let detectedZone = $state(initial.zone ?? 'UTC');
 	/** 'auto' follows the device; otherwise an IANA zone picked by the viewer */
-	let zonePref = $state('auto');
+	let zonePref = $state(initial.timeZone);
 	/** 'auto' follows the request's Cloudflare country; otherwise an ISO code picked by the viewer */
-	let countryPref = $state('auto');
+	let countryPref = $state(initial.country);
 	const detectedCountry = $derived(isCountry(data.country) ? data.country : '');
 	const country = $derived(countryPref === 'auto' ? detectedCountry : countryPref);
 	const timeZone = $derived(zonePref === 'auto' ? detectedZone : zonePref);
@@ -92,15 +92,15 @@
 
 	onMount(() => {
 		detectedZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-		const prefs = readPrefs(STORAGE_KEY);
-		// First-time visitors see every series already, so only returning visitors get the notice.
-		seenNews = prefs && prefs.news !== NEW_SERIES.id ? (typeof prefs.news === 'string' ? prefs.news : '') : NEW_SERIES.id;
+		// Without the cookie (it expired, or prefs predate it), fall back to local storage.
+		const prefs = data.prefs ? null : parsePrefs(readPrefs(PREFS_STORAGE_KEY));
 		if (prefs) {
-			if (Array.isArray(prefs.selected)) selected = prefs.selected.filter((s: string) => s in SERIES);
-			if (isSessionFilter(prefs.filter)) filter = prefs.filter;
-			alarm = Number(prefs.alarm) || 0;
-			if (isCountry(prefs.country)) countryPref = prefs.country;
-			if (typeof prefs.timeZone === 'string' && (prefs.timeZone === 'auto' || isTimeZone(prefs.timeZone))) zonePref = prefs.timeZone;
+			selected = prefs.selected;
+			filter = prefs.filter;
+			alarm = prefs.alarm;
+			countryPref = prefs.country;
+			zonePref = prefs.timeZone;
+			seenNews = prefs.news;
 		}
 		prefsLoaded = true;
 		const timer = setInterval(() => (now = Date.now()), 20_000);
@@ -109,7 +109,9 @@
 
 	$effect(() => {
 		if (!prefsLoaded) return;
-		writePrefs(STORAGE_KEY, { selected, filter, alarm, timeZone: zonePref, country: countryPref, news: seenNews });
+		const prefs = { selected, filter, alarm, timeZone: zonePref, country: countryPref, news: seenNews };
+		writePrefs(PREFS_STORAGE_KEY, prefs);
+		writePrefsCookie({ ...prefs, zone: detectedZone });
 	});
 
 	const kinds = $derived(FILTER_KINDS[filter]);
@@ -239,7 +241,7 @@
 					: `${selected.length} of ${SERIES_IDS.length} series`
 	);
 	const failing = $derived(data.sources.filter((s) => !s.ok));
-	const showNews = $derived(prefsLoaded && seenNews !== NEW_SERIES.id);
+	const showNews = $derived(seenNews !== NEW_SERIES.id);
 	const unselectedNew = $derived(NEW_SERIES.ids.filter((id) => !selected.includes(id)));
 	const newsHighlights = $derived(NEW_SERIES.ids.slice(0, 4).map((id) => SERIES[id].name));
 

@@ -34,7 +34,9 @@
 		<h2>Stored in your browser</h2>
 		<p>
 			Your followed series, session filter, reminder setting, time zone, country and theme are saved in your browser's local storage so
-			the calendar looks the same next time. They never leave your device; clear your site data to remove them.
+			the calendar looks the same next time. All of these except the theme are also kept in a cookie, along with your device's time zone.
+			The cookie is sent to Outlap with each page load only so the server can show your calendar straight away. It is not stored or
+			logged, and nothing in it identifies you. Clear your site data to remove both.
 		</p>
 
 		<h2>Processed by the server</h2>
