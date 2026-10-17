@@ -1,6 +1,7 @@
 <script lang="ts">
 	import CalendarPlus from '~icons/lucide/calendar-plus';
 	import ChevronDown from '~icons/lucide/chevron-down';
+	import ChevronRight from '~icons/lucide/chevron-right';
 	import Sparkles from '~icons/lucide/sparkles';
 	import X from '~icons/lucide/x';
 	import GitHub from '~icons/simple-icons/github';
@@ -336,21 +337,51 @@
 			{/if}
 
 			{#if liveNow.length}
-				<section class={[hero, 'flex-col items-stretch gap-2.5 [--c:var(--color-live)]']} aria-live="polite">
-					<span class={[eyebrow, 'text-live']}><span class="size-2 animate-throb rounded-full bg-live"></span>Live now</span>
-					<div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-2">
-						{#each liveNow as { event, session } (event.id + session.name)}
-							<button
-								class="flex cursor-pointer flex-col rounded-xl border-l-3 border-(--c) bg-subtle px-3 py-2.5 text-left"
-								style:--c={SERIES[event.series].color}
-								onclick={() => expanded.add(weekendOf.get(event.id) ?? event.id)}
-							>
-								<SeriesLogo series={event.series} class={heroBadge} />
-								<span class={heroName}>{event.name}</span>
-								<span class={heroSession}>{session.name} · until {fmtTime(session.end, timeZone)}</span>
-							</button>
-						{/each}
+				<section class={[hero, 'flex-col items-stretch pb-1.5 sm:pb-2 [--c:var(--color-live)]']} aria-labelledby="live-title">
+					<div class="flex items-center justify-between gap-3">
+						<h2 id="live-title" class={[eyebrow, 'text-live']}>
+							<span class="relative flex size-2">
+								<span class="absolute inset-0 animate-ping rounded-full bg-live opacity-70"></span>
+								<span class="relative size-2 rounded-full bg-live"></span>
+							</span>
+							Live now
+						</h2>
+						{#if liveNow.length > 1}<span class="text-[12.5px] text-muted">{liveNow.length} sessions</span>{/if}
 					</div>
+					<ul class="mt-1 divide-y divide-line">
+						{#each liveNow as { event, session } (event.id + session.name)}
+							{@const start = Date.parse(session.start)}
+							{@const progress = Math.min(1, Math.max(0, (now - start) / (Date.parse(session.end) - start)))}
+							<li>
+								<button
+									class="group -mx-2 flex w-[calc(100%+1rem)] cursor-pointer items-center gap-3 rounded-lg px-2 py-3 text-left hover:bg-subtle/60 sm:gap-5"
+									style:--s={SERIES[event.series].color}
+									aria-label="{event.name}, {session.name}, live until {fmtTime(session.end, timeZone)}"
+									onclick={() => expanded.add(weekendOf.get(event.id) ?? event.id)}
+								>
+									<div class="flex min-w-0 flex-1 flex-col">
+										<SeriesLogo series={event.series} class="mb-1 h-3 self-start text-(--s)" />
+										<span class={[heroName, 'truncate']}>{event.name}</span>
+										<span class={[heroSession, 'truncate']}>
+											<span class="font-[550] text-fg">{session.name}</span>{event.location ? ` · ${event.location}` : ''}
+										</span>
+										<span class="mt-2.5 h-1 overflow-hidden rounded-full bg-subtle" aria-hidden="true">
+											<span class="block h-full rounded-full bg-(--s) transition-[width] duration-1000" style:width="{progress * 100}%"></span>
+										</span>
+									</div>
+									<div class="flex shrink-0 flex-col items-end">
+										<span class="text-[19px] leading-[1.1] font-bold tracking-[-0.03em] whitespace-nowrap tabular-nums sm:text-[24px]">
+											{countdown(session.end, now)}
+										</span>
+										<span class="text-[12.5px] whitespace-nowrap text-muted tabular-nums">
+											left · ends {session.estimatedEnd ? '~' : ''}{fmtTime(session.end, timeZone)}
+										</span>
+									</div>
+									<ChevronRight class="-mr-1 hidden shrink-0 text-muted transition-transform group-hover:translate-x-0.5 sm:block" width="18" height="18" aria-hidden="true" />
+								</button>
+							</li>
+						{/each}
+					</ul>
 				</section>
 			{:else if nextUp}
 				{@const s = SERIES[nextUp.event.series]}
