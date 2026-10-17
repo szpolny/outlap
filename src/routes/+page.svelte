@@ -32,7 +32,7 @@
 	} from '#lib/format.ts';
 	import EventRow from '#lib/components/EventRow.svelte';
 	import SeriesLogo from '#lib/components/SeriesLogo.svelte';
-	import SelectionList from '@szpolny/calendar-kit/SelectionList.svelte';
+	import SeriesSidebar from '#lib/components/SeriesSidebar.svelte';
 	import SelectionSheet from '@szpolny/calendar-kit/SelectionSheet.svelte';
 	import SubscribeDialog from '#lib/components/SubscribeDialog.svelte';
 	import BackToTop from '@szpolny/calendar-kit/BackToTop.svelte';
@@ -66,6 +66,8 @@
 	let alarm = $state(0);
 	let subscribeOpen = $state(false);
 	let seriesOpen = $state(false);
+	/** Narrows the calendar to one series, followed or not, without changing what is followed. */
+	let focus = $state<SeriesId | null>(null);
 	let prefsLoaded = $state(false);
 	let barHeight = $state(0);
 	let showFinished = $state(false);
@@ -115,7 +117,7 @@
 			(e) =>
 				// A long event stays listed until its last day.
 				weekStart(isLongEvent(e) ? e.end : anchorDate(e, timeZone)) >= thisWeek &&
-				selected.includes(e.series) &&
+				(focus ? e.series === focus : selected.includes(e.series)) &&
 				(e.allDay || e.sessions.some((s) => kinds.includes(s.kind)))
 		)
 	);
@@ -280,17 +282,8 @@
 	</header>
 
 	<div class="lg:grid lg:grid-cols-[200px_minmax(0,1fr)] lg:gap-12">
-		<aside class="sticky top-4 hidden max-h-[calc(100dvh-2rem)] flex-col gap-6 self-start overflow-y-auto pr-3 pb-4 [scrollbar-width:thin] lg:flex" aria-label="Series">
-			<div class="flex items-center justify-between gap-3 px-1">
-				<h2 class="text-[15px] font-bold tracking-[-0.01em]">Series</h2>
-				<button
-					class="cursor-pointer text-[13px] text-muted hover:text-fg"
-					onclick={() => (selected = allSelected ? [] : [...SERIES_IDS])}
-				>
-					{allSelected ? 'Clear' : 'Select all'}
-				</button>
-			</div>
-			<SelectionList bind:selected groups={SERIES_GROUPS} items={SERIES} logo={seriesMark} layout="list" searchNoun="series" />
+		<aside class="sticky top-4 hidden max-h-[calc(100dvh-2rem)] flex-col gap-5 self-start overflow-y-auto pr-2 pb-4 [scrollbar-width:thin] lg:flex" aria-label="Series">
+			<SeriesSidebar bind:selected bind:focus events={data.events} {kinds} {now} {timeZone} onmanage={() => (seriesOpen = true)} />
 		</aside>
 
 		<div class="min-w-0">
@@ -441,6 +434,19 @@
 							</button>
 						{/each}
 					</div>
+					{#if focus}
+						<button
+							class="inline-flex h-9 shrink-0 cursor-pointer items-center gap-2 rounded-[10px] border border-[color-mix(in_srgb,var(--c)_45%,var(--color-line))] bg-[color-mix(in_srgb,var(--c)_12%,var(--color-panel))] pr-2 pl-3 text-[13px] text-muted hover:text-fg"
+							style:--c={SERIES[focus].color}
+							title="Show all your series"
+							aria-label="Showing only {SERIES[focus].name}. Show all your series"
+							onclick={() => (focus = null)}
+						>
+							Only
+							<SeriesLogo series={focus} class="h-3 text-(--c)" />
+							<X width="14" height="14" aria-hidden="true" />
+						</button>
+					{/if}
 					<button
 						class="inline-flex cursor-pointer items-center gap-[7px] rounded-[10px] bg-accent px-2.5 py-2 sm:ml-auto text-sm font-semibold whitespace-nowrap text-white hover:brightness-[1.08] sm:px-3.5"
 						onclick={() => (subscribeOpen = true)}
@@ -519,7 +525,7 @@
 				{:else}
 					<div class="py-[60px] text-center text-muted">
 						<p class="my-1"><strong class="text-fg">Nothing to show</strong></p>
-						<p class="my-1">{selected.length === 0 ? 'Pick at least one series.' : 'No upcoming sessions match these filters.'}</p>
+						<p class="my-1">{selected.length === 0 && !focus ? 'Pick at least one series.' : 'No upcoming sessions match these filters.'}</p>
 					</div>
 				{/each}
 			</main>
