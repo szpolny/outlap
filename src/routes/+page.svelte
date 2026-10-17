@@ -60,6 +60,7 @@
 
 	const FILTERS = Object.keys(FILTER_LABELS) as SessionFilter[];
 	const STORAGE_KEY = 'outlap:prefs';
+	const WEEKS_PER_PAGE = 2;
 
 	let selected = $state<SeriesId[]>([...DEFAULT_SERIES_IDS]);
 	let filter = $state<SessionFilter>('all');
@@ -71,6 +72,9 @@
 	let prefsLoaded = $state(false);
 	let barHeight = $state(0);
 	let showFinished = $state(false);
+	/** Weeks ahead the list shows, one entry per "Show more" click so "Show less" can step back. */
+	let pages = $state([WEEKS_PER_PAGE]);
+	const weeksShown = $derived(pages.at(-1)!);
 	/** id of the last NEW_SERIES batch this visitor has seen or dismissed */
 	let seenNews = $state('');
 	const expanded = new SvelteSet<string>();
@@ -158,6 +162,23 @@
 		}
 		return items;
 	});
+
+	const visibleWeeks = $derived.by(() => {
+		const limit = addDays(thisWeek, weeksShown * 7);
+		let end = weeks.findIndex((item) => item.start >= limit);
+		if (end === -1) return weeks;
+		// Never stop on a quiet divider or before the first week with events.
+		const firstWeek = weeks.findIndex((item) => item.type === 'week');
+		end = Math.max(end, firstWeek + 1);
+		while (weeks[end - 1]?.type === 'gap') end--;
+		return weeks.slice(0, end);
+	});
+
+	const hiddenEvents = $derived(
+		weeks
+			.slice(visibleWeeks.length)
+			.reduce((n, item) => n + (item.type === 'week' ? item.upcoming.length + item.finished.length : 0), 0)
+	);
 
 	/** Event id → id of the weekend card it is shown in, so the live hero can expand it. */
 	const weekendOf = $derived(
@@ -469,7 +490,7 @@
 			{/if}
 
 			<main class="mt-1.5">
-				{#each weeks as item (item.start)}
+				{#each visibleWeeks as item (item.start)}
 					{#if item.type === 'gap'}
 						<div
 							class="mt-10 flex items-center gap-3 text-[13px] text-muted before:flex-1 before:border-t before:border-dashed before:border-line before:content-[''] after:flex-1 after:border-t after:border-dashed after:border-line after:content-['']"
@@ -528,6 +549,29 @@
 						<p class="my-1">{selected.length === 0 && !focus ? 'Pick at least one series.' : 'No upcoming sessions match these filters.'}</p>
 					</div>
 				{/each}
+				{#if hiddenEvents > 0 || pages.length > 1}
+					<div class="mt-8 flex gap-3">
+						{#if hiddenEvents > 0}
+							<button
+								class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-line px-4 py-3 text-[14px] font-[550] text-muted hover:text-fg"
+								onclick={() => (pages = [...pages, weeksFromNow(visibleWeeks.at(-1)!.start) + 1 + WEEKS_PER_PAGE])}
+							>
+								Show more
+								<span class="font-normal opacity-75">· {hiddenEvents} more event{hiddenEvents === 1 ? '' : 's'}</span>
+								<ChevronDown width="16" height="16" aria-hidden="true" />
+							</button>
+						{/if}
+						{#if pages.length > 1}
+							<button
+								class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-line px-4 py-3 text-[14px] font-[550] text-muted hover:text-fg"
+								onclick={() => (pages = pages.slice(0, -1))}
+							>
+								Show less
+								<ChevronDown class="rotate-180" width="16" height="16" aria-hidden="true" />
+							</button>
+						{/if}
+					</div>
+				{/if}
 			</main>
 
 			<footer class="mt-12 text-[13px] text-muted">
