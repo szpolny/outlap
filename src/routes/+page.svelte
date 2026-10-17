@@ -602,6 +602,7 @@
 						<a class="underline" href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>.
 					</p>
 				</details>
+				<p class="mt-3"><a class="underline" href="/privacy">Privacy</a></p>
 			</footer>
 		</div>
 	</div>
