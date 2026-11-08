@@ -1,0 +1,26 @@
+name: Close waiting issues
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v10
+        with:
+          days-before-issue-stale: 3
+          days-before-issue-close: 2
+          stale-issue-label: stale
+          only-labels: waiting-for-response
+          remove-stale-when-updated: true
+          stale-issue-message: >-
+            This issue is waiting for more information. If there is no follow-up,
+            it will be closed automatically in 2 days.
+          close-issue-message: >-
+            Closing this issue because we did not receive a follow-up.
