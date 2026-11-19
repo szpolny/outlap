@@ -481,16 +481,6 @@
 				</div>
 			</nav>
 
-			{#if failing.length}
-				<div
-					class="mt-3 rounded-xl border border-[color-mix(in_srgb,orange_45%,var(--color-line))] bg-[color-mix(in_srgb,orange_10%,var(--color-panel))] px-3.5 py-2.5 text-sm"
-					role="status"
-				>
-					Couldn't refresh {failing.map((f) => f.series.map((s) => SERIES[s].short).join('/')).join(', ')}.
-					{failing.some((f) => f.fetchedAt) ? 'Showing the last known schedule.' : ''}
-				</div>
-			{/if}
-
 			<main class="mt-1.5">
 				{#each visibleWeeks as item (item.start)}
 					{#if item.type === 'gap'}
@@ -577,6 +567,12 @@
 			</main>
 
 			<footer class="mt-12 text-[13px] text-muted">
+				{#if failing.length}
+					<p class="mb-2" role="status">
+						Couldn't refresh {failing.map((f) => f.series.map((s) => SERIES[s].short).join('/')).join(', ')}.
+						{failing.some((f) => f.fetchedAt) ? 'Showing the last known schedule.' : ''}
+					</p>
+				{/if}
 				<details>
 					<summary class="cursor-pointer">Data sources{oldestRefresh ? ` · refreshed ${fmtTime(oldestRefresh, timeZone)}` : ''}</summary>
 					<ul class="my-3 grid gap-1.5">
