@@ -3,7 +3,7 @@
 	import Plus from '~icons/lucide/plus';
 	import X from '~icons/lucide/x';
 	import { SERIES, SERIES_IDS, type MotorEvent, type SeriesId, type Session, type SessionKind } from '#lib/series.ts';
-	import { addDays, countdown, eventEndMs, fmtDate, fmtDay, fmtRange, fmtTime, localDate, weekStart } from '#lib/format.ts';
+	import { addDays, countdown, sessionLabel, eventEndMs, fmtDate, fmtDay, fmtRange, fmtTime, localDate, weekStart } from '#lib/format.ts';
 	import SeriesLogo from '#lib/components/SeriesLogo.svelte';
 
 	interface Props {
@@ -69,14 +69,14 @@
 			if (eventEndMs(e) <= now) continue;
 			const sessions = e.sessions.filter((s) => kinds.includes(s.kind));
 			const live = sessions.find((s) => Date.parse(s.start) <= now && now < Date.parse(s.end));
-			if (live) return { bucket: 'live', at: Date.parse(live.end), label: live.name, when: `${countdown(live.end, now)} left` };
+			if (live) return { bucket: 'live', at: Date.parse(live.end), label: sessionLabel(live), when: `${countdown(live.end, now)} left` };
 
 			const next = sessions.find((s) => Date.parse(s.start) > now);
 			if (next) {
 				const at = Date.parse(next.start);
 				if (at < best.at) {
 					const bucket = bucketOf(localDate(next.start, timeZone));
-					best = { bucket, at, label: bucket === 'later' ? undefined : next.name, when: sessionWhen(next, bucket) };
+					best = { bucket, at, label: bucket === 'later' ? undefined : sessionLabel(next), when: sessionWhen(next, bucket) };
 				}
 			} else if (e.allDay) {
 				// Date-only events (rallies, the TT) are listed whatever the session filter.

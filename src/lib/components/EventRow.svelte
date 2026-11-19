@@ -29,6 +29,7 @@
 		fmtTime,
 		localDate,
 		mainSession,
+		sessionLabel,
 		sessionState,
 		type SessionFilter,
 		type Weekend,
@@ -63,10 +64,25 @@
 			.flatMap((e) => e.sessions.map((session) => ({ event: e, session })))
 			.sort((a, b) => a.session.start.localeCompare(b.session.start))
 	);
-	const entries = $derived(all.filter((x) => FILTER_KINDS[filter].includes(x.session.kind)));
 	const main = $derived(mainSession(event));
+
+	/** Classes at meetings that bundle several (Macau), the headline race's class first. */
+	const groups = $derived.by(() => {
+		const seen = new Set<string>(main?.group ? [main.group] : []);
+		for (const x of all) if (x.session.group) seen.add(x.session.group);
+		return [...seen];
+	});
+	let picked = $state<string>();
+	const group = $derived(picked && groups.includes(picked) ? picked : groups[0]);
+	const inGroup = $derived(groups.length > 1 ? all.filter((x) => x.session.group === group) : all);
+	const ofKind = (x: Entry) => FILTER_KINDS[filter].includes(x.session.kind);
+	const entries = $derived(inGroup.filter(ofKind));
 	const live = $derived(all.filter((x) => sessionState(x.session, now) === 'live'));
-	const next = $derived(entries.find((x) => sessionState(x.session, now) === 'upcoming'));
+	/** The card's countdown follows the headline class; the list marks the next session of the shown one. */
+	const next = $derived(
+		all.find((x) => ofKind(x) && (!main?.group || x.session.group === main.group) && sessionState(x.session, now) === 'upcoming')
+	);
+	const nextShown = $derived(entries.find((x) => sessionState(x.session, now) === 'upcoming'));
 	const finished = $derived(weekend.events.every((e) => eventEndMs(e) <= now));
 	const raceDay = $derived(anchor === today);
 	const pictured = $derived(weekend.events.find((e) => e.photo));
@@ -83,7 +99,7 @@
 	});
 
 	/** Session names repeat across series ("Race"), so shared weekends prefix the series. */
-	const label = (x: Entry) => (shared ? `${SERIES[x.event.series].short} ${x.session.name}` : x.session.name);
+	const label = (x: Entry) => (shared ? `${SERIES[x.event.series].short} ${sessionLabel(x.session)}` : sessionLabel(x.session));
 
 	const detailsId = $derived(`details-${weekend.id}`);
 
@@ -243,6 +259,21 @@
 						{/if}
 					</p>
 				{:else}
+					{#if groups.length > 1}
+						<div class="mb-4 flex flex-wrap gap-1.5" role="radiogroup" aria-label="Class">
+							{#each groups as g (g)}
+								<button
+									class={[
+										'cursor-pointer rounded-full border px-2.5 py-1 text-[12.5px] whitespace-nowrap',
+										g === group ? 'border-transparent bg-fg font-[550] text-bg' : 'border-line text-muted hover:text-fg'
+									]}
+									role="radio"
+									aria-checked={g === group}
+									onclick={() => (picked = g)}>{g}</button
+								>
+							{/each}
+						</div>
+					{/if}
 					<div class="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-x-8 gap-y-5">
 						{#each days as [day, list] (day)}
 							<div>
@@ -268,15 +299,15 @@
 												]}>{s.name}</span
 											>
 											{#if st === 'live'}<span class={[tag, 'bg-live text-white']}>Live</span>{/if}
-											{#if x === next}<span class={[tag, 'bg-subtle text-muted']}>Next</span>{/if}
+											{#if x === nextShown}<span class={[tag, 'bg-subtle text-muted']}>Next</span>{/if}
 										</li>
 									{/each}
 								</ul>
 							</div>
 						{/each}
 					</div>
-					{#if entries.length < all.length}
-						<p class="mt-3 text-[13px] text-muted">{all.length - entries.length} more sessions hidden by the session filter.</p>
+					{#if entries.length < inGroup.length}
+						<p class="mt-3 text-[13px] text-muted">{inGroup.length - entries.length} more sessions hidden by the session filter.</p>
 					{/if}
 				{/if}
 				<WatchPanel events={weekend.events} bind:countryPref {detectedCountry} {country} />

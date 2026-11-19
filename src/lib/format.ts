@@ -23,6 +23,11 @@ export function isSessionFilter(value: unknown): value is SessionFilter {
 	return typeof value === 'string' && value in FILTER_KINDS;
 }
 
+/** A session's name with its class, for places that show it outside its event card. */
+export function sessionLabel(s: Session): string {
+	return s.group ? `${s.group} · ${s.name}` : s.name;
+}
+
 /** The main race of the weekend, used to place an event in a week and in order. */
 export function mainSession(e: MotorEvent): Session | undefined {
 	return e.sessions.findLast((s) => s.kind === 'race') ?? e.sessions.at(-1);

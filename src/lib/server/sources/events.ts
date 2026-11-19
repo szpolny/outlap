@@ -71,29 +71,44 @@ interface MacauDay {
 	events: { time: string; title: string }[] | null;
 }
 
+/** Classes on the Macau programme, headline first, and the name of each one's untitled race row. */
+const MACAU_CLASSES: [RegExp, string, string][] = [
+	[/^Macau Grand Prix - FIA FR World Cup/, 'FR World Cup', 'Grand Prix'],
+	[/^Macau Formula 4 Race - FIA F4 World Cup/, 'F4 World Cup', 'Race'],
+	[/^Macau GT Cup - FIA GT World Cup/, 'GT World Cup', 'Race'],
+	[/^Macau Guia Race - Kumho FIA TCR World Tour(?: Event of Macau)?/, 'Guia Race (TCR)', 'Race'],
+	[/^Macau Motorcycle Grand Prix(?: - \d+\w* Edition)?/, 'Motorcycle GP', 'Race'],
+	[/^Greater Bay Area GT Cup \(GT ?4\)/, 'GBA GT Cup (GT4)', 'Race'],
+	[/^Macau Roadsport Challenge/, 'Roadsport Challenge', 'Race']
+];
+
 /**
- * The Grand Prix's own sessions from the organiser's programme: each day's rows have a time
- * ("09:25 ~ 10:05", Macau time) and a title ("Macau Grand Prix - FIA FR World Cup - Free
- * Practice 1"); the race itself is "Macau Grand Prix - FIA FR World Cup (15 laps)".
+ * Every class's sessions from the organiser's programme. Each day's rows have a time
+ * ("09:25 ~ 10:05", Macau time) and a title of class, then session ("Macau GT Cup - FIA GT
+ * World Cup - Qualifying 1"); a class's race may carry no session name ("Macau Grand Prix -
+ * FIA FR World Cup (15 laps)"). Circuit openings, inspections and shows are left out.
  */
 export function parseMacauProgramme(days: MacauDay[]): Session[] {
 	const sessions: Session[] = [];
 	for (const day of days) {
 		const date = new Date((day.date_timestamp + 12 * 3600) * 1000);
 		for (const row of day.events ?? []) {
-			const m = row.title.match(/^Macau Grand Prix\s*-\s*FIA FR World Cup\s*(?:-\s*(.+?))?\s*(?:\((\d+) laps\))?$/i);
+			const title = row.title.replace(/\s*[-–]\s*/g, ' - ').replace(/\s+/g, ' ').trim();
+			const cls = MACAU_CLASSES.find(([re]) => re.test(title));
 			const t = row.time.match(/^(\d{1,2}):(\d{2})(?:\s*~\s*(\d{1,2}):(\d{2}))?/);
-			if (!m || !t) continue;
-			const name = (m[1] ?? 'Grand Prix').replace(/\s+/g, ' ').trim();
+			if (!cls || !t) continue;
+			const [re, group, raceName] = cls;
+			const rest = title.replace(re, '').replace(/\(\d+ laps\)/i, '').replace(/^[\s-]+|\s+$/g, '');
+			const name = rest ? rest.charAt(0).toUpperCase() + rest.slice(1) : raceName;
 			const at = (h: string, min: string) =>
 				zonedToUtc(date.getUTCFullYear(), date.getUTCMonth() + 1, date.getUTCDate(), Number(h), Number(min), 'Asia/Macau');
-			const kind = /qualifying race/i.test(name) ? 'sprint' : name === 'Grand Prix' ? 'race' : guessKind(name);
+			const kind = /qualif\w* race/i.test(name) ? 'sprint' : rest ? guessKind(name) : 'race';
 			const session = makeSession(name, at(t[1], t[2]), 40, kind);
 			if (t[3]) {
 				session.end = at(t[3], t[4]);
 				session.estimatedEnd = false;
 			}
-			sessions.push(session);
+			sessions.push({ ...session, group });
 		}
 	}
 	return sessions;

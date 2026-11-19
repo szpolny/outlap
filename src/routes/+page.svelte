@@ -24,6 +24,7 @@
 		fmtTime,
 		groupWeekends,
 		localDate,
+		sessionLabel,
 		sessionState,
 		weekStart,
 		type SessionFilter,
@@ -372,14 +373,14 @@
 								<button
 									class="group -mx-2 flex w-[calc(100%+1rem)] cursor-pointer items-center gap-3 rounded-lg px-2 py-3 text-left hover:bg-subtle/60 sm:gap-5"
 									style:--s={SERIES[event.series].color}
-									aria-label="{event.name}, {session.name}, live until {fmtTime(session.end, timeZone)}"
+									aria-label="{event.name}, {sessionLabel(session)}, live until {fmtTime(session.end, timeZone)}"
 									onclick={() => expanded.add(weekendOf.get(event.id) ?? event.id)}
 								>
 									<div class="flex min-w-0 flex-1 flex-col">
 										<SeriesLogo series={event.series} class="mb-1 h-3 self-start text-(--s)" />
 										<span class={[heroName, 'truncate']}>{event.name}</span>
 										<span class={[heroSession, 'truncate']}>
-											<span class="font-[550] text-fg">{session.name}</span>{event.location ? ` · ${event.location}` : ''}
+											<span class="font-[550] text-fg">{sessionLabel(session)}</span>{event.location ? ` · ${event.location}` : ''}
 										</span>
 										<span class="mt-2.5 h-1 overflow-hidden rounded-full bg-subtle" aria-hidden="true">
 											<span class="block h-full rounded-full bg-(--s) transition-[width] duration-1000" style:width="{progress * 100}%"></span>
@@ -412,7 +413,7 @@
 						<SeriesLogo series={nextUp.event.series} class={heroBadge} />
 						<span class={heroName}>{nextUp.event.name}</span>
 						<span class={heroSession}>
-							{nextUp.session.name} · {fmtDay(nextUp.session.start, timeZone)}
+							{sessionLabel(nextUp.session)} · {fmtDay(nextUp.session.start, timeZone)}
 							{fmtDate(localDate(nextUp.session.start, timeZone), { day: 'numeric', month: 'short' })},
 							{fmtTime(nextUp.session.start, timeZone)}
 						</span>

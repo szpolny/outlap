@@ -449,14 +449,37 @@ test('NLS previews give qualifying and race times, for both days of a double-hea
 	assert.equal(nls.previewSessions('Das Zeittraining findet jeweils von 08:30 bis 10:00 Uhr statt. Die Rennen werden jeweils um 12:00 Uhr gestartet.', double).length, 4);
 });
 
-test('the Macau programme gives the Grand Prix sessions in Macau time', () => {
+test('the Macau programme gives every class its sessions in Macau time', () => {
 	const sessions = events.parseMacauProgramme([
-		{ date_timestamp: 1795017600, events: [{ time: '09:25 ~ 10:05', title: 'Macau Grand Prix - FIA FR World Cup - Free Practice 1' }, { time: '10:20 ~ 11:00', title: 'Macau Formula 4 Race - FIA F4 World Cup- Free Practice 1' }] },
-		{ date_timestamp: 1795276800, events: [{ time: '15:30 ~ 16:35', title: 'Macau Grand Prix - FIA FR World Cup (15 laps)' }] }
+		{
+			date_timestamp: 1795017600,
+			events: [
+				{ time: '06:30 ~ 07:00', title: 'Circuit Inspection' },
+				{ time: '08:25 ~ 08:55', title: 'Macau Motorcycle Grand Prix – 58th Edition – Qualifying 1' },
+				{ time: '09:25 ~ 10:05', title: 'Macau Grand Prix - FIA FR World Cup - Free Practice 1' },
+				{ time: '15:50 ~ 16:20', title: 'Macau GT Cup - FIA GT World Cup- Qualifying 1' }
+			]
+		},
+		{
+			date_timestamp: 1795190400,
+			events: [{ time: '11:40 ~ 12:45', title: 'Macau Formula 4 Race - FIA F4 World Cup - Qualification Race (8 laps)' }]
+		},
+		{
+			date_timestamp: 1795276800,
+			events: [
+				{ time: '11:00 ~ 11:40', title: 'Macau Guia Race -Kumho FIA TCR World Tour Event of Macau - Race 2  (10 laps)' },
+				{ time: '14:00 ~ 14:25', title: 'Special Event' },
+				{ time: '15:30 ~ 16:35', title: 'Macau Grand Prix - FIA FR World Cup (15 laps)' }
+			]
+		}
 	]);
-	assert.deepEqual(sessions.map((s) => [s.name, s.kind, s.start, s.end]), [
-		['Free Practice 1', 'practice', '2026-11-19T01:25:00.000Z', '2026-11-19T02:05:00.000Z'],
-		['Grand Prix', 'race', '2026-11-22T07:30:00.000Z', '2026-11-22T08:35:00.000Z']
+	assert.deepEqual(sessions.map((s) => [s.group, s.name, s.kind, s.start, s.end]), [
+		['Motorcycle GP', 'Qualifying 1', 'qualifying', '2026-11-19T00:25:00.000Z', '2026-11-19T00:55:00.000Z'],
+		['FR World Cup', 'Free Practice 1', 'practice', '2026-11-19T01:25:00.000Z', '2026-11-19T02:05:00.000Z'],
+		['GT World Cup', 'Qualifying 1', 'qualifying', '2026-11-19T07:50:00.000Z', '2026-11-19T08:20:00.000Z'],
+		['F4 World Cup', 'Qualification Race', 'sprint', '2026-11-21T03:40:00.000Z', '2026-11-21T04:45:00.000Z'],
+		['Guia Race (TCR)', 'Race 2', 'race', '2026-11-22T03:00:00.000Z', '2026-11-22T03:40:00.000Z'],
+		['FR World Cup', 'Grand Prix', 'race', '2026-11-22T07:30:00.000Z', '2026-11-22T08:35:00.000Z']
 	]);
 });
 

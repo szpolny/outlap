@@ -1,5 +1,5 @@
 import { buildCalendar, type CalendarEvent } from '@szpolny/calendar-kit/ics';
-import { FILTER_KINDS, type SessionFilter } from '#lib/format.ts';
+import { FILTER_KINDS, sessionLabel, type SessionFilter } from '#lib/format.ts';
 import { SERIES, type MotorEvent } from '#lib/series.ts';
 
 export interface IcsOptions {
@@ -32,14 +32,14 @@ export function buildIcs(events: MotorEvent[], opts: IcsOptions): string {
 		// UIDs derive from the session name (not its time) so a rescheduled session updates in place.
 		const used = new Map<string, number>();
 		for (const session of event.sessions) {
-			const slug = session.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+			const slug = sessionLabel(session).toLowerCase().replace(/[^a-z0-9]+/g, '-');
 			const n = (used.get(slug) ?? 0) + 1;
 			used.set(slug, n);
 			if (!kinds.includes(session.kind)) continue;
 			entries.push({
 				...common,
 				uid: `${event.id}-${slug}${n > 1 ? `-${n}` : ''}@outlap`,
-				summary: `${series.short}: ${event.name} – ${session.name}`,
+				summary: `${series.short}: ${event.name} – ${sessionLabel(session)}`,
 				start: session.start,
 				end: session.end,
 				allDay: false,

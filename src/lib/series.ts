@@ -139,6 +139,8 @@ export interface Session {
 	end: string;
 	/** true when the end time is an estimate rather than published by the organiser */
 	estimatedEnd: boolean;
+	/** the class running this session, at meetings that bundle several ("GT World Cup") */
+	group?: string;
 }
 
 export interface MotorEvent {
