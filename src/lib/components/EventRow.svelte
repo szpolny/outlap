@@ -253,11 +253,35 @@
 					<p class="text-[13px] text-muted">
 						{#if event.series === 'wrc'}
 							Rally runs {fmtDate(event.start, long)} to {fmtDate(event.end, long)}. Stage times aren't available from a reliable feed.
+						{:else if event.stages?.length}
+							Runs {fmtDate(event.start, long)} to {fmtDate(event.end, long)}. Stage start times aren't available from a reliable feed.
 						{:else}
 							{event.end === event.start ? `Race day: ${fmtDate(event.start, long)}` : `Runs ${fmtDate(event.start, long)} to ${fmtDate(event.end, long)}`}.
 							Session times aren't available from a reliable feed.
 						{/if}
 					</p>
+					{#if event.stages?.length}
+						<ol class="mt-4 grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-x-8">
+							{#each event.stages as stage (stage.name + stage.start)}
+								{@const done = stage.end < today}
+								{@const current = stage.start <= today && today <= stage.end}
+								<li class={['flex items-baseline gap-3 py-1 text-sm', done && 'opacity-45']}>
+									<time class={['min-w-[4.5em] tabular-nums', current ? 'font-semibold text-fg' : 'text-muted']} datetime={stage.start}
+										>{fmtDate(stage.start, { day: 'numeric', month: 'short' })}</time
+									>
+									<span class="min-w-0">
+										<span class={[stage.name !== 'Rest day' && 'font-[620]', done && 'line-through decoration-current/40']}>{stage.name}</span>
+										{#if current}<span class={[tag, 'ml-1 bg-live text-white']}>Today</span>{/if}
+										{#if stage.from}
+											<span class="block truncate text-[13px] text-muted"
+												>{stage.from === stage.to ? stage.from : `${stage.from} → ${stage.to}`}</span
+											>
+										{/if}
+									</span>
+								</li>
+							{/each}
+						</ol>
+					{/if}
 				{:else}
 					{#if groups.length > 1}
 						<div class="mb-4 flex flex-wrap gap-1.5" role="radiogroup" aria-label="Class">

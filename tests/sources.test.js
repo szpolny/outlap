@@ -59,6 +59,63 @@ test('heading patterns can skip a table that precedes the calendar', () => {
 	assert.deepEqual(rows, [{ 'Rd.': '1', Date: 'March 7' }]);
 });
 
+test('a Dakar article gives the edition its stages and countries', () => {
+	const event = seasons.parseDakarArticle(`{{Short description|Off-road motorsport event in Portugal, Spain, Morocco and Western Sahara}}
+{{Infobox rally raid
+|country        = {{POR}}<br>{{ESP}}<br>{{MAR}}<br>{{flagicon|Morocco}} [[Western Sahara]]
+}}
+== Stages ==
+{| class="wikitable"
+! rowspan="2" |Stage<ref name="stage"/>
+! colspan="2" rowspan="2" |Date
+! rowspan="2" |Start
+! rowspan="2" |Finish
+|-
+!FIM & FIA
+|-
+|Prologue
+|Saturday
+|9 January 2027
+|[[Loulé]]
+|Loulé
+|-
+|Transfer
+|Monday
+|11 January 2027
+|Loulé
+|[[Bouarfa, Morocco|Bouârfa]]
+|-
+|Rest Day
+|Sunday
+|17 January 2027
+|style="text-align: center;" colspan="2" |Agadir
+|}`, 2027);
+	assert.equal(event.location, 'Portugal, Spain, Morocco and Western Sahara');
+	assert.deepEqual([event.start, event.end], ['2027-01-09', '2027-01-17']);
+	assert.deepEqual(event.stages, [
+		{ name: 'Prologue', start: '2027-01-09', end: '2027-01-09', from: 'Loulé', to: 'Loulé' },
+		{ name: 'Transfer', start: '2027-01-11', end: '2027-01-11', from: 'Loulé', to: 'Bouârfa' },
+		{ name: 'Rest day', start: '2027-01-17', end: '2027-01-17', from: 'Agadir', to: 'Agadir' }
+	]);
+	// 2025 writes dates the US way and marks the rest day with a dash.
+	const older = seasons.parseDakarArticle(`{{Short description|Off-road motorsport event in Saudi Arabia}}
+== Stages ==
+{| class="wikitable"
+|-
+! Stage !! colspan=2| Date !! Start !! Finish !! Total/Special
+|-
+| 2 (Marathon) || Sunday-Monday || January 5–6, 2025 || [[Bisha]] || [[Bisha]] || 1,057&nbsp;km / 965&nbsp;km
+|-
+| – || Friday || January 10, 2025 || colspan=2| [[Ḥaʼil|Ha'il]] || Rest day
+|-
+| Total || - || - || - || - || 7,826&nbsp;km / 134&nbsp;km
+|}`, 2025);
+	assert.deepEqual(older.stages.map((s) => [s.name, s.start, s.end, s.to]), [
+		['Stage 2 (Marathon)', '2025-01-05', '2025-01-06', 'Bisha'],
+		['Rest day', '2025-01-10', '2025-01-10', "Ha'il"]
+	]);
+});
+
 test('the Dakar site header gives the next edition before Wikipedia does', () => {
 	const html = `<a href="/en/discover-saudi-arabia">x</a><span class="header__date">
 		01/01

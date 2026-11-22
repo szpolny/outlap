@@ -1,7 +1,7 @@
-import type { MotorEvent, SeriesId } from '#lib/series.ts';
+import type { MotorEvent, SeriesId, Stage } from '#lib/series.ts';
 import { fetchText, finalizeEvent, makeSession, slugify, titleCase, zonedToUtc } from '../util';
 import type { Source } from './types';
-import { MONTHS, column, dateRange, fetchWikitext, stripWiki, tableGrid } from './wikipedia';
+import { column, dateRange, fetchWikitext, stripWiki, tableGrid } from './wikipedia';
 
 // Series read from the calendar table of the Wikipedia season article: those whose official sites
 // turn away automated clients (btcc.net with Vercel's bot checkpoint, sfl.jp with a Cloudflare
@@ -222,39 +222,54 @@ function seasonSource(season: Season): Source {
 
 export const seasonSources = SEASONS.map(seasonSource);
 
-/** "3 January 2026" */
-const FULL_DATE = /(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/g;
+/** One row of an edition's stage table, or null for the header and total rows. */
+function stageRow(cells: Record<string, string>, year: number): Stage | null {
+	const dates = Object.keys(cells)
+		.filter((key) => /^date/i.test(key))
+		.map((key) => dateRange(cells[key], year))
+		.find(Boolean);
+	const label = text(column(cells, /^stage/i));
+	if (!dates || !label) return null;
+	const n = label.match(/^\d+/)?.[0];
+	// 2025 marks a rest day with a dash in the stage column and says so in the distance column.
+	const rest = /rest/i.test(label) || Object.values(cells).some((cell) => /^rest day$/i.test(text(cell)));
+	const name = rest ? 'Rest day' : n ? `Stage ${label}` : label;
+	const from = text(column(cells, /^start/i)) || undefined;
+	const to = text(column(cells, /^finish/i)) || from;
+	return { name, start: dates[0], end: dates[1], from, to };
+}
 
-/** First and last stage day of past and announced editions, from their Wikipedia articles. */
+/** An edition from its Wikipedia article: the stage table gives its days and route. */
+export function parseDakarArticle(wikitext: string, year: number): MotorEvent | null {
+	const stages = tableGrid(wikitext, /==\s*Stages\s*==/)
+		.map((cells) => stageRow(cells, year))
+		.filter((stage): stage is Stage => stage !== null);
+	if (stages.length === 0) return null;
+	// "Off-road motorsport event in Portugal, Spain, Morocco and Western Sahara". The infobox's
+	// country field writes some editions as flag templates ({{POR}}<br>{{ESP}}) with no names.
+	const location =
+		stripWiki(wikitext.match(/\{\{\s*short description\s*\|[^}]*?\bevent in ([^}]+)\}\}/i)?.[1] ?? '') ||
+		stripWiki(wikitext.match(/\|\s*country\s*=\s*([^\n]*)/i)?.[1].split(/<br\s*\/?>/i)[0] ?? '');
+	return {
+		id: `dakar-${year}`,
+		series: 'dakar',
+		name: `Dakar Rally ${year}`,
+		location: location || undefined,
+		start: stages.map((s) => s.start).sort()[0],
+		end: stages.map((s) => s.end).sort().at(-1)!,
+		allDay: true,
+		sessions: [],
+		stages,
+		url: `https://en.wikipedia.org/wiki/${year}_Dakar_Rally`
+	};
+}
+
 async function dakarArticles(years: number[]): Promise<MotorEvent[]> {
 	const articles = await Promise.all(years.map((year) => fetchWikitext(`${year}_Dakar_Rally`)));
-	const events: MotorEvent[] = [];
-	years.forEach((year, i) => {
-		const wikitext = articles[i];
-		const start = wikitext?.search(/==\s*Stages\s*==/) ?? -1;
-		if (!wikitext || start < 0) return;
-		const table = wikitext.slice(start, wikitext.indexOf('\n|}', start));
-		const days = [...table.matchAll(FULL_DATE)]
-			.map(([, day, month, y]) => {
-				const m = MONTHS.indexOf(month.toLowerCase()) + 1;
-				return m === 0 ? null : `${y}-${String(m).padStart(2, '0')}-${day.padStart(2, '0')}`;
-			})
-			.filter((d): d is string => d !== null)
-			.sort();
-		if (days.length === 0) return;
-		events.push({
-			id: `dakar-${year}`,
-			series: 'dakar',
-			name: `Dakar Rally ${year}`,
-			location: stripWiki(wikitext.match(/\|\s*country\s*=\s*([^\n]*)/i)?.[1] ?? '') || undefined,
-			start: days[0],
-			end: days.at(-1)!,
-			allDay: true,
-			sessions: [],
-			url: `https://en.wikipedia.org/wiki/${year}_Dakar_Rally`
-		});
+	return years.flatMap((year, i) => {
+		const event = articles[i] && parseDakarArticle(articles[i], year);
+		return event ? [event] : [];
 	});
-	return events;
 }
 
 /**
@@ -295,9 +310,12 @@ export const dakar: Source = {
 			})
 		]);
 		const events = new Map(articles.map((event) => [event.id, event]));
-		// The organiser's dates win; the article may still have a better place name.
+		// The organiser's dates win; the article may still have a better place name, and its stages
+		// stand as long as they fit those dates.
 		if (home && years.includes(Number(home.id.slice(-4)))) {
-			events.set(home.id, { ...home, location: events.get(home.id)?.location ?? home.location });
+			const article = events.get(home.id);
+			const stages = article?.stages?.every((s) => home.start <= s.start && s.end <= home.end) ? article.stages : undefined;
+			events.set(home.id, { ...home, location: article?.location ?? home.location, stages });
 		}
 		return [...events.values()];
 	}

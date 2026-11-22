@@ -155,11 +155,24 @@ export interface MotorEvent {
 	end: string;
 	allDay: boolean;
 	sessions: Session[];
+	/** the day-by-day route of a long all-day event, such as the Dakar's stages, which come without start times */
+	stages?: Stage[];
 	url?: string;
 	/** outline in static/tracks/<track>.svg */
 	track?: string;
 	/** Wikimedia Commons photo of the venue or event */
 	photo?: EventImage;
+}
+
+export interface Stage {
+	/** "Prologue", "Stage 3", "Rest day" */
+	name: string;
+	/** YYYY-MM-DD (inclusive); a marathon stage spans two days */
+	start: string;
+	end: string;
+	/** the bivouacs it runs between, the same one for a loop or a rest day */
+	from?: string;
+	to?: string;
 }
 
 export interface EventImage {
