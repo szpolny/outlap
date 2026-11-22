@@ -19,6 +19,8 @@ export interface Prefs {
 	country: string;
 	/** id of the last NEW_SERIES batch this visitor has seen or dismissed */
 	news: string;
+	/** id of the last API_NOTICE this visitor dismissed */
+	apiNotice: string;
 	/** the device's zone at the last visit, so the server can render local times */
 	zone?: string;
 }
@@ -30,7 +32,8 @@ export const DEFAULT_PREFS: Prefs = {
 	alarm: 0,
 	timeZone: 'auto',
 	country: 'auto',
-	news: NEW_SERIES.id
+	news: NEW_SERIES.id,
+	apiNotice: ''
 };
 
 /** Validates saved preferences field by field, falling back to defaults; null when nothing was saved. */
@@ -44,6 +47,7 @@ export function parsePrefs(raw: Record<string, unknown> | null): Prefs | null {
 		timeZone: zone,
 		country: isCountry(raw.country) ? raw.country : 'auto',
 		news: typeof raw.news === 'string' ? raw.news : '',
+		apiNotice: typeof raw.apiNotice === 'string' ? raw.apiNotice : '',
 		zone: typeof raw.zone === 'string' && isTimeZone(raw.zone) ? raw.zone : undefined
 	};
 }

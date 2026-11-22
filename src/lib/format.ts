@@ -20,7 +20,7 @@ export const FILTER_LABELS: Record<SessionFilter, string> = {
 };
 
 export function isSessionFilter(value: unknown): value is SessionFilter {
-	return typeof value === 'string' && value in FILTER_KINDS;
+	return typeof value === 'string' && Object.hasOwn(FILTER_KINDS, value);
 }
 
 /** A session's name with its class, for places that show it outside its event card. */

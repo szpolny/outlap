@@ -1,4 +1,5 @@
 <script lang="ts">
+	import Braces from '~icons/lucide/braces';
 	import CalendarPlus from '~icons/lucide/calendar-plus';
 	import ChevronDown from '~icons/lucide/chevron-down';
 	import ChevronRight from '~icons/lucide/chevron-right';
@@ -9,6 +10,7 @@
 	import { SvelteSet } from 'svelte/reactivity';
 	import { page } from '$app/state';
 	import outlapMark from '#lib/assets/favicon.svg';
+	import { API_NOTICE } from '#lib/api.ts';
 	import { SERIES, SERIES_IDS, SERIES_GROUPS, NEW_SERIES, type MotorEvent, type SeriesId, type Session } from '#lib/series.ts';
 	import {
 		FILTER_KINDS,
@@ -78,6 +80,8 @@
 	const weeksShown = $derived(pages.at(-1)!);
 	/** id of the last NEW_SERIES batch this visitor has seen or dismissed */
 	let seenNews = $state(initial.news);
+	/** id of the last API_NOTICE this visitor dismissed */
+	let seenApiNotice = $state(initial.apiNotice);
 	const expanded = new SvelteSet<string>();
 
 	// Server renders in the zone saved at the last visit, or UTC; the browser switches to the device's zone after hydration.
@@ -102,6 +106,7 @@
 			countryPref = prefs.country;
 			zonePref = prefs.timeZone;
 			seenNews = prefs.news;
+			seenApiNotice = prefs.apiNotice;
 		}
 		prefsLoaded = true;
 		const timer = setInterval(() => (now = Date.now()), 20_000);
@@ -110,7 +115,7 @@
 
 	$effect(() => {
 		if (!prefsLoaded) return;
-		const prefs = { selected, filter, alarm, timeZone: zonePref, country: countryPref, news: seenNews };
+		const prefs = { selected, filter, alarm, timeZone: zonePref, country: countryPref, news: seenNews, apiNotice: seenApiNotice };
 		writePrefs(PREFS_STORAGE_KEY, prefs);
 		writePrefsCookie({ ...prefs, zone: detectedZone });
 	});
@@ -243,6 +248,7 @@
 	);
 	const failing = $derived(data.sources.filter((s) => !s.ok));
 	const showNews = $derived(seenNews !== NEW_SERIES.id);
+	const showApiNotice = $derived(seenApiNotice !== API_NOTICE.id && now < Date.parse(API_NOTICE.until));
 	const unselectedNew = $derived(NEW_SERIES.ids.filter((id) => !selected.includes(id)));
 	const newsHighlights = $derived(NEW_SERIES.ids.slice(0, 4).map((id) => SERIES[id].name));
 
@@ -347,6 +353,35 @@
 						class="-mt-1 -mr-1.5 grid size-8 shrink-0 cursor-pointer place-items-center rounded-full text-muted hover:bg-subtle hover:text-fg"
 						aria-label="Dismiss"
 						onclick={() => (seenNews = NEW_SERIES.id)}
+					>
+						<X width="16" height="16" aria-hidden="true" />
+					</button>
+				</section>
+			{/if}
+
+			{#if showApiNotice}
+				<section
+					class="mb-5 flex items-start gap-3 rounded-2xl border border-[color-mix(in_srgb,var(--color-accent)_30%,var(--color-line))] bg-[color-mix(in_srgb,var(--color-accent)_8%,var(--color-panel))] px-4 py-3.5 sm:px-5"
+					aria-labelledby="api-notice-title"
+				>
+					<Braces class="mt-0.5 shrink-0 text-accent" width="17" height="17" aria-hidden="true" />
+					<div class="min-w-0 flex-1">
+						<h2 id="api-notice-title" class="text-[15px] font-semibold tracking-[-0.01em]">Outlap now has a public API</h2>
+						<p class="mt-0.5 text-[13.5px] text-muted">Every schedule as free JSON, no key needed. Build your own apps, bots and widgets.</p>
+						<div class="mt-2.5 flex flex-wrap gap-2">
+							<a
+								class="rounded-[10px] bg-accent px-3 py-1.5 text-[13.5px] font-semibold text-white hover:brightness-[1.08]"
+								href="/api"
+								onclick={() => (seenApiNotice = API_NOTICE.id)}
+							>
+								Read the API docs
+							</a>
+						</div>
+					</div>
+					<button
+						class="-mt-1 -mr-1.5 grid size-8 shrink-0 cursor-pointer place-items-center rounded-full text-muted hover:bg-subtle hover:text-fg"
+						aria-label="Dismiss API announcement"
+						onclick={() => (seenApiNotice = API_NOTICE.id)}
 					>
 						<X width="16" height="16" aria-hidden="true" />
 					</button>
@@ -601,7 +636,7 @@
 						<a class="underline" href="https://www.openstreetmap.org/copyright">© OpenStreetMap contributors</a>.
 					</p>
 				</details>
-				<p class="mt-3"><a class="underline" href="/privacy">Privacy</a></p>
+				<p class="mt-3"><a class="underline" href="/privacy">Privacy</a> · <a class="underline" href="/api">API</a></p>
 			</footer>
 		</div>
 	</div>
