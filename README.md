@@ -41,6 +41,17 @@ previous years' times are never used as estimates. Until a source publishes a se
 announced calendar is read from the Wikipedia season article as all-day race
 days, and replaced by the official timetable once it appears.
 
+## API
+
+A free, read-only JSON API serves the schedule at `/api/v1` (events, series and
+source status), documented at [outlap.lol/api](https://outlap.lol/api) with an
+[OpenAPI description](https://outlap.lol/api/v1/openapi.json). Responses are
+mapped to public types in [api.ts](src/lib/server/api.ts) rather than exposing
+the snapshot directly; keep that file, [openapi.ts](src/lib/server/openapi.ts)
+and the [docs page](src/routes/api/+page.svelte) in agreement, and treat removing
+or changing a field as a breaking change that needs `/api/v2`. The older
+`/api/events` returns the raw snapshot and is deprecated.
+
 ## Viewing guides
 
 Expand a race to see where to watch it in your country: TV channels,
