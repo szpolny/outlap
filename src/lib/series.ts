@@ -125,7 +125,7 @@ export const SERIES_GROUPS = [...new Set(SERIES_IDS.map((id) => SERIES[id].group
 });
 
 export function isSeriesId(value: string): value is SeriesId {
-	return value in SERIES;
+	return Object.hasOwn(SERIES, value);
 }
 
 export type SessionKind = 'practice' | 'qualifying' | 'sprint' | 'race' | 'other';

@@ -20,7 +20,7 @@ export const FILTER_LABELS: Record<SessionFilter, string> = {
 };
 
 export function isSessionFilter(value: unknown): value is SessionFilter {
-	return typeof value === 'string' && value in FILTER_KINDS;
+	return typeof value === 'string' && Object.hasOwn(FILTER_KINDS, value);
 }
 
 /** The main race of the weekend, used to place an event in a week and in order. */
