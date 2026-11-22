@@ -182,6 +182,9 @@
 		return weeks.slice(0, end);
 	});
 
+	/** First hidden week with events; the next page starts there so a long quiet gap can't swallow it. */
+	const nextWeekStart = $derived(weeks.slice(visibleWeeks.length).find((item) => item.type === 'week')?.start);
+
 	const hiddenEvents = $derived(
 		weeks
 			.slice(visibleWeeks.length)
@@ -582,7 +585,7 @@
 						{#if hiddenEvents > 0}
 							<button
 								class="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-line px-4 py-3 text-[14px] font-[550] text-muted hover:text-fg"
-								onclick={() => (pages = [...pages, weeksFromNow(visibleWeeks.at(-1)!.start) + 1 + WEEKS_PER_PAGE])}
+								onclick={() => (pages = [...pages, weeksFromNow(nextWeekStart!) + WEEKS_PER_PAGE])}
 							>
 								Show more
 								<span class="font-normal opacity-75">· {hiddenEvents} more event{hiddenEvents === 1 ? '' : 's'}</span>
